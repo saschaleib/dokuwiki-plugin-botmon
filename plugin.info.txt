@@ -1,0 +1,7 @@
+base   monitor
+author Sascha Leib
+email  ad@hominem.com
+date   2025-08-20
+name   Monitoring
+desc   Live monitoring traffic on your DokuWiki instance (under development)
+url    https://www.dokuwiki.org/plugin:nustats
