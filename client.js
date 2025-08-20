@@ -2,10 +2,10 @@ monitor_client = {
 	init: function() {
 
 		/* send the page view request: */
-		this._onPageView(this._src.replace( this._scriptName, '/view.php'));
+		this._onPageView(this._src.replace( this._scriptName, '/pview.php'));
 
 		/* send the first heartbeat signal after x seconds: */
-		setTimeout(this._onHeartbeat.bind(this, this._src.replace( this._scriptName, '/tock.php')),this._heartbeat * 1000);
+		setTimeout(this._onHeartbeat.bind(this, this._src.replace( this._scriptName, '/tick.php')),this._heartbeat * 1000);
 	},
 
 	/* keep a reference to the script URL: */
@@ -20,7 +20,6 @@ monitor_client = {
 	/* function to init page data on server: */
 	_onPageView: async function(url) {
 		try {
-
 			/* collect the data to send: */
 			const visit = {
 				'pg': JSINFO.id,
@@ -36,7 +35,7 @@ monitor_client = {
 	
 			/* compile to a FormData object: */
 			const data = new FormData();
-			data.append( "visit", JSON.stringify( visit ) );
+			data.append( "pageview", JSON.stringify( visit ) );
 	
 			/* send the request */
 			const response = await fetch(url + '?t=' + Date.now(), {
@@ -53,11 +52,11 @@ monitor_client = {
 
 	/* function to call regularly to show the user is still on the page: */
 	_onHeartbeat: async function(url) {
-		console.info('monitor_client._onHeartbeat', url);
-		console.log(this);
+		//console.info('monitor_client._onHeartbeat', url);
+
 		try {
 			const response = await fetch(url + '?p=' + encodeURIComponent(JSINFO.id) + '&t=' + Date.now(), {
-				method: 'HEAD',
+				//method: 'HEAD',
 			});
 			if (!response.ok) {
 				throw new Error(response.status + ' ' + response.statusText + ' - ' + url);
