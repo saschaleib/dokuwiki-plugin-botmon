@@ -2,11 +2,9 @@
 
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(
-	intval($_GET['t']), /* timestamp */
-	$_GET['p'] ?? null, /* page ID */
 	$_SERVER['REMOTE_ADDR'] ?? 'null', /* remote IP */
-	$_COOKIE['DokuWiki'] ?? 'null', /* DokuWiki session ID */
-	$_GET['t'] ?? null /* client time */
+	$_GET['p'] ?? null, /* page ID */
+	$_COOKIE['DokuWiki'] ?? 'null' /* DokuWiki session ID */
 );
 
 /* create the log line */

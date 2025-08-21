@@ -1,0 +1,8 @@
+This folder will hold the log files for the monitoring tool.
+
+There will be three files per day, each with the current day
+as file name (in UTC timing), with the following endings:
+
+  - .srv – Logs each time a DokuWiki file is served.
+  - .log – Logs each page-load
+  - .tck – Logs every 30 seconds while a visitor is on a page.
