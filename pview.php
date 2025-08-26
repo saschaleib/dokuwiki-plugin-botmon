@@ -9,18 +9,18 @@ if (!$json) {
 
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(
-	$_SERVER['REMOTE_ADDR'] ?? 'null', /* remote IP */
-	$json['pg'] ?? 'null', /* DW page ID */
-	$_COOKIE['DokuWiki'] ?? 'null', /* DokuWiki session ID */
-	$json['u'] ?? 'null' /* DW User id (if logged in) */
-	// $json['tz'] ?? 'null', /* timzone offset */
-	// $json['lg'] ?? 'null', /* browser language */
-	// $json['td'] ?? 'null', /* load time */
-	// $json['scr'] ?? 'null', /* Screen dimensions */
-	// $json['l'] ?? 'null', /* Accepted languages list */
-	// $json['url'] ?? 'null', /* Full request URL */
-	// $json['r'] ?? 'null', /* Referrer URL */
-	// $_SERVER['HTTP_USER_AGENT'] ?? 'null', /* User agent */
+	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
+	$json['pg'] ?? '', /* DW page ID */
+	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DokuWiki session ID */
+	$json['u'] ?? '' /* DW User id (if logged in) */
+	// $json['tz'] ?? '', /* timzone offset */
+	// $json['lg'] ?? '', /* browser language */
+	// $json['td'] ?? '', /* load time */
+	// $json['scr'] ?? '', /* Screen dimensions */
+	// $json['l'] ?? '', /* Accepted languages list */
+	// $json['url'] ?? '', /* Full request URL */
+	// $json['r'] ?? '', /* Referrer URL */
+	// $_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 	// $json['t'] ?? '' /* Page title */
 );
 

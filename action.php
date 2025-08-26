@@ -55,10 +55,25 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 
 		/* Write out client info to a server log: */
 
+		// what is the session identifier?
+		$sessionId = $_COOKIE['DokuWiki'] ?? null;
+		if (!$sessionId) {
+			if (session_id()) {
+				// if a session ID is set, use it
+				$sessionId = 'P:' . session_id();
+			} else {
+				// if no session ID is set, use an empty string
+				$sessionId = '';
+			}
+		} else {
+			// if no cookie is set, use the session ID
+			$sessionId = 'D:' . $sessionId;
+		}
+
 		$logArr = Array(
-			$_SERVER['REMOTE_ADDR'] ?? '–', /* remote IP */
-			$INFO['id'] ?? '–', /* user agent */
-			$_COOKIE['DokuWiki'] ?? '–', /* DokuWiki session ID */
+			$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
+			$INFO['id'] ?? '', /* page ID */
+			$sessionId, /* Session ID */
 			$username,
 			$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
 		);
