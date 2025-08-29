@@ -64,7 +64,7 @@ const Monitor = {
 			return ( hours > 0 ? sign * hours + ' h' : '') + (offset > 0 ? ` ${offset} min` : '');
 		}
 	}
-}
+};
 
 /* everything specific to the "Today" tab is self-contained here: */
 Monitor.today = {
@@ -225,7 +225,7 @@ Monitor.today = {
 			}
 		}
 	}
-}
+};
 
 /* check if the nustat admin panel is open: */
 if (document.getElementById('monitor__admin')) {
