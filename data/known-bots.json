@@ -1,0 +1,50 @@
+[
+	{"id": "google",
+	 "n": "GoogleBot",
+	 "r": ["Googlebot"],
+	 "rx": ["Googlebot\\/(\\d+\\.\\d+);"],
+	 "url": "http://www.google.com/bot.html"
+	},
+	{"id": "googlead",
+	 "n": "Google AdsBot",
+	 "r": ["AdsBot-Google", "AdsBot-Google-Mobile", "Mediapartners-Google"],
+	 "rx": ["AdsBot-Google;","AdsBot-Google-Mobile;", "Mediapartners-Google\\/(\\d+\\.\\d+);"],
+	 "url": "http://www.google.com/mobile/adsbot.html"
+	},
+	{"id": "googleapi",
+	 "n": "Google APIs",
+	 "r": ["APIs-Google"],
+	 "rx": ["APIs-Google"],
+	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
+	},
+	{"id": "bing",
+	 "n": "Bingbot",
+	 "r": ["bingbot"],
+	 "rx": ["bingbot\\/(\\d+\\.\\d+);"],
+	 "url": "http://www.bing.com/bingbot.htm"
+	},
+	{"id": "apple",
+	 "n": "Applebot",
+	 "r": ["Applebot"],
+	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
+	 "url": "http://www.apple.com/go/applebot"
+	},
+	{"id": "openai",
+	 "n": "OpenAI/ChatGPT Bots",
+	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
+	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
+	 "url": "https://platform.openai.com/docs/bots/"
+	},
+	{"id": "yandex",
+	 "n": "Yandex Bots",
+	 "r": ["YandexBot", "YandexAdNet", "YandexBlogs", "YandexImages", "YandexImageResizer", "YandexMarket", "YandexMedia", "YandexOntoDB", "YandexSitelinks","YandexSpravBot", "YandexVertis", "YandexVerticals", "YandexVideo", "YandexWebmaster", "YandexComBot"],
+	 "rx": ["Yandex\\w+\\/(\\d+\\.\\d+);"],
+	 "url": "http://yandex.com/bots"
+	},
+	{"id": "seznam",
+	 "n": "SeznamBot Crawler",
+	 "r": ["SeznamBot"],
+	 "rx": ["SeznamBot\\/(\\d+\\.\\d+);"],
+	 "url": "https://o-seznam.cz/napoveda/vyhledavani/en/seznambot-crawler/"
+	}
+]
