@@ -73,7 +73,7 @@ Monitor.live = {
 
 		// set the title:
 		const tDiff = '(<abbr title="Coordinated Universal Time">UTC</abbr>' + (Monitor._timeDiff != '' ? `, ${Monitor._timeDiff}` : '' ) + ')';
-		Monitor.live.status.setTitle(`Showing data for <time datetime=${Monitor._today}>${Monitor._today}</time> ${tDiff}`);
+		Monitor.live.gui.status.setTitle(`Showing data for <time datetime=${Monitor._today}>${Monitor._today}</time> ${tDiff}`);
 
 		// init sub-objects:
 		Monitor.t._callInit(this);
@@ -133,11 +133,8 @@ Monitor.live = {
 			console.info('Monitor.live.data._onClientLogLoaded()');
 			
 			// chain the ticks file to load:
-			// Monitor.live.data.loadLogFile('tck', Monitor.live.data._onTicksLogLoaded);
-			//Monitor.live.data.loadLogFile('tck', Monitor.live.data._onTicksLogLoaded);
+			Monitor.live.data.loadLogFile('tck', Monitor.live.data._onTicksLogLoaded);
 
-			console.log(Monitor.live.data.model._visitors);
-			//Monitor.live.data._onTicksLogLoaded();
 		},
 
 		// event callback, after the tiker log has been loaded:
@@ -145,13 +142,13 @@ Monitor.live = {
 			console.info('Monitor.live.data._onTicksLogLoaded()');
 
 			// analyse the data:
-			// #TODO
+			Monitor.live.data.analytics.analyseAll();
 
 			// sort the data:
 			// #TODO
 			
 			// display the data:
-			// #TODO
+			Monitor.live.gui.overview.make();
 
 			console.log(Monitor.live.data.model._visitors);
 
@@ -178,11 +175,15 @@ Monitor.live = {
 			/* if there is already this visit registered, return it (used for updates) */
 			_getVisit: function(visit, view) {
 
+				// shortcut to make code more readable:
+				const model = Monitor.live.data.model;
+
+
 				for (let i=0; i<visit._pageViews.length; i++) {
-					const v = visit._pageViews[i];
-					if (v.pg == view.pg && // same page id, and
-						view.ts.getTime() - v._firstSeen.getTime() < 600000) { // seen less than 10 minutes ago
-							return v; // it is the same visit.
+					const pv = visit._pageViews[i];
+					if (pv.pg == view.pg && // same page id, and
+						view.ts.getTime() - pv._firstSeen.getTime() < 1200000) { // seen less than 20 minutes ago
+							return pv; // it is the same visit.
 					}
 				}
 				return null; // not found
@@ -286,21 +287,136 @@ Monitor.live = {
 
 			// updating visit data from the ticker log:
 			updateTicks: function(dat) {
-				console.info('updateTicks', dat);
+				//console.info('updateTicks', dat);
 
 				// shortcut to make code more readable:
 				const model = Monitor.live.data.model;
 
 				// find the visit info:
 				let visitor = model.findVisitor(dat.id);
+				if (!visitor) {
+					console.warn(`No visitor with ID ${dat.id}, registering a new one.`);
+					visitor = model.registerVisit(dat);
+				}
 				if (visitor) {
-					console.log("Visitor:", visitor);
+					// update "last seen":
+					if (visitor._lastSeen < dat.ts) visitor._lastSeen = dat.ts;
+
+					// get the page view info:
+					const pv = model._getVisit(visitor, dat);
+					if (pv) {
+						// update the page view info:
+						if (pv._lastSeen.getTime() < dat.ts.getTime()) pv._lastSeen = dat.ts;
+					} else {
+						console.warn(`No page view for visit ID ${dat.id}, page ${dat.pg}, registering a new one.`);
+						
+						// add a new page view to the visitor:
+						const newPv = {
+							_by: 'tck',
+							ip: dat.ip,
+							pg: dat.pg,
+							ref: '',
+							_firstSeen: dat.ts,
+							_lastSeen: dat.ts,
+							_jsClient: false
+						};
+						visitor._pageViews.push(newPv);
+					}
+					
 				} else {
-					//model.registerVisit(dat);
-					console.warn(`Unknown visitor with ID ${dat.id}!`);
+					console.warn(`No visit with ID ${dat.id}.`);
+					return;
 				}
 
 			}
+		},
+
+		analytics: {
+
+			init: function() {
+				console.info('Monitor.live.data.analytics.init()');
+			},
+
+			// data storage:
+			data: {
+				totalVisits: 0,
+				totalPageViews: 0,
+				bots: {
+					known: 0,
+					possible: 0,
+					human: 0
+				}
+			},
+
+			// sort the visits by type:
+			groups: {
+				knownBots: [],
+				possibleBots: [],
+				humans: [],
+				users: []
+			},
+
+			// all analytics
+			analyseAll: function() {
+				//console.info('Monitor.live.data.analytics.analyseAll()');
+
+				// shortcut to make code more readable:
+				const model = Monitor.live.data.model;
+
+				// loop over all visitors:
+				model._visitors.forEach( (v) => {
+
+					// count visits and page views:
+					this.data.totalVisits += 1;
+					this.data.totalPageViews += v._pageViews.length;
+					
+					// check for typical bot aspects:
+					let botScore = v._isBot; // start with the known bot score
+
+					if (v._isBot >= 1.0) { // known bots
+
+						this.data.bots.known += 1;
+						this.groups.knownBots.push(v);
+
+					} if (v.usr && v.usr != '') { // known users
+						this.groups.users.push(v);
+					} else {
+						// not a known bot, nor a known user; check other aspects:
+
+						// no referrer at all:
+						if (!v._hasReferrer) botScore += 0.2;
+
+						// no js client logging:
+						if (!v._jsClient) botScore += 0.2;
+
+						// average time between page views less than 30s:
+						if (v._pageViews.length > 1) {
+							botScore -= 0.2; // more than one view: good!
+							let totalDiff = 0;
+							for (let i=1; i<v._pageViews.length; i++) {
+								const diff = v._pageViews[i]._firstSeen.getTime() - v._pageViews[i-1]._lastSeen.getTime();
+								totalDiff += diff;
+							}
+							const avgDiff = totalDiff / (v._pageViews.length - 1);
+							if (avgDiff < 30000) botScore += 0.2;
+							else if (avgDiff < 60000) botScore += 0.1;
+						}
+
+						// decide based on the score:
+						if (botScore >= 0.5) {
+							this.data.bots.possible += 1;
+							this.groups.possibleBots.push(v);
+						} else {
+							this.data.bots.human += 1;
+							this.groups.humans.push(v);
+						}
+					}
+				});
+
+				console.log(this.data);
+				console.log(this.groups);
+			}
+
 		},
 
 		bots: {
@@ -309,7 +425,7 @@ Monitor.live = {
 				//console.info('Monitor.live.data.bots.init()');
 
 				// Load the list of known bots:
-				Monitor.live.status.showBusy("Loading known bots …");
+				Monitor.live.gui.status.showBusy("Loading known bots …");
 				const url = Monitor._baseDir + 'data/known-bots.json';
 				try {
 					const response = await fetch(url);
@@ -322,9 +438,9 @@ Monitor.live = {
 
 					// TODO: allow using the bots list...
 				} catch (error) {
-					Monitor.live.status.setError("Error while loading the ’known bots’ file: " + error.message);
+					Monitor.live.gui.status.setError("Error while loading the ’known bots’ file: " + error.message);
 				} finally {
-					Monitor.live.status.hideBusy("Done.");
+					Monitor.live.gui.status.hideBusy("Done.");
 					Monitor.live.data._dispatch('bots')
 				}
 			},
@@ -359,7 +475,7 @@ Monitor.live = {
 				//console.info('Monitor.live.data.clients.init()');
 
 				// Load the list of known bots:
-				Monitor.live.status.showBusy("Loading known clients");
+				Monitor.live.gui.status.showBusy("Loading known clients");
 				const url = Monitor._baseDir + 'data/known-clients.json';
 				try {
 					const response = await fetch(url);
@@ -371,9 +487,9 @@ Monitor.live = {
 					Monitor.live.data.clients._ready = true;
 
 				} catch (error) {
-					Monitor.live.status.setError("Error while loading the known clients file: " + error.message);
+					Monitor.live.gui.status.setError("Error while loading the known clients file: " + error.message);
 				} finally {
-					Monitor.live.status.hideBusy("Done.");
+					Monitor.live.gui.status.hideBusy("Done.");
 					Monitor.live.data._dispatch('clients')
 				}
 			},
@@ -418,7 +534,7 @@ Monitor.live = {
 				//console.info('Monitor.live.data.platforms.init()');
 
 				// Load the list of known bots:
-				Monitor.live.status.showBusy("Loading known platforms");
+				Monitor.live.gui.status.showBusy("Loading known platforms");
 				const url = Monitor._baseDir + 'data/known-platforms.json';
 				try {
 					const response = await fetch(url);
@@ -430,9 +546,9 @@ Monitor.live = {
 					Monitor.live.data.platforms._ready = true;
 
 				} catch (error) {
-					Monitor.live.status.setError("Error while loading the known platforms file: " + error.message);
+					Monitor.live.gui.status.setError("Error while loading the known platforms file: " + error.message);
 				} finally {
-					Monitor.live.status.hideBusy("Done.");
+					Monitor.live.gui.status.hideBusy("Done.");
 					Monitor.live.data._dispatch('platforms')
 				}
 			},
@@ -488,7 +604,7 @@ Monitor.live = {
 					break;
 				case "tck":
 					typeName = "Ticker";
-					columns = ['ts','ip','pg','id'];
+					columns = ['ts','ip','pg','id','client'];
 					break;
 				default:
 					console.warn(`Unknown log type ${type}.`);
@@ -496,7 +612,7 @@ Monitor.live = {
 			}
 
 			// Show the busy indicator and set the visible status:
-			Monitor.live.status.showBusy(`Loading ${typeName} log file …`);
+			Monitor.live.gui.status.showBusy(`Loading ${typeName} log file …`);
 
 			// compose the URL from which to load:
 			const url = Monitor._baseDir + `logs/${Monitor._today}.${type}`;
@@ -545,57 +661,78 @@ Monitor.live = {
 				}
 
 			} catch (error) {
-				Monitor.live.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
+				Monitor.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
 			} finally {
-				Monitor.live.status.hideBusy("Done.");
+				Monitor.live.gui.status.hideBusy("Done.");
 			}
 		}
 	},
 
-	status: {
-		setText: function(txt) {
-			const el = document.getElementById('monitor__today__status');
-			if (el && Monitor.live.status._errorCount <= 0) {
-				el.innerText = txt;
+	gui: {
+
+		overview: {
+			make: function() {
+				const data = Monitor.live.data.analytics.data;
+				const parent = document.getElementById('monitor__today__content');
+				if (parent) {
+					jQuery(parent).prepend(jQuery(`
+						<h2>Overview</h2>
+						<p>Total visits: ${data.totalVisits}</p>
+						<p>Total page views: ${data.totalPageViews}</p>
+						<h3>Bots vs. Humans</h3>
+						<p>Known bots: ${data.bots.known}</p>
+						<p>Possible bots: ${data.bots.possible}</p>
+						<p>Humans: ${data.bots.human}</p>
+					`));
+				}
 			}
 		},
-
-		setTitle: function(html) {
-			const el = document.getElementById('monitor__today__title');
-			if (el) {
-				el.innerHTML = html;
-			}
-		},
-
-		setError: function(txt) {
-			console.error(txt);
-			Monitor.live.status._errorCount += 1;
-			const el = document.getElementById('monitor__today__status');
-			if (el) {
-				el.innerText = "An error occured. See the browser log for details!";
-				el.classList.add('error');
-			}
-		},
-		_errorCount: 0,
-
-		showBusy: function(txt = null) {
-			Monitor.live.status._busyCount += 1;
-			const el = document.getElementById('monitor__today__busy');
-			if (el) {
-				el.style.display = 'inline-block';
-			}
-			if (txt) Monitor.live.status.setText(txt);
-		},
-		_busyCount: 0,
-
-		hideBusy: function(txt = null) {
-			const el = document.getElementById('monitor__today__busy');
-			Monitor.live.status._busyCount -= 1;
-			if (Monitor.live.status._busyCount <= 0) {
-				if (el) el.style.display = 'none';
-				if (txt) Monitor.live.status.setText(txt);
+		status: {
+			setText: function(txt) {
+				const el = document.getElementById('monitor__today__status');
+				if (el && Monitor.live.gui.status._errorCount <= 0) {
+					el.innerText = txt;
+				}
+			},
+	
+			setTitle: function(html) {
+				const el = document.getElementById('monitor__today__title');
+				if (el) {
+					el.innerHTML = html;
+				}
+			},
+	
+			setError: function(txt) {
+				console.error(txt);
+				Monitor.live.gui.status._errorCount += 1;
+				const el = document.getElementById('monitor__today__status');
+				if (el) {
+					el.innerText = "An error occured. See the browser log for details!";
+					el.classList.add('error');
+				}
+			},
+			_errorCount: 0,
+	
+			showBusy: function(txt = null) {
+				Monitor.live.gui.status._busyCount += 1;
+				const el = document.getElementById('monitor__today__busy');
+				if (el) {
+					el.style.display = 'inline-block';
+				}
+				if (txt) Monitor.live.gui.status.setText(txt);
+			},
+			_busyCount: 0,
+	
+			hideBusy: function(txt = null) {
+				const el = document.getElementById('monitor__today__busy');
+				Monitor.live.gui.status._busyCount -= 1;
+				if (Monitor.live.gui.status._busyCount <= 0) {
+					if (el) el.style.display = 'none';
+					if (txt) Monitor.live.gui.status.setText(txt);
+				}
 			}
 		}
+	
 	}
 };
 
