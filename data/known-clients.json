@@ -1,0 +1,35 @@
+[
+	{"n": "Opera",
+	 "id": "opera",
+	 "rx": [ "\\sOpera\\/.*?Version\\/(\\S+)", "Opera\\/(\\S+)" ]
+	},
+	{"n": "Internet Explorer",
+	 "id": "msie",
+	 "rx": [ "\\sMSIE\\s(\\d+\\.\\d+b?);" ],
+	 "bot": 0.4
+	},
+	{"n": "Brave",
+	 "id": "brave",
+	 "rx": [ "\\sBrave\\s" ]
+	},
+	{"n": "Edge",
+	 "id": "msedge",
+	 "rx": [ "\\sEdg\\/(\\S+)", "\\sEdge\\/(\\S+)" ]
+	},
+	{"n": "Chrome",
+	 "id": "chrome",
+	 "rx": [ "\\sChrome\\/(\\S+)" ]
+	},
+	{"n": "Safari",
+	 "id": "safari",
+	 "rx": [ "\\sSafari\\/(\\S+)" ]
+	},
+	{"n": "DuckDuckGo",
+	 "id": "ddg",
+	 "rx": [ "\\sDdg\\/(\\S+)" ]
+	},
+	{"n": "Firefox",
+	 "id": "firefox",
+	 "rx": [ "\\sFirefox\\/(\\S+)" ]
+	}
+]

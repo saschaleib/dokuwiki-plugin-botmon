@@ -47,8 +47,11 @@ class admin_plugin_monitor extends AdminPlugin {
 		echo '<section role="tabpanel" id="monitor__today"">';
 		echo '<h2 class="a11y">Today</h2>';
 		echo '<header><h3 id="monitor__today__title">Loading&nbsp;&hellip;</h3></header>';
-		echo '<div id="monitor__today__content"></div>';
-		echo '<footer aria-live="polite">' . $svg . '<span id="monitor__today__status">Starting up&nbsp;&hellip;</span></footer>';
+		echo '<div id="monitor__today__content">';
+		echo '<details id="monitor__today__visitors"><summary>Visitor log</summary>';
+		echo '<ul id="monitor__today__visitorlist"></ul>';
+		echo '</details></div>';
+		echo '<footer aria-live="polite">' . $svg . '<span id="monitor__today__status">Initialising&nbsp;&hellip;</span></footer>';
 		echo '</section>';
 		echo '</div><!-- End of Monitor Admin Tool -->';
 

@@ -14,13 +14,13 @@ $logArr = Array(
 	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DokuWiki session ID */
 	$json['u'] ?? '', /* DW User id (if logged in) */
 	$json['td'] ?? '', /* load time */
-	$json['r'] ?? '' /* Referrer URL */
+	$json['r'] ?? '', /* Referrer URL */
+	$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
 	// $json['lg'] ?? '', /* browser language */
 	// $json['scr'] ?? '', /* Screen dimensions */
 	// $json['tz'] ?? '', /* timzone offset */
 	// $json['l'] ?? '', /* Accepted languages list */
 	// $json['url'] ?? '', /* Full request URL */
-	// $_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 	// $json['t'] ?? '' /* Page title */
 );
 

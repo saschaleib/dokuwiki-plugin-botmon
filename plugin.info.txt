@@ -1,7 +1,7 @@
 base   monitor
 author Sascha Leib
 email  ad@hominem.com
-date   2025-08-21
+date   2025-08-30
 name   Monitoring
 desc   Live monitoring traffic on your DokuWiki instance (under development)
 url    https://www.dokuwiki.org/plugin:monitor

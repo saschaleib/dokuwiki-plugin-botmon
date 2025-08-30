@@ -1,0 +1,27 @@
+[
+	{"n": "Win10/11",
+	 "id": "win10",
+	 "rx": [ "\\(Windows NT (1\\d\\.\\d);" ]
+	},
+	{"n": "Linux",
+	 "id": "linux",
+	 "rx": [ "\\sLinux\\s" ]
+	},
+	{"n": "iOS/iPadOS",
+	 "id": "ios",
+	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
+	},
+	{"n": "Android",
+	 "id": "android",
+	 "rx": [ "[\\(\\s]Android\\s([^;]+);" ]
+	},
+	{"n": "MacOS",
+	 "id": "macos",
+	 "rx": [ "\\(Macintosh;" ]
+	},
+	{"n": "Old Windows Version",
+	 "id": "winold",
+	 "rx": [ "\\(Windows NT (\\d\\.\\d)[;\\s\\)]","Windows (\\d\\.\\d)[;\\s]" ],
+	 "bot": 0.4
+	}
+]

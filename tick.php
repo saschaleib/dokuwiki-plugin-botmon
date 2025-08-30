@@ -4,7 +4,8 @@
 $logArr = Array(
 	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 	$_GET['p'] ?? '', /* page ID */
-	$_COOKIE['DokuWiki'] ?? session_id() ?? '' /* DokuWiki session ID */
+	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DokuWiki session ID */
+	$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
 );
 
 /* create the log line */
