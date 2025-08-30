@@ -12,14 +12,14 @@ $logArr = Array(
 	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 	$json['pg'] ?? '', /* DW page ID */
 	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DokuWiki session ID */
-	$json['u'] ?? '' /* DW User id (if logged in) */
-	// $json['tz'] ?? '', /* timzone offset */
+	$json['u'] ?? '', /* DW User id (if logged in) */
+	$json['td'] ?? '', /* load time */
+	$json['r'] ?? '' /* Referrer URL */
 	// $json['lg'] ?? '', /* browser language */
-	// $json['td'] ?? '', /* load time */
 	// $json['scr'] ?? '', /* Screen dimensions */
+	// $json['tz'] ?? '', /* timzone offset */
 	// $json['l'] ?? '', /* Accepted languages list */
 	// $json['url'] ?? '', /* Full request URL */
-	// $json['r'] ?? '', /* Referrer URL */
 	// $_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 	// $json['t'] ?? '' /* Page title */
 );

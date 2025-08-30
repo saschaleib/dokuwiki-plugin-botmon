@@ -76,7 +76,8 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 			$sessionId, /* Session ID */
 			$sessionType,
 			$username,
-			$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
+			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
+			$_SERVER['HTTP_REFERER'] ?? '' /* HTTP Referrer */
 		);
 
 		//* create the log line */
@@ -98,5 +99,4 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 		fclose($logfile);
 
 	}
-
 }

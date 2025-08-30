@@ -25,10 +25,10 @@ monitor_client = {
 				'pg': JSINFO.id,
 				'u': document._monitor.user || null,
 				'lg': navigator.language,
-				'tz': new Date().getTimezoneOffset() /*,
-				'url': window.location.href,
-				'r': document.referrer,
 				'lt': ( document._monitor ? Date.now() - document._monitor.t0 : null),
+				'r': document.referrer /*,
+				'tz': new Date().getTimezoneOffset(),
+				'url': window.location.href,
 				'scr': screen.width+':'+screen.height,
 				'l': navigator.languages */
 			}
