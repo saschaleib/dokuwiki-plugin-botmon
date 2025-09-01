@@ -343,15 +343,16 @@ Monitor.live = {
 				totalPageViews: 0,
 				bots: {
 					known: 0,
-					possible: 0,
-					human: 0
+					likely: 0,
+					human: 0,
+					users: 0
 				}
 			},
 
 			// sort the visits by type:
 			groups: {
 				knownBots: [],
-				possibleBots: [],
+				likelyBots: [],
 				humans: [],
 				users: []
 			},
@@ -380,6 +381,7 @@ Monitor.live = {
 
 					} if (v.usr && v.usr != '') { // known users
 						this.groups.users.push(v);
+						this.data.bots.users += 1;
 					} else {
 						// not a known bot, nor a known user; check other aspects:
 
@@ -404,8 +406,8 @@ Monitor.live = {
 
 						// decide based on the score:
 						if (botScore >= 0.5) {
-							this.data.bots.possible += 1;
-							this.groups.possibleBots.push(v);
+							this.data.bots.likely += 1;
+							this.groups.likelyBots.push(v);
 						} else {
 							this.data.bots.human += 1;
 							this.groups.humans.push(v);
@@ -676,13 +678,27 @@ Monitor.live = {
 				const parent = document.getElementById('monitor__today__content');
 				if (parent) {
 					jQuery(parent).prepend(jQuery(`
-						<h2>Overview</h2>
-						<p>Total visits: ${data.totalVisits}</p>
-						<p>Total page views: ${data.totalPageViews}</p>
-						<h3>Bots vs. Humans</h3>
-						<p>Known bots: ${data.bots.known}</p>
-						<p>Possible bots: ${data.bots.possible}</p>
-						<p>Humans: ${data.bots.human}</p>
+						<details id="monitor__today__overview" open>
+							<summary>Overview</summary>
+							<div class="grid-3-columns">
+								<dl>
+									<dt>Web metrics</dt>
+									<dd><span>Total visits:</span><span>${data.totalVisits}</span></dd>
+									<dd><span>Total page views:</span><span>${data.totalPageViews}</span></dd>
+									<dd><span>Bounce rate:</span><span>(TBD)</span></dd>
+								</dl>
+								<dl>
+									<dt>Bots vs. Humans</dt>
+									<dd><span>Known bots:</span><span>${data.bots.known}</span></dd>
+									<dd><span>Likely bots:</span><span>${data.bots.likely}</span></dd>
+									<dd><span>Probably humans:</span><span>${data.bots.human}</span></dd>
+									<dd><span>Registered users:</span><span>${data.bots.users}</span></dd>
+								</dl>
+								<dl id="monitor__botslistWould be good for me, too">
+									<dt>Known bots</dt>
+								</dl>
+							</div>
+						</details>
 					`));
 				}
 			}

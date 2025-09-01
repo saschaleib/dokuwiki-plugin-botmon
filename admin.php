@@ -44,15 +44,15 @@ class admin_plugin_monitor extends AdminPlugin {
 		echo '</ul></nav>';
 
 		/* Live tab */
-		echo '<section role="tabpanel" id="monitor__today"">';
+		echo '<article role="tabpanel" id="monitor__today"">';
 		echo '<h2 class="a11y">Today</h2>';
-		echo '<header><h3 id="monitor__today__title">Loading&nbsp;&hellip;</h3></header>';
+		echo '<header id="monitor__today__title">Loading&nbsp;&hellip;</header>';
 		echo '<div id="monitor__today__content">';
 		echo '<details id="monitor__today__visitors"><summary>Visitor log</summary>';
 		echo '<ul id="monitor__today__visitorlist"></ul>';
 		echo '</details></div>';
 		echo '<footer aria-live="polite">' . $svg . '<span id="monitor__today__status">Initialising&nbsp;&hellip;</span></footer>';
-		echo '</section>';
+		echo '</article>';
 		echo '</div><!-- End of Monitor Admin Tool -->';
 
 	}
