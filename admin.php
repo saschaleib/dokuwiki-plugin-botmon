@@ -30,7 +30,9 @@ class admin_plugin_botmon extends AdminPlugin {
 	*/
 	public function html() {
 
-		$svg = '<svg width="60" height="60" id="botmon__today__busy" viewBox="0 0 38 38"><g transform="translate(19 19)"><g transform="rotate(0)"><circle cx="0" cy="12" r="3" opacity="0.125"><animate attributeName="opacity" from="0.125" to="0.125" dur="1.2s" begin="0s" repeatCount="indefinite" keyTimes="0;1" values="1;0.125"></animate></circle></g><g transform="rotate(45)"><circle cx="0" cy="12" r="3" opacity="0.25"><animate attributeName="opacity" from="0.25" to="0.25" dur="1.2s" begin="0.15s" repeatCount="indefinite" keyTimes="0;1" values="1;0.25"></animate></circle></g><g transform="rotate(90)"><circle cx="0" cy="12" r="3" opacity="0.375"><animate attributeName="opacity" from="0.375" to="0.375" dur="1.2s" begin="0.3s" repeatCount="indefinite" keyTimes="0;1" values="1;0.375"></animate></circle></g><g transform="rotate(135)"><circle cx="0" cy="12" r="3" opacity="0.5"><animate attributeName="opacity" from="0.5" to="0.5" dur="1.2s" begin="0.45s" repeatCount="indefinite" keyTimes="0;1" values="1;0.5"></animate></circle></g><g transform="rotate(180)"><circle cx="0" cy="12" r="3" opacity="0.625"><animate attributeName="opacity" from="0.625" to="0.625" dur="1.2s" begin="0.6s" repeatCount="indefinite" keyTimes="0;1" values="1;0.625"></animate></circle></g><g transform="rotate(225)"><circle cx="0" cy="12" r="3" opacity="0.75"><animate attributeName="opacity" from="0.75" to="0.75" dur="1.2s" begin="0.75s" repeatCount="indefinite" keyTimes="0;1" values="1;0.75"></animate></circle></g><g transform="rotate(270)"><circle cx="0" cy="12" r="3" opacity="0.875"><animate attributeName="opacity" from="0.875" to="0.875" dur="1.2s" begin="0.9s" repeatCount="indefinite" keyTimes="0;1" values="1;0.875"></animate></circle></g><g transform="rotate(315)"><circle cx="0" cy="12" r="3" opacity="1"><animate attributeName="opacity" from="1" to="1" dur="1.2s" begin="1.05s" repeatCount="indefinite" keyTimes="0;1" values="1;1"></animate></circle></g></g></svg>';
+		global $conf;
+
+		$pluginPath = $conf['basedir'] . 'lib/plugins/' . $this->getPluginName();
 
 		/* Plugin Headline */
 		echo '<div id="botmon__admin">';
@@ -43,6 +45,9 @@ class admin_plugin_botmon extends AdminPlugin {
 		echo '<a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Today</a></li>';
 		echo '</ul></nav>';
 
+		// Beta warning message:
+		echo '<div class="info"><strong>Please note:</strong> This plugin is still in the early stages of development and does not (yet) clean up its <code>logs</code> directory.<br>To avoid taking up too much space on your server, please remove older logs manually!</div>';
+
 		/* Live tab */
 		echo '<article role="tabpanel" id="botmon__today"">';
 		echo '<h2 class="a11y">Today</h2>';
@@ -51,9 +56,8 @@ class admin_plugin_botmon extends AdminPlugin {
 		echo '<details id="botmon__today__visitors"><summary>Visitor log</summary>';
 		echo '<ul id="botmon__today__visitorlist"></ul>';
 		echo '</details></div>';
-		echo '<footer aria-live="polite">' . $svg . '<span id="botmon__today__status">Initialising&nbsp;&hellip;</span></footer>';
+		echo '<footer aria-live="polite"><img src="' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator"><span id="botmon__today__status">Initialising&nbsp;&hellip;</span></footer>';
 		echo '</article>';
-		echo '<div class="error"><strong>IMPORTANT:</strong> This plugin is still in the early stages of development and does not clean up its <code>logs</code> directory.<br>To avoid taking up too much space on your server, please remove older logs manually!</div>';
 		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}

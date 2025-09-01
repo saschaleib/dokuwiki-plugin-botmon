@@ -677,6 +677,9 @@ BotMon.live = {
 				const data = BotMon.live.data.analytics.data;
 				const parent = document.getElementById('botmon__today__content');
 				if (parent) {
+
+					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 1000) / 10;
+
 					jQuery(parent).prepend(jQuery(`
 						<details id="botmon__today__overview" open>
 							<summary>Overview</summary>
@@ -685,7 +688,8 @@ BotMon.live = {
 									<dt>Web metrics</dt>
 									<dd><span>Total visits:</span><span>${data.totalVisits}</span></dd>
 									<dd><span>Total page views:</span><span>${data.totalPageViews}</span></dd>
-									<dd><span>Bounce rate:</span><span>(TBD)</span></dd>
+									<dd><span>Bounce rate:</span><span>${bounceRate}&#x202F;%</span></dd>
+									<dd><span>∅ load time:</span><span>${data.avgLoadTime}&#x202F;ms</span></dd>
 								</dl>
 								<dl>
 									<dt>Bots vs. Humans</dt>

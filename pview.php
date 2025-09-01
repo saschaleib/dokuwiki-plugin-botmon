@@ -11,9 +11,9 @@ if (!$json) {
 $logArr = Array(
 	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 	$json['pg'] ?? '', /* DW page ID */
-	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DokuWiki session ID */
+	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DW session ID */
 	$json['u'] ?? '', /* DW User id (if logged in) */
-	$json['td'] ?? '', /* load time */
+	$json['lt'] ?? '', /* load time */
 	$json['r'] ?? '', /* Referrer URL */
 	$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
 	// $json['lg'] ?? '', /* browser language */
