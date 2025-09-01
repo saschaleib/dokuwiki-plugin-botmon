@@ -615,7 +615,7 @@ Monitor.live = {
 			Monitor.live.gui.status.showBusy(`Loading ${typeName} log file …`);
 
 			// compose the URL from which to load:
-			const url = Monitor._baseDir + `logs/${Monitor._today}.${type}`;
+			const url = Monitor._baseDir + `logs/${Monitor._today}.${type}.txt`;
 			//console.log("Loading:",url);
 
 			// fetch the data:

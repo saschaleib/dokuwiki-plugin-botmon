@@ -2,3 +2,6 @@
 *.log
 *.srv
 *.tck
+logs/*.log.txt
+logs/*.srv.txt
+logs/*.tck.txt

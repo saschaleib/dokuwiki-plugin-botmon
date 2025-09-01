@@ -25,7 +25,7 @@ $logArr = Array(
 );
 
 /* create the log line */
-$filename = 'logs/' . gmdate('Y-m-d') . '.log'; /* use server datetime */
+$filename = 'logs/' . gmdate('Y-m-d') . '.log.txt'; /* use server datetime */
 $logline = gmdate('Y-m-d H:i:s');
 foreach ($logArr as $val) {
 	$logline .= "\t" . $val;

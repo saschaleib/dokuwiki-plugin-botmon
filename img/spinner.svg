@@ -1,4 +1,4 @@
-<svg viewBox="0 0 240 240"><style>.pl1123__ring {animation: ringA 2s linear infinite;}
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><style>.pl1123__ring {animation: ringA 2s linear infinite;}
 .pl1123__ring--a {stroke: currentColor;}
 .pl1123__ring--b {animation-name: ringB;stroke: currentColor;}
 .pl1123__ring--c {animation-name: ringC;stroke: currentColor;}

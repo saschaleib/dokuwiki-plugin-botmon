@@ -9,7 +9,7 @@ $logArr = Array(
 );
 
 /* create the log line */
-$filename = 'logs/' . gmdate('Y-m-d') . '.tck'; /* use GMT date for filename */
+$filename = 'logs/' . gmdate('Y-m-d') . '.tck.txt'; /* use GMT date for filename */
 $line = gmdate('Y-m-d H:i:s'); /* use GMT time for log entries */
 foreach ($logArr as $val) {
 	$line .= "\t" . $val;

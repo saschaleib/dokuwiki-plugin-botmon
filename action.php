@@ -53,7 +53,7 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 			'_data'   => $code
         ];
 
-		/* Write out client info to a server log: */
+		/* Write out server-side info to a server log: */
 
 		// what is the session identifier?
 		$sessionId = $_COOKIE['DokuWiki'] ?? null;
@@ -81,7 +81,7 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 		);
 
 		//* create the log line */
-		$filename = __DIR__ .'/logs/' . gmdate('Y-m-d') . '.srv'; /* use GMT date for filename */
+		$filename = __DIR__ .'/logs/' . gmdate('Y-m-d') . '.srv.txt'; /* use GMT date for filename */
 		$logline = gmdate('Y-m-d H:i:s'); /* use GMT time for log entries */
 		foreach ($logArr as $tab) {
 			$logline .= "\t" . $tab;
