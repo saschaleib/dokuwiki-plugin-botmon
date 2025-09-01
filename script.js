@@ -1,24 +1,24 @@
-/* DokuWiki Monitor Plugin Script file */
-/* 30.08.2025 - 0.1.5 - pre-release */
+/* DokuWiki BotMon Plugin Script file */
+/* 30.08.2025 - 0.1.6 - pre-release */
 /* Authors: Sascha Leib <ad@hominem.info> */
 
-const Monitor = {
+const BotMon = {
 
 	init: function() {
-		//console.info('Monitor.init()');
+		console.info('BotMon.init()');
 
 		// find the plugin basedir:
 		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
-			+ '/plugins/monitor/';
+			+ '/plugins/botmon/';
 
 		// read the page language from the DOM:
 		this._lang = document.getRootNode().documentElement.lang || this._lang;
 
 		// get the time offset:
-		this._timeDiff = Monitor.t._getTimeOffset();
+		this._timeDiff = BotMon.t._getTimeOffset();
 
 		// init the sub-objects:
-		Monitor.t._callInit(this);
+		BotMon.t._callInit(this);
 	},
 
 	_baseDir: null,
@@ -31,7 +31,7 @@ const Monitor = {
 
 		/* helper function to call inits of sub-objects */
 		_callInit: function(obj) {
-			//console.info('Monitor.t._callInit(obj=',obj,')');
+			//console.info('BotMon.t._callInit(obj=',obj,')');
 
 			/* call init / _init on each sub-object: */
 			Object.keys(obj).forEach( (key,i) => {
@@ -67,32 +67,32 @@ const Monitor = {
 };
 
 /* everything specific to the "Today" tab is self-contained in the "live" object: */
-Monitor.live = {
+BotMon.live = {
 	init: function() {
-		//console.info('Monitor.live.init()');
+		//console.info('BotMon.live.init()');
 
 		// set the title:
-		const tDiff = '(<abbr title="Coordinated Universal Time">UTC</abbr>' + (Monitor._timeDiff != '' ? `, ${Monitor._timeDiff}` : '' ) + ')';
-		Monitor.live.gui.status.setTitle(`Showing data for <time datetime=${Monitor._today}>${Monitor._today}</time> ${tDiff}`);
+		const tDiff = '(<abbr title="Coordinated Universal Time">UTC</abbr>' + (BotMon._timeDiff != '' ? `, ${BotMon._timeDiff}` : '' ) + ')';
+		BotMon.live.gui.status.setTitle(`Data for <time datetime=${BotMon._today}>${BotMon._today}</time> ${tDiff}`);
 
 		// init sub-objects:
-		Monitor.t._callInit(this);
+		BotMon.t._callInit(this);
 	},
 
 	data: {
 		init: function() {
-			//console.info('Monitor.live.data.init()');
+			//console.info('BotMon.live.data.init()');
 
 			// call sub-inits:
-			Monitor.t._callInit(this);
+			BotMon.t._callInit(this);
 		},
 
 		// this will be called when the known json files are done loading:
 		_dispatch: function(file) {
-			//console.info('Monitor.live.data._dispatch(,',file,')');
+			//console.info('BotMon.live.data._dispatch(,',file,')');
 
 			// shortcut to make code more readable:
-			const data = Monitor.live.data;
+			const data = BotMon.live.data;
 
 			// set the flags:
 			switch(file) {
@@ -112,7 +112,7 @@ Monitor.live = {
 			// are all the flags set?
 			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded) {
 				// chain the log files loading:
-				Monitor.live.data.loadLogFile('srv', Monitor.live.data._onServerLogLoaded);
+				BotMon.live.data.loadLogFile('srv', BotMon.live.data._onServerLogLoaded);
 			}
 		},
 		// flags to track which data files have been loaded:
@@ -122,35 +122,35 @@ Monitor.live = {
 
 		// event callback, after the server log has been loaded:
 		_onServerLogLoaded: function() {
-			//console.info('Monitor.live.data._onServerLogLoaded()');
+			//console.info('BotMon.live.data._onServerLogLoaded()');
 
 			// chain the client log file to load:
-			Monitor.live.data.loadLogFile('log', Monitor.live.data._onClientLogLoaded);
+			BotMon.live.data.loadLogFile('log', BotMon.live.data._onClientLogLoaded);
 		},
 
 		// event callback, after the client log has been loaded:
 		_onClientLogLoaded: function() {
-			console.info('Monitor.live.data._onClientLogLoaded()');
+			console.info('BotMon.live.data._onClientLogLoaded()');
 			
 			// chain the ticks file to load:
-			Monitor.live.data.loadLogFile('tck', Monitor.live.data._onTicksLogLoaded);
+			BotMon.live.data.loadLogFile('tck', BotMon.live.data._onTicksLogLoaded);
 
 		},
 
 		// event callback, after the tiker log has been loaded:
 		_onTicksLogLoaded: function() {
-			console.info('Monitor.live.data._onTicksLogLoaded()');
+			console.info('BotMon.live.data._onTicksLogLoaded()');
 
 			// analyse the data:
-			Monitor.live.data.analytics.analyseAll();
+			BotMon.live.data.analytics.analyseAll();
 
 			// sort the data:
 			// #TODO
 			
 			// display the data:
-			Monitor.live.gui.overview.make();
+			BotMon.live.gui.overview.make();
 
-			console.log(Monitor.live.data.model._visitors);
+			console.log(BotMon.live.data.model._visitors);
 
 		},
 
@@ -162,7 +162,7 @@ Monitor.live = {
 			findVisitor: function(id) {
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 
 				// loop over all visitors already registered:
 				for (let i=0; i<model._visitors.length; i++) {
@@ -176,7 +176,7 @@ Monitor.live = {
 			_getVisit: function(visit, view) {
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 
 
 				for (let i=0; i<visit._pageViews.length; i++) {
@@ -194,12 +194,12 @@ Monitor.live = {
 				//console.info('registerVisit', dat);
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 	
 				// check if it already exists:
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
-					const bot = Monitor.live.data.bots.match(dat.client);
+					const bot = BotMon.live.data.bots.match(dat.client);
 
 					model._visitors.push(dat);
 					visitor = dat;
@@ -209,8 +209,8 @@ Monitor.live = {
 					visitor._pageViews = []; // array of page views
 					visitor._hasReferrer = false; // has at least one referrer
 					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = bot ?? Monitor.live.data.clients.match(dat.client) ?? null; // client info (browser, bot, etc.)
-					visitor._platform = Monitor.live.data.platforms.match(dat.client); // platform info
+					visitor._client = bot ?? BotMon.live.data.clients.match(dat.client) ?? null; // client info (browser, bot, etc.)
+					visitor._platform = BotMon.live.data.platforms.match(dat.client); // platform info
 
 					// known bots get the bot ID as identifier:
 					if (bot) visitor.id = bot.id;
@@ -250,7 +250,7 @@ Monitor.live = {
 				//console.info('updateVisit', dat);
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
@@ -290,7 +290,7 @@ Monitor.live = {
 				//console.info('updateTicks', dat);
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 
 				// find the visit info:
 				let visitor = model.findVisitor(dat.id);
@@ -334,7 +334,7 @@ Monitor.live = {
 		analytics: {
 
 			init: function() {
-				console.info('Monitor.live.data.analytics.init()');
+				console.info('BotMon.live.data.analytics.init()');
 			},
 
 			// data storage:
@@ -359,10 +359,10 @@ Monitor.live = {
 
 			// all analytics
 			analyseAll: function() {
-				//console.info('Monitor.live.data.analytics.analyseAll()');
+				//console.info('BotMon.live.data.analytics.analyseAll()');
 
 				// shortcut to make code more readable:
-				const model = Monitor.live.data.model;
+				const model = BotMon.live.data.model;
 
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
@@ -424,36 +424,36 @@ Monitor.live = {
 		bots: {
 			// loads the list of known bots from a JSON file:
 			init: async function() {
-				//console.info('Monitor.live.data.bots.init()');
+				//console.info('BotMon.live.data.bots.init()');
 
 				// Load the list of known bots:
-				Monitor.live.gui.status.showBusy("Loading known bots …");
-				const url = Monitor._baseDir + 'data/known-bots.json';
+				BotMon.live.gui.status.showBusy("Loading known bots …");
+				const url = BotMon._baseDir + 'data/known-bots.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
 						throw new Error(`${response.status} ${response.statusText}`);
 					}
 
-					Monitor.live.data.bots._list = await response.json();
-					Monitor.live.data.bots._ready = true;
+					BotMon.live.data.bots._list = await response.json();
+					BotMon.live.data.bots._ready = true;
 
 					// TODO: allow using the bots list...
 				} catch (error) {
-					Monitor.live.gui.status.setError("Error while loading the ’known bots’ file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the ‘known bots’ file: " + error.message);
 				} finally {
-					Monitor.live.gui.status.hideBusy("Done.");
-					Monitor.live.data._dispatch('bots')
+					BotMon.live.gui.status.hideBusy("Status: Done.");
+					BotMon.live.data._dispatch('bots')
 				}
 			},
 
 			// returns bot info if the clientId matches a known bot, null otherwise:
 			match: function(client) {
-				//console.info('Monitor.live.data.bots.match(',client,')');
+				//console.info('BotMon.live.data.bots.match(',client,')');
 
 				if (client) {
-					for (let i=0; i<Monitor.live.data.bots._list.length; i++) {
-						const bot = Monitor.live.data.bots._list[i];
+					for (let i=0; i<BotMon.live.data.bots._list.length; i++) {
+						const bot = BotMon.live.data.bots._list[i];
 						for (let j=0; j<bot.rx.length; j++) {
 							if (client.match(new RegExp(bot.rx[j]))) {
 								return bot; // found a match
@@ -474,36 +474,36 @@ Monitor.live = {
 		clients: {
 			// loads the list of known clients from a JSON file:
 			init: async function() {
-				//console.info('Monitor.live.data.clients.init()');
+				//console.info('BotMon.live.data.clients.init()');
 
 				// Load the list of known bots:
-				Monitor.live.gui.status.showBusy("Loading known clients");
-				const url = Monitor._baseDir + 'data/known-clients.json';
+				BotMon.live.gui.status.showBusy("Loading known clients");
+				const url = BotMon._baseDir + 'data/known-clients.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
 						throw new Error(`${response.status} ${response.statusText}`);
 					}
 
-					Monitor.live.data.clients._list = await response.json();
-					Monitor.live.data.clients._ready = true;
+					BotMon.live.data.clients._list = await response.json();
+					BotMon.live.data.clients._ready = true;
 
 				} catch (error) {
-					Monitor.live.gui.status.setError("Error while loading the known clients file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the known clients file: " + error.message);
 				} finally {
-					Monitor.live.gui.status.hideBusy("Done.");
-					Monitor.live.data._dispatch('clients')
+					BotMon.live.gui.status.hideBusy("Status: Done.");
+					BotMon.live.data._dispatch('clients')
 				}
 			},
 
 			// returns bot info if the clientId matches a known bot, null otherwise:
 			match: function(cid) {
-				//console.info('Monitor.live.data.clients.match(',cid,')');
+				//console.info('BotMon.live.data.clients.match(',cid,')');
 
 				let match = {"n": "Unknown", "v": -1, "id": null};
 
 				if (cid) {
-					Monitor.live.data.clients._list.find(client => {
+					BotMon.live.data.clients._list.find(client => {
 						let r = false;
 						for (let j=0; j<client.rx.length; j++) {
 							const rxr = cid.match(new RegExp(client.rx[j]));
@@ -533,36 +533,36 @@ Monitor.live = {
 		platforms: {
 			// loads the list of known platforms from a JSON file:
 			init: async function() {
-				//console.info('Monitor.live.data.platforms.init()');
+				//console.info('BotMon.live.data.platforms.init()');
 
 				// Load the list of known bots:
-				Monitor.live.gui.status.showBusy("Loading known platforms");
-				const url = Monitor._baseDir + 'data/known-platforms.json';
+				BotMon.live.gui.status.showBusy("Loading known platforms");
+				const url = BotMon._baseDir + 'data/known-platforms.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
 						throw new Error(`${response.status} ${response.statusText}`);
 					}
 
-					Monitor.live.data.platforms._list = await response.json();
-					Monitor.live.data.platforms._ready = true;
+					BotMon.live.data.platforms._list = await response.json();
+					BotMon.live.data.platforms._ready = true;
 
 				} catch (error) {
-					Monitor.live.gui.status.setError("Error while loading the known platforms file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the known platforms file: " + error.message);
 				} finally {
-					Monitor.live.gui.status.hideBusy("Done.");
-					Monitor.live.data._dispatch('platforms')
+					BotMon.live.gui.status.hideBusy("Status: Done.");
+					BotMon.live.data._dispatch('platforms')
 				}
 			},
 
 			// returns bot info if the browser id matches a known platform:
 			match: function(cid) {
-				//console.info('Monitor.live.data.platforms.match(',cid,')');
+				//console.info('BotMon.live.data.platforms.match(',cid,')');
 
 				let match = {"n": "Unknown", "id": null};
 
 				if (cid) {
-					Monitor.live.data.platforms._list.find(platform => {
+					BotMon.live.data.platforms._list.find(platform => {
 						let r = false;
 						for (let j=0; j<platform.rx.length; j++) {
 							const rxr = cid.match(new RegExp(platform.rx[j]));
@@ -590,7 +590,7 @@ Monitor.live = {
 		},
 
 		loadLogFile: async function(type, onLoaded = undefined) {
-			// console.info('Monitor.live.data.loadLogFile(',type,')');
+			// console.info('BotMon.live.data.loadLogFile(',type,')');
 
 			let typeName = '';
 			let columns = [];
@@ -614,10 +614,10 @@ Monitor.live = {
 			}
 
 			// Show the busy indicator and set the visible status:
-			Monitor.live.gui.status.showBusy(`Loading ${typeName} log file …`);
+			BotMon.live.gui.status.showBusy(`Loading ${typeName} log file …`);
 
 			// compose the URL from which to load:
-			const url = Monitor._baseDir + `logs/${Monitor._today}.${type}.txt`;
+			const url = BotMon._baseDir + `logs/${BotMon._today}.${type}.txt`;
 			//console.log("Loading:",url);
 
 			// fetch the data:
@@ -644,13 +644,13 @@ Monitor.live = {
 					// register the visit in the model:
 					switch(type) {
 						case 'srv':
-							Monitor.live.data.model.registerVisit(data);
+							BotMon.live.data.model.registerVisit(data);
 							break;
 						case 'log':
-							Monitor.live.data.model.updateVisit(data);
+							BotMon.live.data.model.updateVisit(data);
 							break;
 						case 'tck':
-							Monitor.live.data.model.updateTicks(data);
+							BotMon.live.data.model.updateTicks(data);
 							break;
 						default:
 							console.warn(`Unknown log type ${type}.`);
@@ -663,9 +663,9 @@ Monitor.live = {
 				}
 
 			} catch (error) {
-				Monitor.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
+				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
 			} finally {
-				Monitor.live.gui.status.hideBusy("Done.");
+				BotMon.live.gui.status.hideBusy("Status: Done.");
 			}
 		}
 	},
@@ -674,11 +674,11 @@ Monitor.live = {
 
 		overview: {
 			make: function() {
-				const data = Monitor.live.data.analytics.data;
-				const parent = document.getElementById('monitor__today__content');
+				const data = BotMon.live.data.analytics.data;
+				const parent = document.getElementById('botmon__today__content');
 				if (parent) {
 					jQuery(parent).prepend(jQuery(`
-						<details id="monitor__today__overview" open>
+						<details id="botmon__today__overview" open>
 							<summary>Overview</summary>
 							<div class="grid-3-columns">
 								<dl>
@@ -694,7 +694,7 @@ Monitor.live = {
 									<dd><span>Probably humans:</span><span>${data.bots.human}</span></dd>
 									<dd><span>Registered users:</span><span>${data.bots.users}</span></dd>
 								</dl>
-								<dl id="monitor__botslistWould be good for me, too">
+								<dl id="botmon__botslist">
 									<dt>Known bots</dt>
 								</dl>
 							</div>
@@ -705,14 +705,14 @@ Monitor.live = {
 		},
 		status: {
 			setText: function(txt) {
-				const el = document.getElementById('monitor__today__status');
-				if (el && Monitor.live.gui.status._errorCount <= 0) {
+				const el = document.getElementById('botmon__today__status');
+				if (el && BotMon.live.gui.status._errorCount <= 0) {
 					el.innerText = txt;
 				}
 			},
 	
 			setTitle: function(html) {
-				const el = document.getElementById('monitor__today__title');
+				const el = document.getElementById('botmon__today__title');
 				if (el) {
 					el.innerHTML = html;
 				}
@@ -720,8 +720,8 @@ Monitor.live = {
 	
 			setError: function(txt) {
 				console.error(txt);
-				Monitor.live.gui.status._errorCount += 1;
-				const el = document.getElementById('monitor__today__status');
+				BotMon.live.gui.status._errorCount += 1;
+				const el = document.getElementById('botmon__today__status');
 				if (el) {
 					el.innerText = "An error occured. See the browser log for details!";
 					el.classList.add('error');
@@ -730,21 +730,21 @@ Monitor.live = {
 			_errorCount: 0,
 	
 			showBusy: function(txt = null) {
-				Monitor.live.gui.status._busyCount += 1;
-				const el = document.getElementById('monitor__today__busy');
+				BotMon.live.gui.status._busyCount += 1;
+				const el = document.getElementById('botmon__today__busy');
 				if (el) {
 					el.style.display = 'inline-block';
 				}
-				if (txt) Monitor.live.gui.status.setText(txt);
+				if (txt) BotMon.live.gui.status.setText(txt);
 			},
 			_busyCount: 0,
 	
 			hideBusy: function(txt = null) {
-				const el = document.getElementById('monitor__today__busy');
-				Monitor.live.gui.status._busyCount -= 1;
-				if (Monitor.live.gui.status._busyCount <= 0) {
+				const el = document.getElementById('botmon__today__busy');
+				BotMon.live.gui.status._busyCount -= 1;
+				if (BotMon.live.gui.status._busyCount <= 0) {
 					if (el) el.style.display = 'none';
-					if (txt) Monitor.live.gui.status.setText(txt);
+					if (txt) BotMon.live.gui.status.setText(txt);
 				}
 			}
 		}
@@ -752,7 +752,7 @@ Monitor.live = {
 	}
 };
 
-/* launch only if the Monitor admin panel is open: */
-if (document.getElementById('monitor__admin')) {
-	Monitor.init();
+/* launch only if the BotMon admin panel is open: */
+if (document.getElementById('botmon__admin')) {
+	BotMon.init();
 }

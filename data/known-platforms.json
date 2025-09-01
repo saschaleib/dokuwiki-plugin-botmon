@@ -19,7 +19,7 @@
 	 "id": "macos",
 	 "rx": [ "\\(Macintosh;" ]
 	},
-	{"n": "Old Windows Version",
+	{"n": "Vintage Windows",
 	 "id": "winold",
 	 "rx": [ "\\(Windows NT (\\d\\.\\d)[;\\s\\)]","Windows (\\d\\.\\d)[;\\s]" ],
 	 "bot": 0.4

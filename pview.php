@@ -1,4 +1,4 @@
-<?php /* MONITOR PLUGIN PAGE VIEW SCRIPT */
+<?php /* BOT MONITOR PLUGIN PAGE VIEW SCRIPT */
 
 /* parse the JSON payload */
 $json = json_decode($_POST['pageview'], true);

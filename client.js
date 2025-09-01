@@ -1,4 +1,4 @@
-monitor_client = {
+botmon_client = {
 	init: function() {
 
 		/* send the page view request: */
@@ -23,9 +23,9 @@ monitor_client = {
 			/* collect the data to send: */
 			const visit = {
 				'pg': JSINFO.id,
-				'u': document._monitor.user || null,
+				'u': document._botmon.user || null,
 				'lg': navigator.language,
-				'lt': ( document._monitor ? Date.now() - document._monitor.t0 : null),
+				'lt': ( document._botmon ? Date.now() - document._botmon.t0 : null),
 				'r': document.referrer /*,
 				'tz': new Date().getTimezoneOffset(),
 				'url': window.location.href,
@@ -52,7 +52,7 @@ monitor_client = {
 
 	/* function to call regularly to show the user is still on the page: */
 	_onHeartbeat: async function(url) {
-		//console.info('monitor_client._onHeartbeat', url);
+		//console.info('botmon_client._onHeartbeat', url);
 
 		try {
 			const response = await fetch(url + '?p=' + encodeURIComponent(JSINFO.id) + '&t=' + Date.now(), {
@@ -71,4 +71,4 @@ monitor_client = {
 }
 
 // init the script:
-monitor_client.init();
+botmon_client.init();

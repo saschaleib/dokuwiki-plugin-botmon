@@ -1,5 +1,5 @@
-# DokuWiki Monitoring Plugin
-Plugin for live-monitoring your DokuWiki instance
+# DokuWiki Bot Monitoring Plugin
+Plugin for live-monitoring your DokuWiki instance for bot activity
 
 #TODO: Work in progress
 

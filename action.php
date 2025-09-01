@@ -4,13 +4,13 @@ use dokuwiki\Extension\EventHandler;
 use dokuwiki\Extension\Event;
 
 /**
- * Action Component for the Monitor Plugin
+ * Action Component for the Bot Monitoring Plugin
  *
  * @license	GPL 3 (http://www.gnu.org/licenses/gpl.html)
  * @author	 Sascha Leib <sascha.leib(at)kolmio.com>
  */
 
-class action_plugin_monitor extends DokuWiki_Action_Plugin {
+class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	/**
 	 * Registers a callback functions
@@ -37,15 +37,15 @@ class action_plugin_monitor extends DokuWiki_Action_Plugin {
 					?  $INFO['userinfo']['name'] : null);
 
 		// build the tracker code:
-		$code = NL . DOKU_TAB . "document._monitor = {'t0': Date.now()};" . NL;
+		$code = NL . DOKU_TAB . "document._botmon = {'t0': Date.now()};" . NL;
 		if ($username) {
-			$code .= DOKU_TAB . 'document._monitor.user = "' . $username . '";'. NL;
+			$code .= DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
 		}
 		$code .= DOKU_TAB . "addEventListener('load',function(){" . NL;
 
 		$code .= DOKU_TAB . DOKU_TAB . "const e=document.createElement('script');" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "e.async=true;e.defer=true;" . NL;
-		$code .= DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/monitor/client.js';" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
 		$code .= DOKU_TAB . "});" . NL;
 

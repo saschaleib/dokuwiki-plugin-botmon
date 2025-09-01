@@ -1,4 +1,4 @@
-<?php /* MONITOR PLUGIN HEARTBEAT TICKER SCRIPT */
+<?php /* BOTMON PLUGIN HEARTBEAT TICKER SCRIPT */
 
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(
