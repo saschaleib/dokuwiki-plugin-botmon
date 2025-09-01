@@ -14,6 +14,7 @@
 			margin: .5rem 0 1pt 0;
 			padding: .25rem .5rem;
 			font-size: 1rem;
+			line-height: 1.25;
 		}
 
 		/* list formatting */
@@ -22,6 +23,8 @@
 				border-left: #555 solid 1px;
 				padding-left: .5rem;
 				margin: 0;
+				font-size: 1rem;
+				line-height: 1.5;
 			}
 			&:first-child {
 				border-left: none;
@@ -44,11 +47,13 @@
 			& > details {
 				& {
 					margin: 0 0 1pt 0;
+					text-align: left;
 				}
 				summary {
 					& {
 						font-weight: bold;
 						font-size: 1rem;
+						line-height: 1.5;
 						padding: .25rem .5rem;
 						background-color: #F0F0F0;
 						color: #333;
@@ -57,18 +62,20 @@
 						justify-content: space-between;
 						margin: 0;
 					}
-					&::marker {
+					&::marker, &::before {
 						content: '';
+						display: none;
 					}
 					&::after {
 						content: '＋';
 						display: inline-block;
 						color: @ini_link;
+						background-color: transparent;
 					}
 				}
 				&[open] {
 					summary::after {
-						content: '－';
+						content: '﹘';
 					}
 				}
 				& > div {
@@ -88,6 +95,7 @@
 				border-radius: 0 0 .5rem .5rem;
 				margin: 1pt 0 0 0;
 				padding: .25rem .5rem;
+				line-height: 1.25;
 			}
 			& > svg {
 				width: 1.25em; height: 1.25em;
@@ -101,6 +109,59 @@
 			& > span.error {
 				color: #961D1B;
 				font-weight: bold;
+			}
+		}
+	}
+}
+
+/* dark mode overrides */
+@media (prefers-color-scheme: dark) {
+	body.darkmode.mode_admin #botmon__admin {
+
+		#botmon__today {
+
+			header {
+				background-color: #0c0c0d;
+				color: #adadb3;
+				border-color: #666;
+			}
+
+			/* list formatting */
+			dl {
+				& {
+					border-left-color: #777;
+				}
+				dt {
+					color: #adadb3;
+				}
+				dd:nth-child(even) {
+					background-color: #4E4E50;
+				}
+			}
+
+			#botmon__today__content  > details summary {
+				& {
+					background-color: #0c0c0d;
+					color: #adadb3;
+					border-color: #666;
+				}
+				&::after {
+					color: #76b0fd;
+				}
+			}
+
+			footer {
+				& {
+					background-color: #0c0c0d;
+					color: #adadb3;
+					border-color: #CCC;
+				}
+				& > svg {
+					fill: #777;
+				}
+				& > span.error {
+					color: #961D1B;
+				}
 			}
 		}
 	}

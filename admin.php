@@ -53,6 +53,7 @@ class admin_plugin_botmon extends AdminPlugin {
 		echo '</details></div>';
 		echo '<footer aria-live="polite">' . $svg . '<span id="botmon__today__status">Initialising&nbsp;&hellip;</span></footer>';
 		echo '</article>';
+		echo '<div class="error"><strong>IMPORTANT:</strong> This plugin is still in the early stages of development and does not clean up its <code>logs</code> directory.<br>To avoid taking up too much space on your server, please remove older logs manually!</div>';
 		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}
