@@ -1,11 +1,12 @@
 <h1>BotMon Cleanup Script</h1>
 <ul><?php
 
-	// get all files in the logs directory
-	$dir = scandir('logs');
+	// exclude the following two dates:
 	$today = gmdate('Y-m-d');
 	$yesterday = gmdate('Y-m-d', time() - 86400);
 
+	// scan the log directory and delete all files except for today and yesterday:
+	$dir = scandir('logs');
 	foreach($dir as $file) {
 		$fName = pathinfo($file, PATHINFO_BASENAME);
 		$bName = strtok($fName, '.');

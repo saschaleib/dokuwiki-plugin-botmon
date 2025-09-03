@@ -1,3 +1,4 @@
+"use strict";
 /* DokuWiki BotMon Plugin Script file */
 /* 03.09.2025 - 0.1.7 - pre-release */
 /* Authors: Sascha Leib <ad@hominem.info> */
@@ -209,30 +210,41 @@ BotMon.live = {
 			},
 
 			// register a new visitor (or update if already exists)
-			registerVisit: function(dat) {
+			registerVisit: function(dat, type) {
 				//console.info('registerVisit', dat);
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
-	
+
 				// check if it already exists:
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
+
+					// is it a known bot?
 					const bot = BotMon.live.data.bots.match(dat.agent);
+
+					// override the visitor type?
+					let visitorType = dat.typ;
+					if (bot) visitorType = 'bot';
+
+					// which user id to use:
+					let visitorId = dat.id; // default is the session ID
+					if (bot) visitorId = bot.id; // use bot ID if known bot
+					if (dat.usr !== '') visitorId = 'usr'; // use user ID if known user
 
 					model._visitors.push(dat);
 					visitor = dat;
+					visitor.id = visitorId;
 					visitor._firstSeen = dat.ts;
 					visitor._lastSeen = dat.ts;
-					visitor._isBot = ( bot ? 1.0 : 0.0 ); // likelihood of being a bot; primed to 0% or 100% in case of a known bot
+					visitor._seenBy = [type];
 					visitor._pageViews = []; // array of page views
 					visitor._hasReferrer = false; // has at least one referrer
 					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = bot ?? BotMon.live.data.clients.match(dat.agent) ?? null; // client info (browser, bot, etc.)
+					visitor._client = BotMon.live.data.clients.match(dat.agent) ?? null; // client info
+					visitor._bot = bot ?? null; // bot info
 					visitor._platform = BotMon.live.data.platforms.match(dat.agent); // platform info
-
-					// known bots get the bot ID as identifier:
-					if (bot) visitor.id = bot.id;
+					visitor._type = visitorType;
 				}
 
 				// find browser 
@@ -271,20 +283,25 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				let visitor = model.findVisitor(dat.id);
+				const type = 'log';
+
+				let visitor = BotMon.live.data.model.findVisitor(dat.id);
 				if (!visitor) {
-					visitor = model.registerVisit(dat);
+					visitor = model.registerVisit(dat, type);
+					visitor._seenBy = [type];
 				}
 				if (visitor) {
+
+					// prime the "seen by" list:
+					seenBy = ( visitor._seenBy ? ( visitor._seenBy.includes(type) ? visitor._seenBy : [...visitor._seenBy, type] ) : [type] );
+
 					visitor._lastSeen = dat.ts;
+					visitor._seenBy = seenBy;
 					visitor._jsClient = true; // seen by client js
-				} else {
-					console.warn(`No visit with ID ${dat.id}.`);
-					return;
 				}
 
 				// find the page view:
-				let prereg = model._getVisit(visitor, dat);
+				let prereg = BotMon.live.data.model._getVisit(visitor, dat);
 				if (prereg) {
 					// update the page view:
 					prereg._lastSeen = dat.ts;
@@ -315,11 +332,12 @@ BotMon.live = {
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
 					console.warn(`No visitor with ID ${dat.id}, registering a new one.`);
-					visitor = model.registerVisit(dat);
+					visitor = model.registerVisit(dat, 'tck');
 				}
 				if (visitor) {
-					// update "last seen":
+					// update visitor:
 					if (visitor._lastSeen < dat.ts) visitor._lastSeen = dat.ts;
+					if (!visitor._seenBy.includes('tck')) visitor._seenBy.push('tck');
 
 					// get the page view info:
 					const pv = model._getVisit(visitor, dat);
@@ -382,6 +400,7 @@ BotMon.live = {
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
+				console.log(model._visitors);
 
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
@@ -391,17 +410,17 @@ BotMon.live = {
 					this.data.totalPageViews += v._pageViews.length;
 					
 					// check for typical bot aspects:
-					let botScore = v._isBot; // start with the known bot score
+					let botScore = 0;
 
-					if (v._isBot >= 1.0) { // known bots
+					/*if (v._isBot >= 1.0) { // known bots
 
 						this.data.bots.known += 1;
 						this.groups.knownBots.push(v);
 
-					} if (v.usr && v.usr != '') { // known users
+					} if (v.usr && v.usr != '') { // known users */
 						this.groups.users.push(v);
 						this.data.bots.users += 1;
-					} else {
+					/*} else {
 						// not a known bot, nor a known user; check other aspects:
 
 						// no referrer at all:
@@ -431,7 +450,7 @@ BotMon.live = {
 							this.data.bots.human += 1;
 							this.groups.humans.push(v);
 						}
-					}
+					}*/
 				});
 
 				console.log(this.data);
@@ -454,10 +473,9 @@ BotMon.live = {
 						throw new Error(`${response.status} ${response.statusText}`);
 					}
 
-					BotMon.live.data.bots._list = await response.json();
-					BotMon.live.data.bots._ready = true;
+					this._list = await response.json();
+					this._ready = true;
 
-					// TODO: allow using the bots list...
 				} catch (error) {
 					BotMon.live.gui.status.setError("Error while loading the ‘known bots’ file: " + error.message);
 				} finally {
@@ -467,21 +485,39 @@ BotMon.live = {
 			},
 
 			// returns bot info if the clientId matches a known bot, null otherwise:
-			match: function(client) {
-				//console.info('BotMon.live.data.bots.match(',client,')');
+			match: function(agent) {
+				//console.info('BotMon.live.data.bots.match(',agent,')');
 
-				if (client) {
-					for (let i=0; i<BotMon.live.data.bots._list.length; i++) {
-						const bot = BotMon.live.data.bots._list[i];
+				const BotList = BotMon.live.data.bots._list;
+
+				// default is: not found!
+				let botInfo = null;
+
+				// check for known bots:
+				if (agent) {
+					BotList.find(bot => {
+						let r = false;
 						for (let j=0; j<bot.rx.length; j++) {
-							if (client.match(new RegExp(bot.rx[j]))) {
-								return bot; // found a match
+							const rxr = agent.match(new RegExp(bot.rx[j]));
+							if (rxr) {
+								botInfo = {
+									n : bot.n,
+									id: bot.id,
+									url: bot.url,
+									v: (rxr.length > 1 ? rxr[1] : -1)
+								}
+								r = true;
+								break;
 							}
 						}
-						return null; // not found!
-					}
+						return r;
+					});
 				}
+
+				//console.log("botInfo:", botInfo);
+				return botInfo;
 			},
+
 
 			// indicates if the list is loaded and ready to use:
 			_ready: false,
@@ -516,16 +552,16 @@ BotMon.live = {
 			},
 
 			// returns bot info if the user-agent matches a known bot, null otherwise:
-			match: function(cid) {
-				//console.info('BotMon.live.data.clients.match(',cid,')');
+			match: function(agent) {
+				//console.info('BotMon.live.data.clients.match(',agent,')');
 
 				let match = {"n": "Unknown", "v": -1, "id": null};
 
-				if (cid) {
+				if (agent) {
 					BotMon.live.data.clients._list.find(client => {
 						let r = false;
 						for (let j=0; j<client.rx.length; j++) {
-							const rxr = cid.match(new RegExp(client.rx[j]));
+							const rxr = agent.match(new RegExp(client.rx[j]));
 							if (rxr) {
 								match.n = client.n;
 								match.v = (rxr.length > 1 ? rxr[1] : -1);
@@ -538,6 +574,7 @@ BotMon.live = {
 					});
 				}
 
+				//console.log(match)
 				return match;
 			},
 
@@ -609,7 +646,7 @@ BotMon.live = {
 		},
 
 		loadLogFile: async function(type, onLoaded = undefined) {
-			// console.info('BotMon.live.data.loadLogFile(',type,')');
+			console.info('BotMon.live.data.loadLogFile(',type,')');
 
 			let typeName = '';
 			let columns = [];
@@ -656,19 +693,21 @@ BotMon.live = {
 					const data = {};
 					cols.forEach( (colVal,i) => {
 						colName = columns[i] || `col${i}`;
-						const colValue = (colName == 'ts' ? new Date(colVal) : colVal);
+						const colValue = (colName == 'ts' ? new Date(colVal) : colVal.trim());
 						data[colName] = colValue;
 					});
 	
 					// register the visit in the model:
 					switch(type) {
 						case 'srv':
-							BotMon.live.data.model.registerVisit(data);
+							BotMon.live.data.model.registerVisit(data, type);
 							break;
 						case 'log':
+							data.typ = 'js';
 							BotMon.live.data.model.updateVisit(data);
 							break;
 						case 'tck':
+							data.typ = 'js';
 							BotMon.live.data.model.updateTicks(data);
 							break;
 						default:
@@ -856,6 +895,8 @@ BotMon.live = {
 				// shortcut for neater code:
 				const make = BotMon.t._makeElement;
 
+				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
+
 				const li = make('li'); // root list item
 				const details = make('details');
 				const summary = make('summary');
@@ -863,15 +904,29 @@ BotMon.live = {
 
 				const span1 = make('span'); /* left-hand group */
 
-				let typeDescr = "Seen by: " + ( data.typ == 'php' ? "Server-only": "Server + Client");
-				span1.appendChild(make('span', { /* Type */
-					'class': 'icon type type_' + data.typ,
-					'title': typeDescr
-				}, data.typ));
+				if (data._type == 'bot') { /* Bot only */
 
-				span1.appendChild(make('span', { /* ID */
-					'class': 'id'
-				}, data.id));
+					span1.appendChild(make('span', { /* Bot */
+						'class': 'bot bot_' + (data._bot ? data._bot.id : 'unknown'),
+						'title': "Bot: " + (data._bot ? data._bot.n : 'Unknown')
+					}, (data._bot ? data._bot.n : 'Unknown')));
+
+				} else if (data._type == 'usr') { /* User only */
+
+					span1.appendChild(make('span', { /* User */
+						'class': 'user' + (data._user ? data._user.id : 'unknown'),
+						'title': "User: " + data.usr
+					}, data.usr));
+
+				} else { /* others */
+
+					if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
+					span1.appendChild(make('span', { /* IP-Address */
+						'class': 'ipaddr ip' + ipType,
+						'title': "IP-Address: " + data.ip
+					}, data.ip));
+
+				}
 
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				span1.appendChild(make('span', { /* Platform */
@@ -885,12 +940,7 @@ BotMon.live = {
 					'title': "Client: " + clientName
 				}, clientName));
 
-				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
-				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
-				span1.appendChild(make('span', { /* IP-Address */
-					'class': 'icon ipaddr ip' + ipType,
-					'title': "IP-Address: " + data.ip
-				}, data.ip));
+				
 
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
@@ -906,6 +956,12 @@ BotMon.live = {
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
+				if (data._bot) {
+					dl.appendChild(make('dt', {}, "Bot:")); /* bot info */
+					dl.appendChild(make('dd', {'class': 'has_icon bot bot_' + (data._bot ? data._bot.id : 'unknown')},
+						(data._bot ? data._bot.n : 'Unknown')));
+				}
+
 				dl.appendChild(make('dt', {}, "Client:")); /* client */
 				dl.appendChild(make('dd', {'class': 'has_icon client_' + (data._client ? data._client.id : 'unknown')},
 					clientName + ( data._client.v > 0 ? ' (' + data._client.v + ')' : '' ) ));

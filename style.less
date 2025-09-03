@@ -95,7 +95,7 @@
 					}
 				}
 				&[open] {
-					summary::before {
+					& > summary::before {
 						transform: rotate(0deg);
 					}
 				}
@@ -193,43 +193,52 @@
 				background-size: 1em;
 			}
 
-			/* type icons */
-			span.type_dw::before, dd.type_dw::before { background-image: url('img/incognito.svg'); }
-			span.type_php::before, dd.type_php::before { background-image: url('img/cogs.svg'); }
+			/* bot icons */
+			span.bot::before, dd.bot::before { background-image: url('img/robot.svg') }
+			span.bot_bingbot::before, dd.bot_bingbot::before { background-image: url('img/bing.svg') }
+			span.bot_googlebot::before, dd.bot_googlebot::before,
+			span.bot_googleads::before, dd.bot_googleads::before,
+			span.bot_googleapi::before, dd.bot_googleapi::before { background-image: url('img/google.svg') }
+			span.bot_applebot::before, dd.bot_applebot::before { background-image: url('img/apple.svg') }
+			span.bot_metabots::before, dd.bot_metabots::before { background-image: url('img/meta.svg') }
+			span.bot_yandexbots::before, dd.bot_yandexbots::before { background-image: url('img/yandex.svg') }
+			span.bot_seznambot::before, dd.bot_seznambot::before { background-image: url('img/seznam.svg') }
+
+			/* user info */
+			span.user::before { background-image: url('img/user.svg') }
 
 			/* platform icons */
-			span.platform_macos::before, dd.platform_macos::before { background-image: url('img/macos.svg'); }
-			span.platform_win10::before, dd.platform_win10::before { background-image: url('img/win11.svg'); }
-			span.platform_linux::before, dd.platform_linux::before { background-image: url('img/linux.svg'); }
-			span.platform_ios::before, dd.platform_ios::before { background-image: url('img/ios.svg'); }
-			span.platform_android::before, dd.platform_android::before { background-image: url('img/android.svg'); }
-			span.platform_winold::before, dd.platform_winold::before { background-image: url('img/winold.svg'); }
-			span.platform_tizen::before, dd.platform_tizen::before { background-image: url('img/tizen.png'); }
-			span.platform_hmos::before, dd.platform_hmos::before { background-image: url('img/hmos.svg'); }
-			span.platform_chromium::before, dd.platform_chromium::before { background-image: url('img/chromium.svg'); }
-
+			span.platform_macos::before, dd.platform_macos::before { background-image: url('img/apple.svg') }
+			span.platform_win10::before, dd.platform_win10::before { background-image: url('img/win11.svg') }
+			span.platform_linux::before, dd.platform_linux::before { background-image: url('img/linux.svg') }
+			span.platform_ios::before, dd.platform_ios::before { background-image: url('img/ios.svg') }
+			span.platform_android::before, dd.platform_android::before { background-image: url('img/android.svg') }
+			span.platform_winold::before, dd.platform_winold::before { background-image: url('img/winold.png') }
+			span.platform_tizen::before, dd.platform_tizen::before { background-image: url('img/tizen.png') }
+			span.platform_hmos::before, dd.platform_hmos::before { background-image: url('img/hmos.svg') }
+			span.platform_chromium::before, dd.platform_chromium::before { background-image: url('img/chromium.svg') }
 
 			/* browser icons */
-			span.client_opera::before, dd.client_opera::before { background-image: url('img/opera.svg'); }
-			span.client_msie::before, dd.client_msie::before { background-image: url('img/msie.svg'); }
-			span.client_brave::before, dd.client_brave::before { background-image: url('img/brave.svg'); }
-			span.client_msedge::before, dd.client_msedge::before { background-image: url('img/msedge.svg'); }
-			span.client_chrome::before, dd.client_chrome::before { background-image: url('img/chrome.svg'); }
-			span.client_chromeold::before, dd.client_chromeold::before { background-image: url('img/chromeold.svg'); }
-			span.client_safari::before, dd.client_safari::before { background-image: url('img/safari.svg'); }
-			span.client_ddg::before, dd.client_ddg::before { background-image: url('img/ddg.svg'); }
-			span.client_firefox::before, dd.client_firefox::before { background-image: url('img/firefox.svg'); }
-			span.client_samsung::before, dd.client_samsung::before { background-image: url('img/samsung.svg'); }
-			span.client_uc::before, dd.client_uc::before { background-image: url('img/uc.svg'); }
-			span.client_huawei::before, dd.client_huawei::before { background-image: url('img/huawei.png'); }
+			span.client_opera::before, dd.client_opera::before { background-image: url('img/opera.svg') }
+			span.client_msie::before, dd.client_msie::before { background-image: url('img/msie.svg') }
+			span.client_brave::before, dd.client_brave::before { background-image: url('img/brave.svg') }
+			span.client_msedge::before, dd.client_msedge::before { background-image: url('img/msedge.svg') }
+			span.client_chrome::before, dd.client_chrome::before { background-image: url('img/chrome.svg') }
+			span.client_chromeold::before, dd.client_chromeold::before { background-image: url('img/chromeold.svg') }
+			span.client_safari::before, dd.client_safari::before { background-image: url('img/safari.png') }
+			span.client_ddg::before, dd.client_ddg::before { background-image: url('img/ddg.svg') }
+			span.client_firefox::before, dd.client_firefox::before { background-image: url('img/firefox.png') }
+			span.client_samsung::before, dd.client_samsung::before { background-image: url('img/samsung.svg') }
+			span.client_uc::before, dd.client_uc::before { background-image: url('img/uc.svg') }
+			span.client_huawei::before, dd.client_huawei::before { background-image: url('img/huawei.png') }
 			
 			/* ip address type */
-			span.ip6::before, dd.ip6::before { background-image: url('img/ip6.svg'); }
-			span.ip4::before, dd.ip4::before { background-image: url('img/ip4.svg'); }
-			span.ip0::before, dd.ip0::before { background-image: url('img/localhost.svg'); }
+			span.ip6::before, dd.ip6::before { background-image: url('img/ip6.svg') }
+			span.ip4::before, dd.ip4::before { background-image: url('img/ip4.svg') }
+			span.ip0::before, dd.ip0::before { background-image: url('img/localhost.svg') }
 
 			/* user agent */
-			span.agent::before { background-image: url('img/info.svg'); }
+			span.agent::before { background-image: url('img/info.svg') }
 
 		}
 
@@ -302,6 +311,13 @@
 				}
 				& > div {
 					border-color: #666;
+				}
+			}
+
+			/* visitor lists: */
+			#botmon__today__visitorlists {
+				details ul > li {
+					color: #aeaeae;
 				}
 			}
 
