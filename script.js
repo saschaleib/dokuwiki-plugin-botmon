@@ -879,7 +879,7 @@ BotMon.live = {
 					'title': "Platform: " + platformName
 				}, platformName));
 
-				const clientName = (data._client ? data._client.n: 'Unknown')
+				const clientName = (data._client ? data._client.n: 'Unknown');
 				span1.appendChild(make('span', { /* Client */
 					'class': 'icon client client_' + (data._client ? data._client.id : 'unknown'),
 					'title': "Client: " + clientName
