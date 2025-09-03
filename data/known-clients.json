@@ -3,6 +3,18 @@
 	 "id": "opera",
 	 "rx": [ "\\sOpera\\/.*?Version\\/(\\S+)", "Opera\\/(\\S+)" ]
 	},
+	{"n": "Samsung Internet",
+	 "id": "samsung",
+	 "rx": [ "\\sSamsungBrowser\\/(\\S+)" ]
+	},
+	{"n": "UC Browser",
+	 "id": "uc",
+	 "rx": [ "\\sUCBrowser\\/(\\d+\\.\\d+)[\\s\\.]"]
+	},
+	{"n": "HuaweiBrowser",
+	 "id": "huawei",
+	 "rx": [ "\\sHuaweiBrowser\\/(\\d+\\.\\d+)[\\s\\.]", "\\/harmony360Browser\\/(\\d+\\.\\d+)[\\s\\.]"]
+	},
 	{"n": "Internet Explorer",
 	 "id": "msie",
 	 "rx": [ "\\sMSIE\\s(\\d+\\.\\d+b?);" ],
@@ -16,9 +28,13 @@
 	 "id": "msedge",
 	 "rx": [ "\\sEdg\\/(\\S+)", "\\sEdge\\/(\\S+)" ]
 	},
+	{"n": "Old Chrome",
+	 "id": "chromeold",
+	 "rx": [ "\\sChrome\\/(\\d\\d\\.\\d+)[\\.\\s;]" ]
+	},
 	{"n": "Chrome",
 	 "id": "chrome",
-	 "rx": [ "\\sChrome\\/(\\S+)" ]
+	 "rx": [ "\\sChrome\\/(1\\d\\d\\.\\d+)[\\.\\s;]" ]
 	},
 	{"n": "Safari",
 	 "id": "safari",

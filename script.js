@@ -1,11 +1,11 @@
 /* DokuWiki BotMon Plugin Script file */
-/* 30.08.2025 - 0.1.6 - pre-release */
+/* 03.09.2025 - 0.1.7 - pre-release */
 /* Authors: Sascha Leib <ad@hominem.info> */
 
 const BotMon = {
 
 	init: function() {
-		console.info('BotMon.init()');
+		//console.info('BotMon.init()');
 
 		// find the plugin basedir:
 		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
@@ -62,6 +62,25 @@ const BotMon = {
 				offset -= 60;
 			}
 			return ( hours > 0 ? sign * hours + ' h' : '') + (offset > 0 ? ` ${offset} min` : '');
+		},
+
+		/* helper function to create a new element with all attributes and text content */
+		_makeElement: function(name, atlist = undefined, text = undefined) {
+			var r = null;
+			try {
+				r = document.createElement(name);
+				if (atlist) {
+					for (let attr in atlist) {
+						r.setAttribute(attr, atlist[attr]);
+					}
+				}
+				if (text) {
+					r.textContent = text.toString();
+				}
+			} catch(e) {
+				console.error(e);
+			}
+			return r;
 		}
 	}
 };
@@ -130,7 +149,7 @@ BotMon.live = {
 
 		// event callback, after the client log has been loaded:
 		_onClientLogLoaded: function() {
-			console.info('BotMon.live.data._onClientLogLoaded()');
+			//console.info('BotMon.live.data._onClientLogLoaded()');
 			
 			// chain the ticks file to load:
 			BotMon.live.data.loadLogFile('tck', BotMon.live.data._onTicksLogLoaded);
@@ -139,7 +158,7 @@ BotMon.live = {
 
 		// event callback, after the tiker log has been loaded:
 		_onTicksLogLoaded: function() {
-			console.info('BotMon.live.data._onTicksLogLoaded()');
+			//console.info('BotMon.live.data._onTicksLogLoaded()');
 
 			// analyse the data:
 			BotMon.live.data.analytics.analyseAll();
@@ -150,7 +169,7 @@ BotMon.live = {
 			// display the data:
 			BotMon.live.gui.overview.make();
 
-			console.log(BotMon.live.data.model._visitors);
+			//console.log(BotMon.live.data.model._visitors);
 
 		},
 
@@ -199,7 +218,7 @@ BotMon.live = {
 				// check if it already exists:
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
-					const bot = BotMon.live.data.bots.match(dat.client);
+					const bot = BotMon.live.data.bots.match(dat.agent);
 
 					model._visitors.push(dat);
 					visitor = dat;
@@ -209,8 +228,8 @@ BotMon.live = {
 					visitor._pageViews = []; // array of page views
 					visitor._hasReferrer = false; // has at least one referrer
 					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = bot ?? BotMon.live.data.clients.match(dat.client) ?? null; // client info (browser, bot, etc.)
-					visitor._platform = BotMon.live.data.platforms.match(dat.client); // platform info
+					visitor._client = bot ?? BotMon.live.data.clients.match(dat.agent) ?? null; // client info (browser, bot, etc.)
+					visitor._platform = BotMon.live.data.platforms.match(dat.agent); // platform info
 
 					// known bots get the bot ID as identifier:
 					if (bot) visitor.id = bot.id;
@@ -343,7 +362,7 @@ BotMon.live = {
 				totalPageViews: 0,
 				bots: {
 					known: 0,
-					likely: 0,
+					suspected: 0,
 					human: 0,
 					users: 0
 				}
@@ -352,7 +371,7 @@ BotMon.live = {
 			// sort the visits by type:
 			groups: {
 				knownBots: [],
-				likelyBots: [],
+				suspectedBots: [],
 				humans: [],
 				users: []
 			},
@@ -406,8 +425,8 @@ BotMon.live = {
 
 						// decide based on the score:
 						if (botScore >= 0.5) {
-							this.data.bots.likely += 1;
-							this.groups.likelyBots.push(v);
+							this.data.bots.suspected += 1;
+							this.groups.suspectedBots.push(v);
 						} else {
 							this.data.bots.human += 1;
 							this.groups.humans.push(v);
@@ -496,7 +515,7 @@ BotMon.live = {
 				}
 			},
 
-			// returns bot info if the clientId matches a known bot, null otherwise:
+			// returns bot info if the user-agent matches a known bot, null otherwise:
 			match: function(cid) {
 				//console.info('BotMon.live.data.clients.match(',cid,')');
 
@@ -598,15 +617,15 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','client','ref'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref'];
 					break;
 				case "log":
 					typeName = "Page load";
-					columns = ['ts','ip','pg','id','usr','lt','ref','client'];
+					columns = ['ts','ip','pg','id','usr','lt','ref','agent'];
 					break;
 				case "tck":
 					typeName = "Ticker";
-					columns = ['ts','ip','pg','id','client'];
+					columns = ['ts','ip','pg','id','agent'];
 					break;
 				default:
 					console.warn(`Unknown log type ${type}.`);
@@ -671,6 +690,10 @@ BotMon.live = {
 	},
 
 	gui: {
+		init: function() {
+			// init the lists view:
+			this.lists.init();
+		},
 
 		overview: {
 			make: function() {
@@ -694,7 +717,7 @@ BotMon.live = {
 								<dl>
 									<dt>Bots vs. Humans</dt>
 									<dd><span>Known bots:</span><span>${data.bots.known}</span></dd>
-									<dd><span>Likely bots:</span><span>${data.bots.likely}</span></dd>
+									<dd><span>Suspected bots:</span><span>${data.bots.suspected}</span></dd>
 									<dd><span>Probably humans:</span><span>${data.bots.human}</span></dd>
 									<dd><span>Registered users:</span><span>${data.bots.users}</span></dd>
 								</dl>
@@ -751,8 +774,190 @@ BotMon.live = {
 					if (txt) BotMon.live.gui.status.setText(txt);
 				}
 			}
+		},
+
+		lists: {
+			init: function() {
+
+				const parent = document.getElementById('botmon__today__visitorlists');
+				if (parent) {
+
+					for (let i=0; i < 4; i++) {
+
+						// change the id and title by number:
+						let listTitle = '';
+						let listId = '';
+						switch (i) {
+							case 0:
+								listTitle = "Registered users";
+								listId = 'users';
+								break;
+							case 1:
+								listTitle = "Probably humans";
+								listId = 'humans';
+								break;
+							case 2:
+								listTitle = "Suspected bots";
+								listId = 'suspectedBots';
+								break;
+							case 3:
+								listTitle = "Known bots";
+								listId = 'knownBots';
+								break;
+							default:
+								console.warn('Unknwon list number.');
+						}
+
+						const details = BotMon.t._makeElement('details', {
+							'data-group': listId,
+							'data-loaded': false
+						});
+						details.appendChild(BotMon.t._makeElement('summary',
+							undefined,
+							listTitle
+						));
+						details.addEventListener("toggle", this._onDetailsToggle);
+
+						parent.appendChild(details);
+
+					}
+				}
+			},
+
+			_onDetailsToggle: function(e) {
+				console.info('BotMon.live.gui.lists._onDetailsToggle()');
+
+				const target = e.target;
+				
+				if (target.getAttribute('data-loaded') == 'false') { // only if not loaded yet
+					target.setAttribute('data-loaded', 'loading');
+
+					const fillType = target.getAttribute('data-group');
+					const fillList = BotMon.live.data.analytics.groups[fillType];
+					if (fillList && fillList.length > 0) {
+
+						const ul = BotMon.t._makeElement('ul');
+
+						fillList.forEach( (it) => {
+							ul.appendChild(BotMon.live.gui.lists._makeVisitorItem(it, fillType));
+						});
+
+						target.appendChild(ul);
+						target.setAttribute('data-loaded', 'true');
+					} else {
+						target.setAttribute('data-loaded', 'false');
+					}
+
+				}
+			},
+
+			_makeVisitorItem: function(data, type) {
+
+				// shortcut for neater code:
+				const make = BotMon.t._makeElement;
+
+				const li = make('li'); // root list item
+				const details = make('details');
+				const summary = make('summary');
+				details.appendChild(summary);
+
+				const span1 = make('span'); /* left-hand group */
+
+				let typeDescr = "Seen by: " + ( data.typ == 'php' ? "Server-only": "Server + Client");
+				span1.appendChild(make('span', { /* Type */
+					'class': 'icon type type_' + data.typ,
+					'title': typeDescr
+				}, data.typ));
+
+				span1.appendChild(make('span', { /* ID */
+					'class': 'id'
+				}, data.id));
+
+				const platformName = (data._platform ? data._platform.n : 'Unknown');
+				span1.appendChild(make('span', { /* Platform */
+					'class': 'icon platform platform_' + (data._platform ? data._platform.id : 'unknown'),
+					'title': "Platform: " + platformName
+				}, platformName));
+
+				const clientName = (data._client ? data._client.n: 'Unknown')
+				span1.appendChild(make('span', { /* Client */
+					'class': 'icon client client_' + (data._client ? data._client.id : 'unknown'),
+					'title': "Client: " + clientName
+				}, clientName));
+
+				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
+				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
+				span1.appendChild(make('span', { /* IP-Address */
+					'class': 'icon ipaddr ip' + ipType,
+					'title': "IP-Address: " + data.ip
+				}, data.ip));
+
+				summary.appendChild(span1);
+				const span2 = make('span'); /* right-hand group */
+
+				span2.appendChild(make('time', { /* Last seen */
+					'data-field': 'last-seen',
+					'datetime': (data._lastSeen ? data._lastSeen : 'unknown')
+				}, (data._lastSeen ? data._lastSeen.getHours() + ':' + data._lastSeen.getMinutes() + ':' + data._lastSeen.getSeconds() : 'Unknown')));
+
+				summary.appendChild(span2);
+
+				// create expanable section:
+
+				const dl = make('dl', {'class': 'visitor_details'});
+				
+				dl.appendChild(make('dt', {}, "Client:")); /* client */
+				dl.appendChild(make('dd', {'class': 'has_icon client_' + (data._client ? data._client.id : 'unknown')},
+					clientName + ( data._client.v > 0 ? ' (' + data._client.v + ')' : '' ) ));
+
+				dl.appendChild(make('dt', {}, "Platform:")); /* platform */
+				dl.appendChild(make('dd', {'class': 'has_icon platform_' + (data._platform ? data._platform.id : 'unknown')},
+					platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
+
+				dl.appendChild(make('dt', {}, "IP-Address:"));
+				dl.appendChild(make('dd', {'class': 'has_icon ip' + ipType}, data.ip));
+
+				if ((data._lastSeen - data._firstSeen) < 1) {
+					dl.appendChild(make('dt', {}, "Seen:"));
+					dl.appendChild(make('dd', {'class': 'seen'}, data._firstSeen.toLocaleString()));
+				} else {
+					dl.appendChild(make('dt', {}, "First seen:"));
+					dl.appendChild(make('dd', {'class': 'firstSeen'}, data._firstSeen.toLocaleString()));
+					dl.appendChild(make('dt', {}, "Last seen:"));
+					dl.appendChild(make('dd', {'class': 'lastSeen'}, data._lastSeen.toLocaleString()));
+				}
+
+				dl.appendChild(make('dt', {}, "User-Agent:"));
+				dl.appendChild(make('dd', {'class': 'agent' + ipType}, data.agent));
+
+				dl.appendChild(make('dt', {}, "Visited pages:"));
+				const pagesDd = make('dd', {'class': 'pages'});
+				const pageList = make('ul');
+
+				data._pageViews.forEach( (page) => {
+					const pgLi = make('li');
+
+					let visitTimeStr = "Bounce";
+					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+					if (visitDuration > 0) {
+						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+					}
+
+					pgLi.appendChild(make('span', {}, page.pg));
+					pgLi.appendChild(make('span', {}, page.ref));
+					pgLi.appendChild(make('span', {}, visitTimeStr));
+					pageList.appendChild(pgLi);
+				});
+
+				pagesDd.appendChild(pageList);
+				dl.appendChild(pagesDd);
+
+				details.appendChild(dl);
+
+				li.appendChild(details);
+				return li;
+			}
 		}
-	
 	}
 };
 

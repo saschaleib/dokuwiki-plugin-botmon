@@ -21,7 +21,18 @@
 	},
 	{"n": "Vintage Windows",
 	 "id": "winold",
-	 "rx": [ "\\(Windows NT (\\d\\.\\d)[;\\s\\)]","Windows (\\d\\.\\d)[;\\s]" ],
-	 "bot": 0.4
+	 "rx": [ "\\(Windows NT (\\d\\.\\d)[;\\s\\)]","Windows (\\d\\.\\d)[;\\s]" ]
+	},
+	{"n": "Tizen",
+	 "id": "tizen",
+	 "rx": [ "\\sTizen\\s(\\d+\\.\\d+)[;\\s]" ]
+	},
+	{"n": "HarmonyOS",
+	 "id": "hmos",
+	 "rx": [ "\\sHarmonyOS[;\\/\\s](\\d+\\.\\d)?[\\.\\)\\s]*" ]
+	},
+	{"n": "Chromium",
+	 "id": "chromium",
+	 "rx": [ "Chromebook", "\\sCrOS\\s" ]
 	}
 ]

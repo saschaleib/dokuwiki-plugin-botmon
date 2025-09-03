@@ -1,0 +1,11 @@
+{
+	"ip-ranges": [
+		{"range": "191.177.0.0", "mask": 16, "bot": 50}
+	],
+	"rules": [
+		{"field": "_client", "item": "id", "op": "equals", "value": "chromeold", "bot": 30}
+	],
+	"thresholds": {
+		"bot": 50
+	}
+}
