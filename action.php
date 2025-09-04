@@ -60,7 +60,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$sessionType = 'dw';
 		if (!$sessionId) {
 			$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
-			if ($sessionId == '127.0.0.1' || $sessionId = '::1') {
+			if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
 				$sessionId = 'localhost';
 			}
 			$sessionType = 'ip';
