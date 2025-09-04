@@ -29,14 +29,14 @@
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
-	{"id": "openaibots",
-	 "n": "OpenAI/ChatGPT Bots",
+	{"id": "openai",
+	 "n": "OpenAI/ChatGPT",
 	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
 	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "metabots",
-	 "n": "Meta Web Crawlers",
+	 "n": "Meta/Facebook",
 	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
 	 "rx": ["facebook\\w+\\/(\\d+\\.\\d+)", "meta-\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"

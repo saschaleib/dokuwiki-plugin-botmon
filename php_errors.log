@@ -1,0 +1,8 @@
+[03-Sep-2025 15:22:41 UTC] PHP Warning:  Undefined variable $file in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 14
+[03-Sep-2025 15:22:54 UTC] PHP Warning:  Undefined variable $file in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 14
+[03-Sep-2025 15:25:36 UTC] PHP Parse error:  syntax error, unexpected end of file, expecting "," or ";" in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 15
+[03-Sep-2025 15:35:57 UTC] PHP Deprecated:  Using ${var} in strings is deprecated, use {$var} instead in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 14
+[03-Sep-2025 15:37:51 UTC] PHP Warning:  unlink(logs/.): Is a directory in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 15
+[03-Sep-2025 15:37:51 UTC] PHP Warning:  unlink(logs/..): Resource temporarily unavailable in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 15
+[03-Sep-2025 15:38:10 UTC] PHP Warning:  unlink(logs/.): Is a directory in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 17
+[03-Sep-2025 15:38:10 UTC] PHP Warning:  unlink(logs/..): Resource temporarily unavailable in D:\Webroot\development\lib\plugins\botmon\cleanup.php on line 17

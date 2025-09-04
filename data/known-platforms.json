@@ -1,15 +1,19 @@
 [
 	{"n": "Win10/11",
 	 "id": "win10",
-	 "rx": [ "\\(Windows NT (1\\d\\.\\d);" ]
+	 "rx": [ "[\\(\\s]Windows\\sNT\\s(1\\d\\.\\d)[\\)\\s\\.;]" ]
 	},
 	{"n": "Linux",
 	 "id": "linux",
 	 "rx": [ "\\sLinux\\s" ]
 	},
+	{"n": "BSD",
+	 "id": "bsd",
+	 "rx": [ "\\sNetBSD[\\);\\s]", "\\sOpenBSD[\\);\\s]", "\\sFreeBSD[\\);\\s]" ]
+	},
 	{"n": "iOS/iPadOS",
 	 "id": "ios",
-	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
+	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\siPhone\\sOS\\s([\\d\\._]+)\\s", "\\siPadOS\\s([\\d\\._]+)\\s", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
 	},
 	{"n": "Android",
 	 "id": "android",

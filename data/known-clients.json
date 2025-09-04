@@ -15,6 +15,14 @@
 	 "id": "huawei",
 	 "rx": [ "\\sHuaweiBrowser\\/(\\d+\\.\\d+)[\\s\\.]", "\\/harmony360Browser\\/(\\d+\\.\\d+)[\\s\\.]"]
 	},
+	{"n": "DuckDuckGo",
+	 "id": "ddg",
+	 "rx": [ "\\sDdg\\/(\\S+)" ]
+	},
+	{"n": "Vivaldi",
+	 "id": "vivaldi",
+	 "rx": [ "\\sVivaldi\\/(\\d+\\.\\d+)[\\s\\.]" ]
+	},
 	{"n": "Internet Explorer",
 	 "id": "msie",
 	 "rx": [ "\\sMSIE\\s(\\d+\\.\\d+b?);" ],
@@ -34,15 +42,11 @@
 	},
 	{"n": "Chrome",
 	 "id": "chrome",
-	 "rx": [ "\\sChrome\\/(1\\d\\d\\.\\d+)[\\.\\s;]" ]
+	 "rx": [ "\\sChrome\\/(1\\d\\d)\\.\\d+" ]
 	},
 	{"n": "Safari",
 	 "id": "safari",
 	 "rx": [ "\\sSafari\\/(\\S+)" ]
-	},
-	{"n": "DuckDuckGo",
-	 "id": "ddg",
-	 "rx": [ "\\sDdg\\/(\\S+)" ]
 	},
 	{"n": "Firefox",
 	 "id": "firefox",

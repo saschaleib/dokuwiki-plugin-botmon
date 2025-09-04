@@ -3,6 +3,16 @@
 /* 04.09.2025 - 0.1.8 - pre-release */
 /* Authors: Sascha Leib <ad@hominem.info> */
 
+// enumeration of user types:
+const BM_USERTYPE = Object.freeze({
+	'UNKNOWN': 'unknown',
+	'KNOWN_USER': 'user',
+	'HUMAN': 'human',
+	'LIKELY_BOT': 'likely_bot',
+	'KNOWN_BOT': 'known_bot'
+});
+
+/* BotMon root object */
 const BotMon = {
 
 	init: function() {
@@ -179,7 +189,9 @@ BotMon.live = {
 			_visitors: [],
 
 			// find an already existing visitor record:
-			findVisitor: function(id) {
+			findVisitor: function(visitor) {
+				//console.info('BotMon.live.data.model.findVisitor()');
+				//console.log(visitor);
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
@@ -187,7 +199,29 @@ BotMon.live = {
 				// loop over all visitors already registered:
 				for (let i=0; i<model._visitors.length; i++) {
 					const v = model._visitors[i];
-					if (v && v.id == id) return v;
+
+					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
+
+						// bots match when their ID matches:
+						if (v._bot && v._bot.id == visitor._bot.id) {
+							return v;
+						}
+
+					} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
+						
+						// visitors match when their names match:
+						if ( v.usr == visitor.usr
+						 && v.ip == visitor.ip
+						 && v.agent == visitor.agent) {
+							return v;
+						}
+					} else { /* any other visitor */
+
+						if ( v.id == visitor.id) { /* match the pre-defined IDs */
+							return v;
+						}
+
+					}
 				}
 				return null; // nothing found
 			},
@@ -210,56 +244,47 @@ BotMon.live = {
 			},
 
 			// register a new visitor (or update if already exists)
-			registerVisit: function(dat, type) {
-				console.info('registerVisit', dat);
+			registerVisit: function(nv, type) {
+				//console.info('registerVisit', nv, type);
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
 				// is it a known bot?
-				const bot = BotMon.live.data.bots.match(dat.agent);
+				const bot = BotMon.live.data.bots.match(nv.agent);
 
-				// which user id to use:
-				let visitorId = dat.id; // default is the session ID
-				if (bot) visitorId = bot.id; // use bot ID if known bot
-				if (dat.usr !== '') visitorId = 'usr'; // use user ID if known user
+				// enrich new visitor with relevant data:
+				if (!nv._bot) nv._bot = bot ?? null; // bot info
+				nv._type = ( bot ? BM_USERTYPE.KNOWN_BOT : ( nv.usr !== '' ? BM_USERTYPE.KNOWN_USER : BM_USERTYPE.UNKNOWN ) );
+				if (!nv._firstSeen) nv._firstSeen = nv.ts;
+				if (!nv._lastSeen) nv._lastSeen = nv.ts;
 
 				// check if it already exists:
-				let visitor = model.findVisitor(dat.id);
+				let visitor = model.findVisitor(nv);
 				if (!visitor) {
-
-					// override the visitor type?
-					let visitorType = dat.typ;
-					if (bot) visitorType = 'bot';
-
-					model._visitors.push(dat);
-					visitor = dat;
-					visitor.id = visitorId;
-					visitor._firstSeen = dat.ts;
-					visitor._lastSeen = dat.ts;
+					visitor = nv;
 					visitor._seenBy = [type];
 					visitor._pageViews = []; // array of page views
 					visitor._hasReferrer = false; // has at least one referrer
 					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = BotMon.live.data.clients.match(dat.agent) ?? null; // client info
-					visitor._bot = bot ?? null; // bot info
-					visitor._platform = BotMon.live.data.platforms.match(dat.agent); // platform info
-					visitor._type = visitorType;
+					visitor._client = BotMon.live.data.clients.match(nv.agent) ?? null; // client info
+					visitor._platform = BotMon.live.data.platforms.match(nv.agent); // platform info
+					model._visitors.push(visitor);
 				}
 
 				// find browser 
 
 				// is this visit already registered?
-				let prereg = model._getVisit(visitor, dat);
+				let prereg = model._getVisit(visitor, nv);
 				if (!prereg) {
 					// add the page view to the visitor:
 					prereg = {
 						_by: 'srv',
-						ip: dat.ip,
-						pg: dat.pg,
-						ref: dat.ref || '',
-						_firstSeen: dat.ts,
-						_lastSeen: dat.ts,
+						ip: nv.ip,
+						pg: nv.pg,
+						ref: nv.ref || '',
+						_firstSeen: nv.ts,
+						_lastSeen: nv.ts,
 						_jsClient: false
 					};
 					visitor._pageViews.push(prereg);
@@ -270,7 +295,7 @@ BotMon.live = {
 					(prereg.ref !== undefined && prereg.ref !== '');
 
 				// update time stamp for last-seen:
-				visitor._lastSeen = dat.ts;
+				visitor._lastSeen = nv.ts;
 
 				// if needed:
 				return visitor;
@@ -279,13 +304,14 @@ BotMon.live = {
 			// updating visit data from the client-side log:
 			updateVisit: function(dat) {
 				//console.info('updateVisit', dat);
+				return;
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
 				const type = 'log';
 
-				let visitor = BotMon.live.data.model.findVisitor(dat.id);
+				let visitor = BotMon.live.data.model.findVisitor(dat);
 				if (!visitor) {
 					visitor = model.registerVisit(dat, type);
 					visitor._seenBy = [type];
@@ -324,14 +350,15 @@ BotMon.live = {
 			// updating visit data from the ticker log:
 			updateTicks: function(dat) {
 				//console.info('updateTicks', dat);
+				return;
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
 				// find the visit info:
-				let visitor = model.findVisitor(dat.id);
+				let visitor = model.findVisitor(dat);
 				if (!visitor) {
-					console.warn(`No visitor with ID ${dat.id}, registering a new one.`);
+					//console.warn(`No visitor with ID ${dat.id}, registering a new one.`);
 					visitor = model.registerVisit(dat, 'tck');
 				}
 				if (visitor) {
@@ -345,7 +372,7 @@ BotMon.live = {
 						// update the page view info:
 						if (pv._lastSeen.getTime() < dat.ts.getTime()) pv._lastSeen = dat.ts;
 					} else {
-						console.warn(`No page view for visit ID ${dat.id}, page ${dat.pg}, registering a new one.`);
+						//console.warn(`No page view for visit ID ${dat.id}, page ${dat.pg}, registering a new one.`);
 						
 						// add a new page view to the visitor:
 						const newPv = {
@@ -359,19 +386,14 @@ BotMon.live = {
 						};
 						visitor._pageViews.push(newPv);
 					}
-					
-				} else {
-					console.warn(`No visit with ID ${dat.id}.`);
-					return;
-				}
-
+				} 
 			}
 		},
 
 		analytics: {
 
 			init: function() {
-				console.info('BotMon.live.data.analytics.init()');
+				//console.info('BotMon.live.data.analytics.init()');
 			},
 
 			// data storage:
@@ -412,49 +434,27 @@ BotMon.live = {
 					// check for typical bot aspects:
 					let botScore = 0;
 
-					/*if (v._isBot >= 1.0) { // known bots
+					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
 						this.data.bots.known += 1;
 						this.groups.knownBots.push(v);
 
-					} if (v.usr && v.usr != '') { // known users */
+					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
+
 						this.groups.users.push(v);
 						this.data.bots.users += 1;
-					/*} else {
-						// not a known bot, nor a known user; check other aspects:
+						
+					} else {
 
-						// no referrer at all:
-						if (!v._hasReferrer) botScore += 0.2;
-
-						// no js client logging:
-						if (!v._jsClient) botScore += 0.2;
-
-						// average time between page views less than 30s:
-						if (v._pageViews.length > 1) {
-							botScore -= 0.2; // more than one view: good!
-							let totalDiff = 0;
-							for (let i=1; i<v._pageViews.length; i++) {
-								const diff = v._pageViews[i]._firstSeen.getTime() - v._pageViews[i-1]._lastSeen.getTime();
-								totalDiff += diff;
-							}
-							const avgDiff = totalDiff / (v._pageViews.length - 1);
-							if (avgDiff < 30000) botScore += 0.2;
-							else if (avgDiff < 60000) botScore += 0.1;
-						}
-
-						// decide based on the score:
-						if (botScore >= 0.5) {
-							this.data.bots.suspected += 1;
-							this.groups.suspectedBots.push(v);
-						} else {
-							this.data.bots.human += 1;
-							this.groups.humans.push(v);
-						}
-					}*/
+						// TODO: find suspected bots
+						this.data.bots.suspected += 1;
+						this.groups.suspectedBots.push(v);
+						
+					}
 				});
 
-				console.log(this.data);
-				console.log(this.groups);
+				//console.log(this.data);
+				//console.log(this.groups);
 			}
 
 		},
@@ -736,8 +736,13 @@ BotMon.live = {
 
 		overview: {
 			make: function() {
+
 				const data = BotMon.live.data.analytics.data;
 				const parent = document.getElementById('botmon__today__content');
+
+				// shortcut for neater code:
+				const makeElement = BotMon.t._makeElement;
+
 				if (parent) {
 
 					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 1000) / 10;
@@ -760,15 +765,29 @@ BotMon.live = {
 									<dd><span>Probably humans:</span><span>${data.bots.human}</span></dd>
 									<dd><span>Registered users:</span><span>${data.bots.users}</span></dd>
 								</dl>
-								<dl id="botmon__botslist">
-									<dt>Known bots</dt>
-								</dl>
+								<dl id="botmon__botslist"></dl>
 							</div>
 						</details>
 					`));
+
+					// update known bots list:
+					const block = document.getElementById('botmon__botslist');
+					block.innerHTML = "<dt>Top known bots</dt>";
+
+					let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
+						return b._pageViews.length - a._pageViews.length;
+					});
+
+					for (let i=0; i < Math.min(bots.length, 4); i++) {
+						const dd = makeElement('dd');
+						dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id}, bots[i]._bot.n));
+						dd.appendChild(makeElement('span', undefined, bots[i]._pageViews.length));
+						block.appendChild(dd);
+					}
 				}
 			}
 		},
+
 		status: {
 			setText: function(txt) {
 				const el = document.getElementById('botmon__today__status');
@@ -864,7 +883,7 @@ BotMon.live = {
 			},
 
 			_onDetailsToggle: function(e) {
-				console.info('BotMon.live.gui.lists._onDetailsToggle()');
+				//console.info('BotMon.live.gui.lists._onDetailsToggle()');
 
 				const target = e.target;
 				
@@ -904,17 +923,20 @@ BotMon.live = {
 
 				const span1 = make('span'); /* left-hand group */
 
-				if (data._type == 'bot') { /* Bot only */
+				const platformName = (data._platform ? data._platform.n : 'Unknown');
+				const clientName = (data._client ? data._client.n: 'Unknown');
+
+				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
 
 					span1.appendChild(make('span', { /* Bot */
 						'class': 'bot bot_' + (data._bot ? data._bot.id : 'unknown'),
 						'title': "Bot: " + (data._bot ? data._bot.n : 'Unknown')
 					}, (data._bot ? data._bot.n : 'Unknown')));
 
-				} else if (data._type == 'usr') { /* User only */
+				} else if (data._type == BM_USERTYPE.KNOWN_USER) { /* User only */
 
 					span1.appendChild(make('span', { /* User */
-						'class': 'user' + (data._user ? data._user.id : 'unknown'),
+						'class': 'user_known',
 						'title': "User: " + data.usr
 					}, data.usr));
 
@@ -928,27 +950,24 @@ BotMon.live = {
 
 				}
 
-				const platformName = (data._platform ? data._platform.n : 'Unknown');
-				span1.appendChild(make('span', { /* Platform */
-					'class': 'icon platform platform_' + (data._platform ? data._platform.id : 'unknown'),
-					'title': "Platform: " + platformName
-				}, platformName));
+				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* Not for bots */
+					span1.appendChild(make('span', { /* Platform */
+						'class': 'icon platform platform_' + (data._platform ? data._platform.id : 'unknown'),
+						'title': "Platform: " + platformName
+					}, platformName));
 
-				const clientName = (data._client ? data._client.n: 'Unknown');
-				span1.appendChild(make('span', { /* Client */
-					'class': 'icon client client_' + (data._client ? data._client.id : 'unknown'),
-					'title': "Client: " + clientName
-				}, clientName));
-
-				
+					span1.appendChild(make('span', { /* Client */
+						'class': 'icon client client_' + (data._client ? data._client.id : 'unknown'),
+						'title': "Client: " + clientName
+					}, clientName));
+				}
 
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
-				span2.appendChild(make('time', { /* Last seen */
-					'data-field': 'last-seen',
-					'datetime': (data._lastSeen ? data._lastSeen : 'unknown')
-				}, (data._lastSeen ? data._lastSeen.getHours() + ':' + data._lastSeen.getMinutes() + ':' + data._lastSeen.getSeconds() : 'Unknown')));
+				span2.appendChild(make('span', { /* page views */
+					'class': 'pageviews'
+				}, data._pageViews.length));
 
 				summary.appendChild(span2);
 
@@ -956,19 +975,32 @@ BotMon.live = {
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
-				if (data._bot) {
-					dl.appendChild(make('dt', {}, "Bot:")); /* bot info */
+				if (data._type == BM_USERTYPE.KNOWN_BOT) {
+
+					dl.appendChild(make('dt', {}, "Bot name:")); /* bot info */
 					dl.appendChild(make('dd', {'class': 'has_icon bot bot_' + (data._bot ? data._bot.id : 'unknown')},
 						(data._bot ? data._bot.n : 'Unknown')));
+
+					if (data._bot && data._bot.url) {
+						dl.appendChild(make('dt', {}, "Bot info:")); /* bot info */
+						const botInfoDd = dl.appendChild(make('dd'));
+						botInfoDd.appendChild(make('a', {
+							'href': data._bot.url,
+							'target': '_blank'
+						}, data._bot.url)); /* bot info link*/
+
+					}
+
+				} else { /* not for bots */
+
+					dl.appendChild(make('dt', {}, "Client:")); /* client */
+					dl.appendChild(make('dd', {'class': 'has_icon client_' + (data._client ? data._client.id : 'unknown')},
+						clientName + ( data._client.v > 0 ? ' (' + data._client.v + ')' : '' ) ));
+
+					dl.appendChild(make('dt', {}, "Platform:")); /* platform */
+					dl.appendChild(make('dd', {'class': 'has_icon platform_' + (data._platform ? data._platform.id : 'unknown')},
+						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 				}
-
-				dl.appendChild(make('dt', {}, "Client:")); /* client */
-				dl.appendChild(make('dd', {'class': 'has_icon client_' + (data._client ? data._client.id : 'unknown')},
-					clientName + ( data._client.v > 0 ? ' (' + data._client.v + ')' : '' ) ));
-
-				dl.appendChild(make('dt', {}, "Platform:")); /* platform */
-				dl.appendChild(make('dd', {'class': 'has_icon platform_' + (data._platform ? data._platform.id : 'unknown')},
-					platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
 				dl.appendChild(make('dt', {}, "IP-Address:"));
 				dl.appendChild(make('dd', {'class': 'has_icon ip' + ipType}, data.ip));
@@ -985,6 +1017,12 @@ BotMon.live = {
 
 				dl.appendChild(make('dt', {}, "User-Agent:"));
 				dl.appendChild(make('dd', {'class': 'agent' + ipType}, data.agent));
+
+				dl.appendChild(make('dt', {}, "Visitor Type:"));
+				dl.appendChild(make('dd', undefined, data._type ));
+
+				dl.appendChild(make('dt', {}, "Seen by:"));
+				dl.appendChild(make('dd', undefined, data._seenBy.join(', ') ));
 
 				dl.appendChild(make('dt', {}, "Visited pages:"));
 				const pagesDd = make('dd', {'class': 'pages'});
@@ -1013,6 +1051,7 @@ BotMon.live = {
 				li.appendChild(details);
 				return li;
 			}
+
 		}
 	}
 };
