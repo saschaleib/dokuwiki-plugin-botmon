@@ -59,15 +59,11 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$sessionId = $_COOKIE['DokuWiki'] ?? null;
 		$sessionType = 'dw';
 		if (!$sessionId) {
-			if (session_id()) {
-				// if a session ID is set, use it
-				$sessionId = session_id();
-				$sessionType = 'php';
-			} else {
-				// if no session ID is set, use the ip address:
-				$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
-				$sessionType = 'ip';
+			$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
+			if ($sessionId == '127.0.0.1' || $sessionId = '::1') {
+				$sessionId = 'localhost';
 			}
+			$sessionType = 'ip';
 		}
 
 		$logArr = Array(

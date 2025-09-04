@@ -7,11 +7,22 @@ if (!$json) {
 	die("Error: Invalid JSON data sent to server.");
 }
 
+// what is the session identifier?
+$sessionId = $_COOKIE['DokuWiki'] ?? null;
+$sessionType = 'dw';
+if (!$sessionId) {
+	$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
+	if ($sessionId == '127.0.0.1' || $sessionId = '::1') {
+		$sessionId = 'localhost';
+	}
+	$sessionType = 'ip';
+}
+
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(
 	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 	$json['pg'] ?? '', /* DW page ID */
-	$_COOKIE['DokuWiki'] ?? session_id() ?? '', /* DW session ID */
+	$sessionId, /* Session ID */
 	$json['u'] ?? '', /* DW User id (if logged in) */
 	$json['lt'] ?? '', /* load time */
 	$json['r'] ?? '', /* Referrer URL */

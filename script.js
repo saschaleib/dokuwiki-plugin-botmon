@@ -1,6 +1,6 @@
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
-/* 03.09.2025 - 0.1.7 - pre-release */
+/* 04.09.2025 - 0.1.8 - pre-release */
 /* Authors: Sascha Leib <ad@hominem.info> */
 
 const BotMon = {
@@ -211,26 +211,26 @@ BotMon.live = {
 
 			// register a new visitor (or update if already exists)
 			registerVisit: function(dat, type) {
-				//console.info('registerVisit', dat);
+				console.info('registerVisit', dat);
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
+
+				// is it a known bot?
+				const bot = BotMon.live.data.bots.match(dat.agent);
+
+				// which user id to use:
+				let visitorId = dat.id; // default is the session ID
+				if (bot) visitorId = bot.id; // use bot ID if known bot
+				if (dat.usr !== '') visitorId = 'usr'; // use user ID if known user
 
 				// check if it already exists:
 				let visitor = model.findVisitor(dat.id);
 				if (!visitor) {
 
-					// is it a known bot?
-					const bot = BotMon.live.data.bots.match(dat.agent);
-
 					// override the visitor type?
 					let visitorType = dat.typ;
 					if (bot) visitorType = 'bot';
-
-					// which user id to use:
-					let visitorId = dat.id; // default is the session ID
-					if (bot) visitorId = bot.id; // use bot ID if known bot
-					if (dat.usr !== '') visitorId = 'usr'; // use user ID if known user
 
 					model._visitors.push(dat);
 					visitor = dat;
