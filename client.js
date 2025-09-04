@@ -54,9 +54,11 @@ botmon_client = {
 	_onHeartbeat: async function(url) {
 		//console.info('botmon_client._onHeartbeat', url);
 
+		let uid = document._botmon.user || null;
+
 		try {
-			const response = await fetch(url + '?p=' + encodeURIComponent(JSINFO.id) + '&t=' + Date.now(), {
-				//method: 'HEAD',
+			const response = await fetch(url + '?p=' + encodeURIComponent(JSINFO.id) + '&t=' + Date.now() + ( uid ? '&u=' + encodeURIComponent(uid) : ''), {
+				method: 'HEAD'
 			});
 			if (!response.ok) {
 				throw new Error(response.status + ' ' + response.statusText + ' - ' + url);

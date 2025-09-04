@@ -34,7 +34,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		// is there a user logged in?
 		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name'])
-					?  $INFO['userinfo']['name'] : null);
+					?  $INFO['userinfo']['name'] : '');
 
 		// build the tracker code:
 		$code = NL . DOKU_TAB . "document._botmon = {'t0': Date.now()};" . NL;
@@ -56,9 +56,13 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		/* Write out server-side info to a server log: */
 
 		// what is the session identifier?
-		$sessionId = $_COOKIE['DokuWiki'] ?? null;
-		$sessionType = 'dw';
-		if (!$sessionId) {
+		$sessionId = $username;
+		$sessionType = 'usr';
+		if ($sessionId == '') {
+			$sessionId = $_COOKIE['DokuWiki'] ?? '';
+			$sessionType = 'dw';
+		}
+		if ($sessionId == '') {
 			$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 			if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
 				$sessionId = 'localhost';

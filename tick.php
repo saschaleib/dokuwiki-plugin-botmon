@@ -1,16 +1,17 @@
 <?php /* BOTMON PLUGIN HEARTBEAT TICKER SCRIPT */
 
+
 // what is the session identifier?
-$sessionId = $_COOKIE['DokuWiki'] ?? null;
-$sessionType = 'dw';
-if (!$sessionId) {
+$sessionId = $_GET['u'] ?? '';
+if ($sessionId == '') {
+	$sessionId = $_COOKIE['DokuWiki'] ?? '';
+}
+if ($sessionId == '') {
 	$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 	if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
 		$sessionId = 'localhost';
 	}
-	$sessionType = 'ip';
 }
-
 
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(

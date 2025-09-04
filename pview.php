@@ -8,9 +8,13 @@ if (!$json) {
 }
 
 // what is the session identifier?
-$sessionId = $_COOKIE['DokuWiki'] ?? null;
-$sessionType = 'dw';
-if (!$sessionId) {
+$sessionId = $json['u'] ?? '';
+$sessionType = 'usr';
+if ($sessionId == '') {
+	$sessionId = $_COOKIE['DokuWiki'] ?? '';
+	$sessionType = 'dw';
+}
+if ($sessionId == '') {
 	$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 	if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
 		$sessionId = 'localhost';
