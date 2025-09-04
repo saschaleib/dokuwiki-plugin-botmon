@@ -505,11 +505,11 @@ BotMon.live = {
 									id: bot.id,
 									url: bot.url,
 									v: (rxr.length > 1 ? rxr[1] : -1)
-								}
+								};
 								r = true;
 								break;
 							}
-						}
+						};
 						return r;
 					});
 				}
