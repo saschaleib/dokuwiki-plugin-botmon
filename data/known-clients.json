@@ -37,7 +37,7 @@
 	},
 	{"n": "Edge",
 	 "id": "msedge",
-	 "rx": [ "\\sEdg\\/(\\S+)", "\\sEdge\\/(\\S+)" ]
+	 "rx": [ "\\sEdg\\/(\\d+)\\.", "\\sEdge\\/(\\d+)" ]
 	},
 	{"n": "Old Chrome",
 	 "id": "chromeold",
