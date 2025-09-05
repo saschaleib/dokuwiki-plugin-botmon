@@ -47,7 +47,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$code .= DOKU_TAB . DOKU_TAB . "e.async=true;e.defer=true;" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
-		$code .= DOKU_TAB . "});" . NL;
+		$code .= DOKU_TAB . "});" . NL . DOKU_TAB;
 
 		$event->data['script'][] = [
 			'_data'   => $code

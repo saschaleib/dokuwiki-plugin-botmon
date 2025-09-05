@@ -2,15 +2,15 @@
 	"threshold": 100,
 	"rules": [
 		{"func": "obsoleteClient",
-		 "id": "oldClient", "desc": "Visit with obsolete browser version",
+		 "id": "oldClient", "desc": "Obsolete browser version",
 		 "bot": 40
 		},
 		{"func": "obsoletePlatform",
-		 "id": "oldOS", "desc": "Visit with obsolete platform version",
+		 "id": "oldOS", "desc": "Obsolete platform version",
 		 "bot": 40
 		},
 		{"func": "noJavaScript",
-		 "id": "noJS", "desc": "Visit with JavaScript disabled",
+		 "id": "noJS", "desc": "JavaScript disabled",
 		 "bot": 20
 		},
 		{"func": "smallPageCount", "params": [1],
@@ -22,7 +22,7 @@
 		 "bot": 10
 		},
 		{"func": "noReferences",
-		 "id": "noRefs", "desc": "None of the page views came with a reference field",
+		 "id": "noRefs", "desc": "No reference field",
 		 "bot": 30
 		}
 	]

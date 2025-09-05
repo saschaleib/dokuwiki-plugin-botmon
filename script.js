@@ -787,7 +787,7 @@ BotMon.live = {
 				// there are no ticks recorded for a visitor
 				// note that this will also trigger the "noJavaScript" rule:
 				noTicks: function(visitor) {
-					return visitor._seenBy.includes('tck');
+					return !visitor._seenBy.includes('tck');
 				},
 
 				// there are no references in any of the page visits:
@@ -1202,27 +1202,29 @@ BotMon.live = {
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
 
-				dl.appendChild(make('dt', {}, "Evaluation:"));
-				const evalDd = make('dd');
-				const testList = make('ul');
-				data._eval.forEach( (test) => {
-					console.log(test);
+				if (data._eval) {
+					dl.appendChild(make('dt', {}, "Evaluation:"));
+					const evalDd = make('dd');
+					const testList = make('ul');
+					data._eval.forEach( (test) => {
+						console.log(test);
 
-					const tObj = BotMon.live.data.rules.getRuleInfo(test);
-					const tDesc = tObj ? tObj.desc : test;
+						const tObj = BotMon.live.data.rules.getRuleInfo(test);
+						const tDesc = tObj ? tObj.desc : test;
 
-					const tstLi = make('li');
-					tstLi.appendChild(make('span', {
-						'class': 'test test_' . test
-					}, ( tObj ? tObj.desc : test )));
-					tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
-					testList.appendChild(tstLi);
-				});
+						const tstLi = make('li');
+						tstLi.appendChild(make('span', {
+							'class': 'test test_' . test
+						}, ( tObj ? tObj.desc : test )));
+						tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
+						testList.appendChild(tstLi);
+					});
 
-				const tst2Li = make('li');
-				tst2Li.appendChild(make('span', {}, "Total:"));
-				tst2Li.appendChild(make('span', {}, data._botVal));
-				testList.appendChild(tst2Li);
+					const tst2Li = make('li');
+					tst2Li.appendChild(make('span', {}, "Total:"));
+					tst2Li.appendChild(make('span', {}, data._botVal));
+					testList.appendChild(tst2Li);
+				}
 
 				evalDd.appendChild(testList);
 				dl.appendChild(evalDd);
