@@ -15,6 +15,10 @@
 	 "id": "uc",
 	 "rx": [ "\\sUCBrowser\\/(\\d+\\.\\d+)[\\s\\.]"]
 	},
+	{"n": "Yandex Browser",
+	 "id": "ya",
+	 "rx": [ "\\sYaBrowser\\/(\\d+\\.\\d+)[\\s\\.]"]
+	},
 	{"n": "HuaweiBrowser",
 	 "id": "huawei",
 	 "rx": [ "\\sHuaweiBrowser\\/(\\d+\\.\\d+)[\\s\\.]", "\\/harmony360Browser\\/(\\d+\\.\\d+)[\\s\\.]"]
