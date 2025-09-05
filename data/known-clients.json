@@ -29,8 +29,7 @@
 	},
 	{"n": "Internet Explorer",
 	 "id": "msie",
-	 "rx": [ "\\sMSIE\\s(\\d+\\.\\d+b?);" ],
-	 "bot": 0.4
+	 "rx": [ "\\sMSIE\\s(\\d+\\.\\d+b?);" ]
 	},
 	{"n": "Brave",
 	 "id": "brave",

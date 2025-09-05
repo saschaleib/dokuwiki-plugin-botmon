@@ -21,7 +21,7 @@
 	},
 	{"n": "MacOS (old)",
 	 "id": "macosold",
-	 "rx": [ "\\sMac OS X (10_\\d+_\\d+)" ]
+	 "rx": [ "\\sMac OS X (10[\\._]\\d+)[\\s_\\.;]" ]
 	},
 	{"n": "MacOS",
 	 "id": "macos",

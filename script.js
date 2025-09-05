@@ -135,12 +135,15 @@ BotMon.live = {
 				case 'platforms':
 					data._dispatchPlatformsLoaded = true;
 					break;
+				case 'rules':
+					data._dispatchRulesLoaded = true;
+					break;
 				default:
 					// ignore
 			}
 
 			// are all the flags set?
-			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded) {
+			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded && data._dispatchRulesLoaded) {
 				// chain the log files loading:
 				BotMon.live.data.loadLogFile('srv', BotMon.live.data._onServerLogLoaded);
 			}
@@ -149,6 +152,7 @@ BotMon.live = {
 		_dispatchBotsLoaded: false,
 		_dispatchClientsLoaded: false,
 		_dispatchPlatformsLoaded: false,
+		_dispatchRulesLoaded: false,
 
 		// event callback, after the server log has been loaded:
 		_onServerLogLoaded: function() {
@@ -435,19 +439,31 @@ BotMon.live = {
 
 					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
-						this.data.bots.known += 1;
+						this.data.bots.known += v._pageViews.length;
 						this.groups.knownBots.push(v);
 
 					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
 
+						this.data.bots.users += v._pageViews.length;
 						this.groups.users.push(v);
-						this.data.bots.users += 1;
 
 					} else {
 
+						// get evaluation: 
+						const e = BotMon.live.data.rules.evaluate(v);
+						v._eval = e.rules;
+						v._botVal = e.val;
+
+						if (e.isBot) { // likely bots
+							v._type = BM_USERTYPE.LIKELY_BOT;
+							this.data.bots.suspected += v._pageViews.length;
+							this.groups.suspectedBots.push(v);
+						} else { // probably humans
+							v._type = BM_USERTYPE.HUMAN;
+							this.data.bots.human += v._pageViews.length;
+							this.groups.humans.push(v);
+						}
 						// TODO: find suspected bots
-						this.data.bots.suspected += 1;
-						this.groups.suspectedBots.push(v);
 						
 					}
 				});
@@ -650,6 +666,138 @@ BotMon.live = {
 
 		},
 
+		rules: {
+			// loads the list of rules and settings from a JSON file:
+			init: async function() {
+				//console.info('BotMon.live.data.rules.init()');
+
+				// Load the list of known bots:
+				BotMon.live.gui.status.showBusy("Loading list of rules …");
+				const url = BotMon._baseDir + 'data/rules.json';
+				try {
+					const response = await fetch(url);
+					if (!response.ok) {
+						throw new Error(`${response.status} ${response.statusText}`);
+					}
+
+					const json = await response.json();
+
+					if (json.rules) {
+						console.log(json.rules);
+						this._rulesList = json.rules;
+					}
+
+					if (json.threshold) {
+						this._threshold = json.threshold;
+					}
+
+					this._ready = true;
+
+				} catch (error) {
+					BotMon.live.gui.status.setError("Error while loading the ‘rules’ file: " + error.message);
+				} finally {
+					BotMon.live.gui.status.hideBusy("Status: Done.");
+					BotMon.live.data._dispatch('rules')
+				}
+			},
+
+			_rulesList: [], // list of rules to find out if a visitor is a bot
+			_threshold: 100, // above this, it is considered a bot.
+
+			// returns a descriptive text for a rule id
+			getRuleInfo: function(ruleId) {
+				// console.info('getRuleInfo', ruleId);
+
+				// shortcut for neater code:
+				const me = BotMon.live.data.rules;
+
+				for (let i=0; i<me._rulesList.length; i++) {
+					const rule = me._rulesList[i];
+					if (rule.id == ruleId) {
+						return rule;
+					}
+				}
+				return null;
+
+			},
+
+			// evaluate a visitor for lkikelihood of being a bot
+			evaluate: function(visitor) {
+
+				// shortcut for neater code:
+				const me = BotMon.live.data.rules;
+
+				let r =  {	// evaluation result
+					'val': 0,
+					'rules': [],
+					'isBot': false
+				};
+
+				for (let i=0; i<me._rulesList.length; i++) {
+					const rule = me._rulesList[i];
+					const params = ( rule.params ? rule.params : [] );
+
+					if (rule.func) { // rule is calling a function
+						if (me.func[rule.func]) {
+							if(me.func[rule.func](visitor, ...params)) {
+								r.val += rule.bot;
+								r.rules.push(rule.id)
+							}
+						} else {
+							//console.warn("Unknown rule function: “${rule.func}”. Ignoring rule.")
+						}
+					}
+				}
+
+				// is a bot?
+				r.isBot = (r.val >= me._threshold);
+
+				return r;
+			},
+
+			// list of functions that can be called by the rules list to evaluate a visitor:
+			func: {
+
+				// check if client is one of the obsolete ones:
+				obsoleteClient: function(visitor) {
+
+					const obsClients = ['aol', 'msie', 'chromeold'];
+					const clientId = ( visitor._client ? visitor._client.id : '');
+					return obsClients.includes(clientId);
+				},
+
+				// check if OS/Platform is one of the obsolete ones:
+				obsoletePlatform: function(visitor) {
+
+					const obsPlatforms = ['winold', 'macosold'];
+					const platformId = ( visitor._platform ? visitor._platform.id : '');
+					return obsPlatforms.includes(platformId);
+				},
+
+				// client does not use JavaScript:
+				noJavaScript: function(visitor) {
+					return (visitor._jsClient === false);
+				},
+
+				// are there at lest num pages loaded?
+				smallPageCount: function(visitor, num) {
+					return (visitor._pageViews.length <= Number(num));
+				},
+
+				// there are no ticks recorded for a visitor
+				// note that this will also trigger the "noJavaScript" rule:
+				noTicks: function(visitor) {
+					return visitor._seenBy.includes('tck');
+				},
+
+				// there are no references in any of the page visits:
+				noReferences: function(visitor) {
+					return (visitor._hasReferrer === true);
+				}
+			}
+
+		},
+
 		loadLogFile: async function(type, onLoaded = undefined) {
 			console.info('BotMon.live.data.loadLogFile(',type,')');
 
@@ -750,7 +898,7 @@ BotMon.live = {
 
 				if (parent) {
 
-					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 1000) / 10;
+					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 100);
 
 					jQuery(parent).prepend(jQuery(`
 						<details id="botmon__today__overview" open>
@@ -758,17 +906,16 @@ BotMon.live = {
 							<div class="grid-3-columns">
 								<dl>
 									<dt>Web metrics</dt>
-									<dd><span>Total visits:</span><span>${data.totalVisits}</span></dd>
-									<dd><span>Total page views:</span><span>${data.totalPageViews}</span></dd>
-									<dd><span>Bounce rate:</span><span>${bounceRate}&#x202F;%</span></dd>
-									<dd><span>∅ load time:</span><span>${data.avgLoadTime}&#x202F;ms</span></dd>
+									<dd><span>Total page views:</span><strong>${data.totalPageViews}</strong></dd>
+									<dd><span>Total visitors (est.):</span><span>${data.totalVisits}</span></dd>
+									<dd><span>Bounce rate (est.):</span><span>${bounceRate}%</span></dd>
 								</dl>
 								<dl>
 									<dt>Bots vs. Humans</dt>
-									<dd><span>Known bots:</span><span>${data.bots.known}</span></dd>
-									<dd><span>Suspected bots:</span><span>${data.bots.suspected}</span></dd>
-									<dd><span>Probably humans:</span><span>${data.bots.human}</span></dd>
-									<dd><span>Registered users:</span><span>${data.bots.users}</span></dd>
+									<dd><span>Registered users:</span><strong>${data.bots.users}</strong></dd>
+									<dd><span>Probably humans:</span><strong>${data.bots.human}</strong></dd>
+									<dd><span>Suspected bots:</span><strong>${data.bots.suspected}</strong></dd>
+									<dd><span>Known bots:</span><strong>${data.bots.known}</strong></dd>
 								</dl>
 								<dl id="botmon__botslist"></dl>
 							</div>
@@ -786,7 +933,7 @@ BotMon.live = {
 					for (let i=0; i < Math.min(bots.length, 4); i++) {
 						const dd = makeElement('dd');
 						dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id}, bots[i]._bot.n));
-						dd.appendChild(makeElement('span', undefined, bots[i]._pageViews.length));
+						dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
 						block.appendChild(dd);
 					}
 				}
@@ -1036,7 +1183,6 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "Visited pages:"));
 				const pagesDd = make('dd', {'class': 'pages'});
 				const pageList = make('ul');
-
 				data._pageViews.forEach( (page) => {
 					const pgLi = make('li');
 
@@ -1053,9 +1199,33 @@ BotMon.live = {
 					pgLi.appendChild(make('span', {}, page._lastSeen.toLocaleString()));
 					pageList.appendChild(pgLi);
 				});
-
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
+
+				dl.appendChild(make('dt', {}, "Evaluation:"));
+				const evalDd = make('dd');
+				const testList = make('ul');
+				data._eval.forEach( (test) => {
+					console.log(test);
+
+					const tObj = BotMon.live.data.rules.getRuleInfo(test);
+					const tDesc = tObj ? tObj.desc : test;
+
+					const tstLi = make('li');
+					tstLi.appendChild(make('span', {
+						'class': 'test test_' . test
+					}, ( tObj ? tObj.desc : test )));
+					tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
+					testList.appendChild(tstLi);
+				});
+
+				const tst2Li = make('li');
+				tst2Li.appendChild(make('span', {}, "Total:"));
+				tst2Li.appendChild(make('span', {}, data._botVal));
+				testList.appendChild(tst2Li);
+
+				evalDd.appendChild(testList);
+				dl.appendChild(evalDd);
 
 				details.appendChild(dl);
 
