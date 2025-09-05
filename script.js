@@ -226,7 +226,7 @@ BotMon.live = {
 						if ( v.id == visitor.id) { /* match the pre-defined IDs */
 							return v;
 						} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
-							console.info("Visitor ID not found, using matchin IP + User-Agent instead.");
+							console.warn("Visitor ID not found, using matchin IP + User-Agent instead.");
 							return v;
 						}
 
@@ -683,7 +683,6 @@ BotMon.live = {
 					const json = await response.json();
 
 					if (json.rules) {
-						console.log(json.rules);
 						this._rulesList = json.rules;
 					}
 
@@ -759,19 +758,17 @@ BotMon.live = {
 			func: {
 
 				// check if client is one of the obsolete ones:
-				obsoleteClient: function(visitor) {
+				obsoleteClient: function(visitor, ...clients) {
 
-					const obsClients = ['aol', 'msie', 'chromeold'];
 					const clientId = ( visitor._client ? visitor._client.id : '');
-					return obsClients.includes(clientId);
+					return clients.includes(clientId);
 				},
 
 				// check if OS/Platform is one of the obsolete ones:
-				obsoletePlatform: function(visitor) {
+				obsoletePlatform: function(visitor, ...platforms) {
 
-					const obsPlatforms = ['winold', 'macosold'];
-					const platformId = ( visitor._platform ? visitor._platform.id : '');
-					return obsPlatforms.includes(platformId);
+					const pId = ( visitor._platform ? visitor._platform.id : '');
+					return platforms.includes(pId);
 				},
 
 				// client does not use JavaScript:
@@ -799,7 +796,7 @@ BotMon.live = {
 		},
 
 		loadLogFile: async function(type, onLoaded = undefined) {
-			console.info('BotMon.live.data.loadLogFile(',type,')');
+			//console.info('BotMon.live.data.loadLogFile(',type,')');
 
 			let typeName = '';
 			let columns = [];
@@ -911,7 +908,7 @@ BotMon.live = {
 									<dd><span>Bounce rate (est.):</span><span>${bounceRate}%</span></dd>
 								</dl>
 								<dl>
-									<dt>Bots vs. Humans</dt>
+									<dt>Bots vs. Humans (page views)</dt>
 									<dd><span>Registered users:</span><strong>${data.bots.users}</strong></dd>
 									<dd><span>Probably humans:</span><strong>${data.bots.human}</strong></dd>
 									<dd><span>Suspected bots:</span><strong>${data.bots.suspected}</strong></dd>
@@ -924,7 +921,7 @@ BotMon.live = {
 
 					// update known bots list:
 					const block = document.getElementById('botmon__botslist');
-					block.innerHTML = "<dt>Top known bots</dt>";
+					block.innerHTML = "<dt>Top known bots (page views)</dt>";
 
 					let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
 						return b._pageViews.length - a._pageViews.length;
@@ -989,6 +986,9 @@ BotMon.live = {
 		lists: {
 			init: function() {
 
+				// function shortcut:
+				const makeElement = BotMon.t._makeElement;
+
 				const parent = document.getElementById('botmon__today__visitorlists');
 				if (parent) {
 
@@ -1017,15 +1017,16 @@ BotMon.live = {
 							default:
 								console.warn('Unknwon list number.');
 						}
+						let group = BotMon.live.data.analytics.groups[listId];
+						let gCount = '–'
 
-						const details = BotMon.t._makeElement('details', {
+						const details = makeElement('details', {
 							'data-group': listId,
 							'data-loaded': false
 						});
-						details.appendChild(BotMon.t._makeElement('summary',
-							undefined,
-							listTitle
-						));
+						const title = details.appendChild(makeElement('summary'));
+						title.appendChild(makeElement('span', {'class':'title'}, listTitle))
+						title.appendChild(makeElement('span', {'class':'counter'}, gCount))
 						details.addEventListener("toggle", this._onDetailsToggle);
 
 						parent.appendChild(details);
@@ -1192,6 +1193,8 @@ BotMon.live = {
 						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
 					}
 
+					console.log(page);
+
 					pgLi.appendChild(make('span', {}, page.pg));
 					// pgLi.appendChild(make('span', {}, page.ref));
 					pgLi.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
@@ -1209,7 +1212,6 @@ BotMon.live = {
 						'class': 'eval'
 					});
 					data._eval.forEach( (test) => {
-						console.log(test);
 
 						const tObj = BotMon.live.data.rules.getRuleInfo(test);
 						const tDesc = tObj ? tObj.desc : test;

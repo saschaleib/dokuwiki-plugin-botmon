@@ -106,8 +106,13 @@
 					border-radius: 0 0 .25rem .25rem;
 				}
 				& details summary {
-					background-color: transparent;
-					border: transparent none 0;
+					& {
+						background-color: transparent;
+						border: transparent none 0;
+					}
+					span.title {
+						flex-grow: 1;
+					}
 				}
 			}
 			& > details > summary {
@@ -142,7 +147,7 @@
 				line-height: 1.5;
 				background-color: #F0F0F0;
 				border-bottom: #CCC solid 1px;
-				border-radius: .5em;
+				border-radius: .7em;
 			}
 
 			details ul > li > details > summary > span {
@@ -159,6 +164,7 @@
 				column-gap: .25em;
 				height: 1.5em;
 				overflow: hidden;
+				margin-right: .2rem;
 			}
 			details ul > li > details > summary > span > span::before {
 				content: '';
@@ -235,10 +241,30 @@
 			span.bot_googleads::before, dd.bot_googleads::before,
 			span.bot_googleapi::before, dd.bot_googleapi::before { background-image: url('img/google.svg') }
 			span.bot_applebot::before, dd.bot_applebot::before { background-image: url('img/apple.svg') }
+			span.bot_slurp::before, dd.bot_slurp::before { background-image: url('img/yahoo.svg') }
+			span.bot_ddg::before, dd.bot_ddg::before { background-image: url('img/ddg.svg') }
 			span.bot_openai::before, dd.bot_openai::before { background-image: url('img/openai.svg') }
+			span.bot_claude::before, dd.bot_claude::before { background-image: url('img/anthropic.png') }
+			span.bot_perplexity::before, dd.bot_perplexity::before { background-image: url('img/perplexity.svg') }
 			span.bot_metabots::before, dd.bot_metabots::before { background-image: url('img/meta.svg') }
-			span.bot_yandexbots::before, dd.bot_yandexbots::before { background-image: url('img/yandex.svg') }
+			span.bot_qwant::before, dd.bot_qwant::before { background-image: url('img/qwant.svg') }
+			span.bot_yandex::before, dd.bot_yandex::before { background-image: url('img/yandex.svg') }
 			span.bot_seznambot::before, dd.bot_seznambot::before { background-image: url('img/seznam.svg') }
+			span.bot_ahrefs::before, dd.bot_ahrefs::before { background-image: url('img/ahrefs.png') }
+			span.bot_ccbot::before, dd.bot_ccbot::before { background-image: url('img/ccbot.png') }
+			span.bot_mjbot::before, dd.bot_mjbot::before { background-image: url('img/majestic.png') }
+			span.bot_petal::before, dd.bot_petal::before { background-image: url('img/petal.svg') }
+			span.bot_barkrowler::before, dd.bot_barkrowler::before { background-image: url('img/babbar.png') }
+			span.bot_semrush::before, dd.bot_semrush::before { background-image: url('img/semrush.png') }
+			span.bot_bytespider::before, dd.bot_bytespider::before { background-image: url('img/bytedance.svg') }
+			span.bot_dfseo::before, dd.bot_dfseo::before { background-image: url('img/dataforseo.png') }
+			span.bot_hunter::before, dd.bot_hunter::before { background-image: url('img/hunter.png') }
+			span.bot_serpstat::before, dd.bot_serpstat::before { background-image: url('img/serpstat.svg') }
+			span.bot_netestate::before, dd.bot_netestate::before { background-image: url('img/netestate.png') }
+			span.bot_imagesift::before, dd.bot_imagesift::before { background-image: url('img/hive.svg') }
+			/*span.bot_dotbot::before, dd.bot_dotbot::before { background-image: url('img/moz.svg') }*/
+			/*span.bot_maui::before, dd.bot_maui::before { background-image: url('img/maui.svg') }*/
+			span.bot_plagaware::before, dd.bot_plagaware::before { background-image: url('img/plagaware.png') }
 
 			/* user info */
 			span.user_known::before { background-image: url('img/user.svg') }

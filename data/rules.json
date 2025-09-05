@@ -1,24 +1,24 @@
 {
 	"threshold": 100,
 	"rules": [
-		{"func": "obsoleteClient",
+		{"func": "obsoleteClient", "params": ["aol", "msie", "chromeold"],
 		 "id": "oldClient", "desc": "Obsolete browser version",
 		 "bot": 40
 		},
-		{"func": "obsoletePlatform",
+		{"func": "obsoletePlatform", "params": ["winold", "macosold"],
 		 "id": "oldOS", "desc": "Obsolete platform version",
 		 "bot": 40
 		},
 		{"func": "noJavaScript",
 		 "id": "noJS", "desc": "JavaScript disabled",
-		 "bot": 20
+		 "bot": 40
 		},
 		{"func": "smallPageCount", "params": [1],
-		 "id": "onePage", "desc": "Views only a single page",
-		 "bot": 20
+		 "id": "onePage", "desc": "Visiter loaded only a single page",
+		 "bot": 40
 		},
 		{"func": "noTicks",
-		 "id": "noTicks", "desc": "Visitor did not spend time reading any page",
+		 "id": "noTicks", "desc": "Visitor did not spend time reading a page",
 		 "bot": 10
 		},
 		{"func": "noReferences",
