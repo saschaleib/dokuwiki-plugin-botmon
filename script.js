@@ -443,7 +443,7 @@ BotMon.live = {
 
 						this.groups.users.push(v);
 						this.data.bots.users += 1;
-						
+
 					} else {
 
 						// TODO: find suspected bots
@@ -1004,6 +1004,9 @@ BotMon.live = {
 
 				dl.appendChild(make('dt', {}, "IP-Address:"));
 				dl.appendChild(make('dd', {'class': 'has_icon ip' + ipType}, data.ip));
+
+				dl.appendChild(make('dt', {}, "ID:"));
+				dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));
 
 				if ((data._lastSeen - data._firstSeen) < 1) {
 					dl.appendChild(make('dt', {}, "Seen:"));

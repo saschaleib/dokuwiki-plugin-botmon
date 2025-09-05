@@ -56,12 +56,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		/* Write out server-side info to a server log: */
 
 		// what is the session identifier?
-		$sessionId = $username;
-		$sessionType = 'usr';
-		if ($sessionId == '') {
-			$sessionId = $_COOKIE['DokuWiki'] ?? '';
-			$sessionType = 'dw';
-		}
+		$sessionId = $_COOKIE['DokuWiki']  ?? '';
+		$sessionType = 'dw';
 		if ($sessionId == '') {
 			$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 			if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
@@ -70,11 +66,14 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$sessionType = 'ip';
 		}
 
+		// clean the page ID
+		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
+
 		$logArr = Array(
 			$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
-			$INFO['id'] ?? '', /* page ID */
+			$pageId, /* page ID */
 			$sessionId, /* Session ID */
-			$sessionType,
+			$sessionType, /* session ID type */
 			$username,
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 			$_SERVER['HTTP_REFERER'] ?? '' /* HTTP Referrer */

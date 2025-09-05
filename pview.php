@@ -4,16 +4,12 @@
 $json = json_decode($_POST['pageview'], true);
 if (!$json) {
 	http_response_code(400);
-	die("Error: Invalid JSON data sent to server.");
+	die("Invalid JSON Data.");
 }
 
-// what is the session identifier?
-$sessionId = $json['u'] ?? '';
-$sessionType = 'usr';
-if ($sessionId == '') {
-	$sessionId = $_COOKIE['DokuWiki'] ?? '';
-	$sessionType = 'dw';
-}
+// select the session identifier?
+$sessionId = $_COOKIE['DokuWiki']  ?? '';
+$sessionType = 'dw';
 if ($sessionId == '') {
 	$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 	if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
@@ -22,15 +18,37 @@ if ($sessionId == '') {
 	$sessionType = 'ip';
 }
 
+// check if valid session id string:
+if (strlen($sessionId) < 46 && !preg_match('/^[\w\d\.:]+$/', $sessionId)) {
+	$sessionId = 'invalid-session-id';
+}
+
+// clean the page ID
+$pageId = preg_replace('/[\x00-\x1F{};]/', "\u{FFFD}", $json['pg'] ?? '');
+
+// clean the user-name
+$userName = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $json['u'] ?? '');
+
+// check load time
+$loadTime = $json['lt'] ?? '';
+if ($loadTime !== '' ) $loadTime = intval($loadTime);
+
+// clean the user agent string
+$agent = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $_SERVER['HTTP_USER_AGENT'] ?? '');
+
+// clean the referer
+$referer = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $json['r'] ?? '');
+
+
 /* build the resulting log line (ensure fixed column positions!) */
 $logArr = Array(
 	$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
-	$json['pg'] ?? '', /* DW page ID */
+	$pageId, /* DW Page ID */
 	$sessionId, /* Session ID */
-	$json['u'] ?? '', /* DW User id (if logged in) */
-	$json['lt'] ?? '', /* load time */
-	$json['r'] ?? '', /* Referrer URL */
-	$_SERVER['HTTP_USER_AGENT'] ?? '' /* User agent */
+	$userName, /* DW User name (if logged in) */
+	$loadTime, /* load time */
+	$referer, /* Referrer URL */
+	$agent /* User agent */
 	// $json['lg'] ?? '', /* browser language */
 	// $json['scr'] ?? '', /* Screen dimensions */
 	// $json['tz'] ?? '', /* timzone offset */
