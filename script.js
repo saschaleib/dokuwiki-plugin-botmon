@@ -1015,7 +1015,7 @@ BotMon.live = {
 								listId = 'knownBots';
 								break;
 							default:
-								console.warn('Unknwon list number.');
+								console.warn('Unknown list number.');
 						}
 
 						const details = makeElement('details', {
@@ -1023,8 +1023,8 @@ BotMon.live = {
 							'data-loaded': false
 						});
 						const title = details.appendChild(makeElement('summary'));
-						title.appendChild(makeElement('span', {'class':'title'}, '–'))
-						title.appendChild(makeElement('span', {'class':'counter'}, gCount))
+						title.appendChild(makeElement('span', {'class':'title'}, listTitle));
+						title.appendChild(makeElement('span', {'class':'counter'}, '–'));
 						details.addEventListener("toggle", this._onDetailsToggle);
 
 						parent.appendChild(details);
