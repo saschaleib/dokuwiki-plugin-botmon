@@ -213,6 +213,21 @@
 				background-size: 1em;
 			}
 
+			ul.eval {
+				li {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+				}
+				li:nth-child(odd) {
+					background-color: #EEE;
+				}
+				li.total {
+					border-top: #333 solid 1px;
+					font-style: italic;
+				}
+			}
+
 			/* bot icons */
 			span.bot::before, dd.bot::before { background-image: url('img/robot.svg') }
 			span.bot_bingbot::before, dd.bot_bingbot::before { background-image: url('img/bing.svg') }

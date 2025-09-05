@@ -1205,7 +1205,9 @@ BotMon.live = {
 				if (data._eval) {
 					dl.appendChild(make('dt', {}, "Evaluation:"));
 					const evalDd = make('dd');
-					const testList = make('ul');
+					const testList = make('ul',{
+						'class': 'eval'
+					});
 					data._eval.forEach( (test) => {
 						console.log(test);
 
@@ -1220,14 +1222,16 @@ BotMon.live = {
 						testList.appendChild(tstLi);
 					});
 
-					const tst2Li = make('li');
+					const tst2Li = make('li', {
+						'class': 'total'
+					});
 					tst2Li.appendChild(make('span', {}, "Total:"));
 					tst2Li.appendChild(make('span', {}, data._botVal));
 					testList.appendChild(tst2Li);
-				}
 
-				evalDd.appendChild(testList);
-				dl.appendChild(evalDd);
+					evalDd.appendChild(testList);
+					dl.appendChild(evalDd);
+				}
 
 				details.appendChild(dl);
 
