@@ -1018,14 +1018,14 @@ BotMon.live = {
 								console.warn('Unknwon list number.');
 						}
 						let group = BotMon.live.data.analytics.groups[listId];
-						let gCount = '–';
+						// todo: add group information!
 
 						const details = makeElement('details', {
 							'data-group': listId,
 							'data-loaded': false
 						});
 						const title = details.appendChild(makeElement('summary'));
-						title.appendChild(makeElement('span', {'class':'title'}, listTitle))
+						title.appendChild(makeElement('span', {'class':'title'}, '–'))
 						title.appendChild(makeElement('span', {'class':'counter'}, gCount))
 						details.addEventListener("toggle", this._onDetailsToggle);
 
