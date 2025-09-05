@@ -1018,7 +1018,7 @@ BotMon.live = {
 								console.warn('Unknwon list number.');
 						}
 						let group = BotMon.live.data.analytics.groups[listId];
-						let gCount = '–'
+						let gCount = '–';
 
 						const details = makeElement('details', {
 							'data-group': listId,
