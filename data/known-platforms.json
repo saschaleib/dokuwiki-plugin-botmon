@@ -19,9 +19,13 @@
 	 "id": "android",
 	 "rx": [ "[\\(\\s]Android\\s([^;]+);" ]
 	},
+	{"n": "MacOS (old)",
+	 "id": "macosold",
+	 "rx": [ "\\sMac OS X (10_\\d+_\\d+)" ]
+	},
 	{"n": "MacOS",
 	 "id": "macos",
-	 "rx": [ "\\(Macintosh;" ]
+	 "rx": [ "\\sMac OS X (1[1-9]_\\d+_\\d+)" ]
 	},
 	{"n": "Vintage Windows",
 	 "id": "winold",

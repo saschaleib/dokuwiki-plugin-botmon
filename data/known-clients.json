@@ -3,9 +3,13 @@
 	 "id": "opera",
 	 "rx": [ "\\sOpera\\/.*?Version\\/(\\S+)", "Opera\\/(\\S+)" ]
 	},
+	{"n": "AOL Explorer",
+	 "id": "aol",
+	 "rx": [ "\\sAOL\\s(\\d+\\.\\d+)\\)", "\\sAOLBUILD\\/(\\S+)", "\\sBukaolshop\\s", "\\.aolapp\\/(\\d+\\.\\d+)\\." ]
+	},
 	{"n": "Samsung Internet",
 	 "id": "samsung",
-	 "rx": [ "\\sSamsungBrowser\\/(\\S+)" ]
+	 "rx": [ "\\sSamsungBrowser[\\/\\s](\\d+\\.\\d+)" ]
 	},
 	{"n": "UC Browser",
 	 "id": "uc",

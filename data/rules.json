@@ -1,11 +1,29 @@
 {
-	"ip-ranges": [
-		{"range": "191.177.0.0", "mask": 16, "bot": 50}
-	],
+	"threshold": 100,
 	"rules": [
-		{"field": "_client", "item": "id", "op": "equals", "value": "chromeold", "bot": 30}
-	],
-	"thresholds": {
-		"bot": 50
-	}
+		{"func": "obsoleteClient",
+		 "id": "oldClient", "desc": "Visit with obsolete browser version",
+		 "bot": 40
+		},
+		{"func": "obsoletePlatform",
+		 "id": "oldOS", "desc": "Visit with obsolete platform version",
+		 "bot": 40
+		},
+		{"func": "noJavaScript",
+		 "id": "noJS", "desc": "Visit with JavaScript disabled",
+		 "bot": 20
+		},
+		{"func": "smallPageCount", "params": [1],
+		 "id": "onePage", "desc": "Views only a single page",
+		 "bot": 20
+		},
+		{"func": "noTicks",
+		 "id": "noTicks", "desc": "Visitor did not spend time reading any page",
+		 "bot": 10
+		},
+		{"func": "noReferences",
+		 "id": "noRefs", "desc": "None of the page views came with a reference field",
+		 "bot": 30
+		}
+	]
 }
