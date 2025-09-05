@@ -1017,8 +1017,6 @@ BotMon.live = {
 							default:
 								console.warn('Unknwon list number.');
 						}
-						let group = BotMon.live.data.analytics.groups[listId];
-						// todo: add group information!
 
 						const details = makeElement('details', {
 							'data-group': listId,
