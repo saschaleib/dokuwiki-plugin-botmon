@@ -175,7 +175,7 @@
 	{"id": "blexbot",
 	 "n": "BLEXBot (DE)",
 	 "r": ["BLEXBot"],
-	 "rx": ["BLEXBot/\\/(\\d\\.\\d)"],
+	 "rx": ["BLEXBot\\/(\\d\\.\\d);"],
 	 "url": "https://help.seranking.com/en/blex-crawler"
 	}
 ]
