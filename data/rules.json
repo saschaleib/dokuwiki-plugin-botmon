@@ -29,6 +29,10 @@
 		 "id": "noRefs", "desc": "No referer field",
 		 "bot": 30
 		},
+		{"func": "matchLang", "params": ["en"],
+		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language (except English pages)",
+		 "bot": 20
+		},
 		{"func": "clientTest", "params": ["brave"],
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
@@ -62,6 +66,7 @@
 		{"from": "124.243.128.0", "to": "124.243.191.255", "isp": "huawei", "loc":"sg"},
 		{"from": "150.40.128.0", "to": "150.40.255.255", "isp": "huawei", "loc":"hk"},
 		{"from": "159.138.0.0", "to": "159.138.225.255", "isp": "huawei", "loc":"th"},
+		{"from": "162.128.0.2505", "to": "162.128.127.255", "isp": "zenlayer", "loc":"sg"},
 		{"from": "166.108.192.0", "to": "166.108.255.255", "isp": "huawei", "loc":"sg"},
 		{"from": "177.0.0.0", "to": "177.223.255.255", "isp": "ths", "loc":"br"},
 		{"from": "183.87.32.0", "to": "183.87.159.255", "isp": "huawei", "loc":"hk"},

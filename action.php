@@ -54,6 +54,18 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
         ];
 
 		/* Write out server-side info to a server log: */
+		$this->writeServerLog($username);
+	}
+
+	/**
+	 * Writes data to the server log.
+	 *
+	 * @return void
+	 */
+	private function writeServerLog($username) {
+
+		global $conf;
+		global $INFO;
 
 		// what is the session identifier?
 		$sessionId = $_COOKIE['DokuWiki']  ?? '';
@@ -69,6 +81,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		// clean the page ID
 		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
 
+		// create the log array:
 		$logArr = Array(
 			$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 			$pageId, /* page ID */
@@ -76,7 +89,9 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$sessionType, /* session ID type */
 			$username,
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
-			$_SERVER['HTTP_REFERER'] ?? '' /* HTTP Referrer */
+			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
+			substr($conf['lang'],0,2), /* page language */
+			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])))) /* accepted client languages */
 		);
 
 		//* create the log line */
@@ -96,6 +111,5 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		/* Done */
 		fclose($logfile);
-
 	}
 }

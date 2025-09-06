@@ -234,7 +234,9 @@ BotMon.live = {
 						if ( v.id == visitor.id) { /* match the pre-defined IDs */
 							return v;
 						} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
-							console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
+							if (v.typ !== 'ip') {
+								console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
+							}
 							return v;
 						}
 
@@ -285,6 +287,10 @@ BotMon.live = {
 					visitor._client = BotMon.live.data.clients.match(nv.agent) ?? null; // client info
 					visitor._platform = BotMon.live.data.platforms.match(nv.agent); // platform info
 					model._visitors.push(visitor);
+				} else { // update existing 
+					if (visitor._firstSeen < nv.ts) {
+						visitor._firstSeen = nv.ts;
+					}
 				}
 
 				// find browser 
@@ -307,7 +313,9 @@ BotMon.live = {
 					(prereg.ref !== undefined && prereg.ref !== '');
 
 				// update time stamp for last-seen:
-				visitor._lastSeen = nv.ts;
+				if (visitor._lastSeen < nv.ts) {
+					visitor._lastSeen = nv.ts;
+				}
 
 				// if needed:
 				return visitor;
@@ -444,6 +452,8 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
+				BotMon.live.gui.status.showBusy("Analysing data …");
+
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
 
@@ -485,8 +495,8 @@ BotMon.live = {
 					}
 				});
 
-				//console.log(this.data);
-				//console.log(this.groups);
+				BotMon.live.gui.status.hideBusy('Done.');
+
 			}
 
 		},
@@ -848,7 +858,7 @@ BotMon.live = {
 					return false;
 				},
 
-				// unusual combinations of PLatform and Client:
+				// unusual combinations of Platform and Client:
 				combTest: function(visitor, ...combinations) {
 
 					for (let i=0; i<combinations.length; i++) {
@@ -868,6 +878,16 @@ BotMon.live = {
 					const ipInfo = BotMon.live.data.rules.getBotIPInfo(visitor.ip);
 
 					return (ipInfo !== null);
+				},
+
+				// is the page language mentioned in the client's accepted languages?
+				// the parameter holds an array of exceptions, i.e. page languages that should be ignored.
+				matchLang: function(visitor, ...exceptions) {
+
+					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) < 0) {
+						return visitor.accept.split(',').indexOf(visitor.lang) < 0;
+					}
+					return false;
 				}
 			},
 
@@ -906,7 +926,7 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','agent','ref'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept'];
 					break;
 				case "log":
 					typeName = "Page load";

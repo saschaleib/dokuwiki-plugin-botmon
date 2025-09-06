@@ -67,7 +67,7 @@ foreach ($logArr as $val) {
 /* write the log line to the file */
 $logfile = fopen($filename, 'a');
 if (!$logfile) {
-	http_response_code(500);
+	http_response_code(507);
 	die("Error: Unable to open log file. Please check file permissions.");
 }
 
