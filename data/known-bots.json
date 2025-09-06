@@ -173,9 +173,15 @@
 	 "url": "https://www.plagaware.com/bot"
 	},
 	{"id": "blexbot",
-	 "n": "BLEXBot (DE)",
+	 "n": "BLEXBot",
 	 "r": ["BLEXBot"],
 	 "rx": ["BLEXBot\\/(\\d\\.\\d);"],
 	 "url": "https://help.seranking.com/en/blex-crawler"
+	},
+	{"id": "sogou",
+	 "n": "Sogou web spider",
+	 "r": ["Sogou web spider"],
+	 "rx": ["Sogou web spider\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
+	 "url": "http://www.sogou.com/docs/help/webmasters.htm#07"
 	}
 ]

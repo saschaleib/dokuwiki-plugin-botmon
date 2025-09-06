@@ -53,7 +53,7 @@
 	},
 	{"n": "Safari",
 	 "id": "safari",
-	 "rx": [ "\\sSafari\\/(\\S+)" ]
+	 "rx": [ "\\sSafari\\/(\\d+)" ]
 	},
 	{"n": "Firefox",
 	 "id": "firefox",

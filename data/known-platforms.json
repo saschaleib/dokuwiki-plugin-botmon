@@ -13,7 +13,7 @@
 	},
 	{"n": "iOS/iPadOS",
 	 "id": "ios",
-	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\siPhone\\sOS\\s([\\d\\._]+)\\s", "\\siPadOS\\s([\\d\\._]+)\\s", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
+	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\siPhone\\sOS\\s([\\d\\._]+)\\s", "\\siPadOS\\s([\\d\\._]+)\\s", "\\siPad; CPU OS (\\d+)[_\\.\\s]", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
 	},
 	{"n": "Android",
 	 "id": "android",
@@ -21,7 +21,7 @@
 	},
 	{"n": "Old MacOS",
 	 "id": "macosold",
-	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[12])[\\._]" ]
+	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[123])[\\._]" ]
 	},
 	{"n": "MacOS",
 	 "id": "macos",
