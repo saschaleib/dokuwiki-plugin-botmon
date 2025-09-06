@@ -1,7 +1,7 @@
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
-/* 04.09.2025 - 0.1.8 - pre-release */
-/* Authors: Sascha Leib <ad@hominem.info> */
+/* 06.09.2025 - 0.2.0 - beta */
+/* Author: Sascha Leib <ad@hominem.info> */
 
 // enumeration of user types:
 const BM_USERTYPE = Object.freeze({
@@ -39,7 +39,6 @@ const BotMon = {
 
 	/* internal tools */
 	t: {
-
 		/* helper function to call inits of sub-objects */
 		_callInit: function(obj) {
 			//console.info('BotMon.t._callInit(obj=',obj,')');
@@ -92,6 +91,15 @@ const BotMon = {
 				console.error(e);
 			}
 			return r;
+		},
+
+		/* helper to convert an ip address string to a normalised format: */
+		_ip2Num: function(ip) {
+			if (ip.indexOf(':') > 0) { /* IP6 */
+				return (ip.split(':').map(d => ('0000'+d).slice(-4) ).join(''));
+			} else { /* IP4 */
+				return Number(ip.split('.').map(d => ('000'+d).slice(-3) ).join(''));
+			}
 		}
 	}
 };
@@ -126,6 +134,9 @@ BotMon.live = {
 
 			// set the flags:
 			switch(file) {
+				case 'rules':
+					data._dispatchRulesLoaded = true;
+					break;
 				case 'bots':
 					data._dispatchBotsLoaded = true;
 					break;
@@ -134,9 +145,6 @@ BotMon.live = {
 					break;
 				case 'platforms':
 					data._dispatchPlatformsLoaded = true;
-					break;
-				case 'rules':
-					data._dispatchRulesLoaded = true;
 					break;
 				default:
 					// ignore
@@ -226,7 +234,7 @@ BotMon.live = {
 						if ( v.id == visitor.id) { /* match the pre-defined IDs */
 							return v;
 						} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
-							console.warn("Visitor ID not found, using matchin IP + User-Agent instead.");
+							console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
 							return v;
 						}
 
@@ -353,7 +361,7 @@ BotMon.live = {
 				// find the visit info:
 				let visitor = model.findVisitor(dat);
 				if (!visitor) {
-					console.warn(`No visitor with ID ${dat.id}, registering a new one.`);
+					console.info(`No visitor with ID “${dat.id}” found, registering as a new one.`);
 					visitor = model.registerVisit(dat, type);
 				}
 				if (visitor) {
@@ -379,11 +387,20 @@ BotMon.live = {
 
 			// helper function to create a new "page view" item:
 			_makePageView: function(data, type) {
+
+				// try to parse the referrer:
+				let rUrl = null;
+				try {
+					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
+				} catch (e) {
+					console.info(`Invalid referer: “${data.ref}”.`);
+				}
+
 				return {
 					_by: type,
 					ip: data.ip,
 					pg: data.pg,
-					ref: data.ref || '',
+					_ref: rUrl,
 					_firstSeen: data.ts,
 					_lastSeen: data.ts,
 					_seenBy: [type],
@@ -690,6 +707,22 @@ BotMon.live = {
 						this._threshold = json.threshold;
 					}
 
+					if (json.ipRanges) {
+						// clean up the IPs first:
+						let list = [];
+						json.ipRanges.forEach( it => {
+							let item = {
+								'from': BotMon.t._ip2Num(it.from),
+								'to': BotMon.t._ip2Num(it.to),
+								'isp': it.isp,
+								'loc': it.loc
+							};
+							list.push(item);
+						});
+
+						this._botIPs = list;
+					}
+
 					this._ready = true;
 
 				} catch (error) {
@@ -773,7 +806,9 @@ BotMon.live = {
 
 				// client does not use JavaScript:
 				noJavaScript: function(visitor) {
-					return (visitor._jsClient === false);
+
+					return !(visitor._seenBy.includes('log') || visitor._seenBy.includes('tck'));
+
 				},
 
 				// are there at lest num pages loaded?
@@ -787,10 +822,75 @@ BotMon.live = {
 					return !visitor._seenBy.includes('tck');
 				},
 
-				// there are no references in any of the page visits:
-				noReferences: function(visitor) {
-					return (visitor._hasReferrer === true);
+				// there are no referrers in any of the page visits:
+				noReferrer: function(visitor) {
+
+					let r = false; // return value
+					for (let i = 0; i < visitor._pageViews.length; i++) {
+						if (!visitor._pageViews[i]._ref) {
+							r = true;
+							break;
+						}
+					}
+					return r;
+				},
+
+				// test for specific client identifiers:
+				clientTest: function(visitor, ...list) {
+
+					for (let i=0; i<list.length; i++) {
+						if (visitor._client.id == list[i]) {
+								return true
+						}
+					};
+					return false;
+				},
+
+				// unusual combinations of PLatform and Client:
+				combTest: function(visitor, ...combinations) {
+
+					for (let i=0; i<combinations.length; i++) {
+
+						if (visitor._platform.id == combinations[i][0]
+							&& visitor._client.id == combinations[i][1]) {
+								return true
+						}
+					};
+
+					return false;
+				},
+
+				// is the IP address from a known bot network?
+				fromKnownBotIP: function(visitor) {
+
+					const ipInfo = BotMon.live.data.rules.getBotIPInfo(visitor.ip);
+
+					return (ipInfo !== null);
 				}
+			},
+
+			/* known bot IP ranges: */
+			_botIPs: [],
+
+			// return information on a bot IP range:
+			getBotIPInfo: function(ip) {
+
+				// shortcut to make code more readable:
+				const me = BotMon.live.data.rules;
+
+				// convert IP address to easier comparable form:
+				const ipNum = BotMon.t._ip2Num(ip);
+
+				for (let i=0; i < me._botIPs.length; i++) {
+					const ipRange = me._botIPs[i];
+
+					if (ipNum >= ipRange.from && ipNum <= ipRange.to) {
+						return ipRange;
+					}
+
+				};
+				return null;
+
 			}
 
 		},
@@ -1066,6 +1166,8 @@ BotMon.live = {
 				const make = BotMon.t._makeElement;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
+				const platformName = (data._platform ? data._platform.n : 'Unknown');
+				const clientName = (data._client ? data._client.n: 'Unknown');
 
 				const li = make('li'); // root list item
 				const details = make('details');
@@ -1073,10 +1175,6 @@ BotMon.live = {
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
-
-				const platformName = (data._platform ? data._platform.n : 'Unknown');
-				const clientName = (data._client ? data._client.n: 'Unknown');
-
 				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
 
 					const botName = ( data._bot && data._bot.n ? data._bot.n : "Unknown");
@@ -1123,7 +1221,22 @@ BotMon.live = {
 
 				summary.appendChild(span2);
 
-				// create expanable section:
+				// add details expandable section:
+				details.appendChild(BotMon.live.gui.lists._makeVisitorDetails(data, type));
+
+				li.appendChild(details);
+				return li;
+			},
+
+			_makeVisitorDetails: function(data, type) {
+
+				// shortcut for neater code:
+				const make = BotMon.t._makeElement;
+
+				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
+				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
+				const platformName = (data._platform ? data._platform.n : 'Unknown');
+				const clientName = (data._client ? data._client.n: 'Unknown');
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
@@ -1171,7 +1284,7 @@ BotMon.live = {
 				}
 
 				dl.appendChild(make('dt', {}, "User-Agent:"));
-				dl.appendChild(make('dd', {'class': 'agent' + ipType}, data.agent));
+				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
 				dl.appendChild(make('dt', {}, "Visitor Type:"));
 				dl.appendChild(make('dd', undefined, data._type ));
@@ -1182,6 +1295,8 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "Visited pages:"));
 				const pagesDd = make('dd', {'class': 'pages'});
 				const pageList = make('ul');
+
+				/* list all page views */
 				data._pageViews.forEach( (page) => {
 					const pgLi = make('li');
 
@@ -1191,10 +1306,16 @@ BotMon.live = {
 						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
 					}
 
-					console.log(page);
-
-					pgLi.appendChild(make('span', {}, page.pg));
-					// pgLi.appendChild(make('span', {}, page.ref));
+					pgLi.appendChild(make('span', {}, page.pg)); /* DW Page ID */
+					if (page._ref) {
+						pgLi.appendChild(make('span', {
+							'data-ref': page._ref.host,
+							'title': "Referrer: " + page._ref.full
+						}, page._ref.site));
+					} else {
+						pgLi.appendChild(make('span', {
+						}, "No referer"));
+					}
 					pgLi.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
 					pgLi.appendChild(make('span', {}, page._firstSeen.toLocaleString()));
 					pgLi.appendChild(make('span', {}, page._lastSeen.toLocaleString()));
@@ -1203,25 +1324,36 @@ BotMon.live = {
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
 
+				/* add bot evaluation: */
 				if (data._eval) {
 					dl.appendChild(make('dt', {}, "Evaluation:"));
 					const evalDd = make('dd');
 					const testList = make('ul',{
 						'class': 'eval'
 					});
-					data._eval.forEach( (test) => {
+					data._eval.forEach( test => {
 
 						const tObj = BotMon.live.data.rules.getRuleInfo(test);
-						const tDesc = tObj ? tObj.desc : test;
+						let tDesc = tObj ? tObj.desc : test;
 
+						// special case for Bot IP range test:
+						if (tObj.func == 'fromKnownBotIP') {
+							const rangeInfo = BotMon.live.data.rules.getBotIPInfo(data.ip);
+							if (rangeInfo) {
+								tDesc += ` (${rangeInfo.isp}, ${rangeInfo.loc.toUpperCase()})`;
+							}
+						}
+
+						// create the entry field
 						const tstLi = make('li');
 						tstLi.appendChild(make('span', {
-							'class': 'test test_' . test
-						}, ( tObj ? tObj.desc : test )));
+							'data-testid': test
+						}, tDesc));
 						tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
 						testList.appendChild(tstLi);
 					});
 
+					// add total row 
 					const tst2Li = make('li', {
 						'class': 'total'
 					});
@@ -1232,11 +1364,7 @@ BotMon.live = {
 					evalDd.appendChild(testList);
 					dl.appendChild(evalDd);
 				}
-
-				details.appendChild(dl);
-
-				li.appendChild(details);
-				return li;
+				return dl;
 			}
 
 		}
