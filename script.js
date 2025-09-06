@@ -525,6 +525,8 @@ BotMon.live = {
 				// default is: not found!
 				let botInfo = null;
 
+				if (!agent) return null;
+
 				// check for known bots:
 				BotList.find(bot => {
 					let r = false;
