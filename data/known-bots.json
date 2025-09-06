@@ -101,7 +101,7 @@
 	 "url": "http://www.majestic12.co.uk/bot.php"
 	},
 	{"id": "petal",
-	 "n": "PetalSearch Bot (China)",
+	 "n": "PetalSearch Bot (CN)",
 	 "r": ["PetalBot", "AspiegelBot"],
 	 "rx": ["[\\s;]PetalBot[\\s\\/;]", "AspiegelBot[\\)$]"],
 	 "url": "https://webmaster.petalsearch.com/site/petalbot"
@@ -155,7 +155,7 @@
 	 "url": "https://darkvisitors.com/agents/imagesiftbot"
 	},
 	{"id": "dotbot",
-	 "n": "Moz.com DotBot Crawler",
+	 "n": "Moz.com DotBot",
 	 "r": ["ImagesiftBot"],
 	 "rx": ["DotBot\\/(\\d\\.\\d)[\\.;\\s]"],
 	 "url": "https://moz.com/help/moz-procedures/crawlers/dotbot"
@@ -171,5 +171,11 @@
 	 "r": ["PlagAwareBot"],
 	 "rx": ["PlagAwareBot\\/(\\d\\.\\d)"],
 	 "url": "https://www.plagaware.com/bot"
+	},
+	{"id": "blexbot",
+	 "n": "BLEXBot (DE)",
+	 "r": ["BLEXBot"],
+	 "rx": ["BLEXBot/\\/(\\d\\.\\d)"],
+	 "url": "https://help.seranking.com/en/blex-crawler"
 	}
 ]
