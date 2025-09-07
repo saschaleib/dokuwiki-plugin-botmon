@@ -7,7 +7,7 @@
 	{"id": "googlebot",
 	 "n": "Google Bot",
 	 "r": ["Googlebot"],
-	 "rx": ["\\sGooglebot\\/(\\d+\\.\\d+);"],
+	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)"],
 	 "url": "http://www.google.com/bot.html"
 	},
 	{"id": "googleads",

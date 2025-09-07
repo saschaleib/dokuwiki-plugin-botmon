@@ -1,27 +1,25 @@
-<h1>BotMon Cleanup Script</h1>
-<ul><?php
+<?php header("Content-Type: text/plain"); ?>BotMon Cleanup Script
+=====================
+<?php
+// exclude the following two dates:
+$today = gmdate('Y-m-d');
+$yesterday = gmdate('Y-m-d', time() - 86400);
 
-	// exclude the following two dates:
-	$today = gmdate('Y-m-d');
-	$yesterday = gmdate('Y-m-d', time() - 86400);
+// scan the log directory and delete all files except for today and yesterday:
+$dir = scandir('logs');
+foreach($dir as $file) {
+	$fName = pathinfo($file, PATHINFO_BASENAME);
+	$bName = strtok($fName, '.');
 
-	// scan the log directory and delete all files except for today and yesterday:
-	$dir = scandir('logs');
-	foreach($dir as $file) {
-		$fName = pathinfo($file, PATHINFO_BASENAME);
-		$bName = strtok($fName, '.');
-
-		echo "<li>File “{$fName}” – ";
-		if ($bName == '' || $bName == 'logfiles') {
-			echo " <em>ignored</em></li>";
-		} else if ($bName == $today || $bName == $yesterday) {
-			echo " <em>skipped</em></li>";
+	if ($bName == '' || $bName == 'logfiles') {
+		//echo "File “{$fName}” ignored.";
+	} else if ($bName == $today || $bName == $yesterday) {
+		//echo "File “{$fName}” skipped.\n";
+	} else {
+		if (unlink('logs/' . $file)) {
+			echo "File “{$fName}” deleted.\n";
 		} else {
-			if (unlink('logs/' . $file)) {
-				echo "deleted.</li>";
-			} else {
-				echo " <strong>not deleted!</strong></li>";
-			}
+			echo " File “{$fName}” could not be deleted!\n";
 		}
 	}
- ?></ul>
+}

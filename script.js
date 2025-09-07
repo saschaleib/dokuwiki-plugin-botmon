@@ -100,6 +100,40 @@ const BotMon = {
 			} else { /* IP4 */
 				return Number(ip.split('.').map(d => ('000'+d).slice(-3) ).join(''));
 			}
+		},
+
+		/* helper function to format a Date object to show only the time. */
+		/* returns String */
+		_formatTime: function(date) {
+
+			if (date) {
+				return ('0'+date.getHours()).slice(-2) + ':' + ('0'+date.getMinutes()).slice(-2) + ':' + ('0'+date.getSeconds()).slice(-2);
+			} else {
+				return null;
+			}
+
+		},
+
+		/* helper function to show a time difference in seconds or minutes */
+		/* returns String */
+		_formatTimeDiff: function(dateA, dateB) {
+
+			// if the second date is ealier, swap them:
+			if (dateA > dateB) dateB = [dateA, dateA = dateB][0];
+
+			// get the difference in milliseconds:
+			let ms = dateB - dateA;
+
+			if (ms > 50) { /* ignore small time spans */
+				const h = Math.floor((ms / (1000 * 60 * 60)) % 24);
+				const m = Math.floor((ms / (1000 * 60)) % 60);
+				const s = Math.floor((ms / 1000) % 60);
+
+				return ( h>0 ? h + 'h ': '') + ( m>0 ? m + 'm ': '') + ( s>0 ? s + 's': '');
+			}
+
+			return null;
+
 		}
 	}
 };
@@ -208,38 +242,40 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
+				const timeout = 60 * 60 * 1000; /* session timeout: One hour */
+
 				// loop over all visitors already registered:
 				for (let i=0; i<model._visitors.length; i++) {
 					const v = model._visitors[i];
 
-					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
+					if (Math.abs(v._lastSeen - visitor.ts) < timeout) { /* ignore timed out visits */
+						if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
 
-						// bots match when their ID matches:
-						if (v._bot && v._bot.id == visitor._bot.id) {
-							return v;
-						}
-
-					} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
-						
-						//if (visitor.id == 'fsmoe7lgqb89t92vt4ju8vdl0q') console.log(visitor);
-
-						// visitors match when their names match:
-						if ( v.usr == visitor.usr
-						 && v.ip == visitor.ip
-						 && v.agent == visitor.agent) {
-							return v;
-						}
-					} else { /* any other visitor */
-
-						if ( v.id == visitor.id) { /* match the pre-defined IDs */
-							return v;
-						} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
-							if (v.typ !== 'ip') {
-								console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
+							// bots match when their ID matches:
+							if (v._bot && v._bot.id == visitor._bot.id) {
+								return v;
 							}
-							return v;
-						}
 
+						} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
+
+							// visitors match when their names match:
+							if ( v.usr == visitor.usr
+							&& v.ip == visitor.ip
+							&& v.agent == visitor.agent) {
+								return v;
+							}
+						} else { /* any other visitor */
+
+							if ( v.id == visitor.id) { /* match the pre-defined IDs */
+								return v;
+							} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
+								if (v.typ !== 'ip') {
+									console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
+								}
+								return v;
+							}
+
+						}
 					}
 				}
 				return null; // nothing found
@@ -288,7 +324,7 @@ BotMon.live = {
 					visitor._platform = BotMon.live.data.platforms.match(nv.agent); // platform info
 					model._visitors.push(visitor);
 				} else { // update existing 
-					if (visitor._firstSeen < nv.ts) {
+					if (visitor._firstSeen > nv.ts) {
 						visitor._firstSeen = nv.ts;
 					}
 				}
@@ -306,6 +342,7 @@ BotMon.live = {
 					prereg._lastSeen = nv.ts;
 					// increase view count:
 					prereg._viewCount += 1;
+					prereg._tickCount += 1;
 				}
 
 				// update referrer state:
@@ -336,7 +373,9 @@ BotMon.live = {
 				}
 				if (visitor) {
 
-					visitor._lastSeen = dat.ts;
+					if (visitor._lastSeen < dat.ts) {
+						visitor._lastSeen = dat.ts;
+					}
 					if (!visitor._seenBy.includes(type)) {
 						visitor._seenBy.push(type);
 					}
@@ -355,6 +394,7 @@ BotMon.live = {
 					prereg = model._makePageView(dat, type);
 					visitor._pageViews.push(prereg);
 				}
+				prereg._tickCount += 1;
 			},
 
 			// updating visit data from the ticker log:
@@ -380,7 +420,7 @@ BotMon.live = {
 					// get the page view info:
 					let pv = model._getPageView(visitor, dat);
 					if (!pv) {
-						console.warn(`No page view for visit ID ${dat.id}, page ${dat.pg}, registering a new one.`);
+						console.warn(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
 						pv = model._makePageView(dat, type);
 						visitor._pageViews.push(pv);
 					}
@@ -451,6 +491,7 @@ BotMon.live = {
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
+				const me = BotMon.live.data.analytics;
 
 				BotMon.live.gui.status.showBusy("Analysing data …");
 
@@ -481,6 +522,11 @@ BotMon.live = {
 						v._eval = e.rules;
 						v._botVal = e.val;
 
+						// add each page view to IP range information (unless it is already from a known bot IP range):
+						v._pageViews.forEach( pv => {
+							me._addToIPRanges(pv.ip);
+						});
+
 						if (e.isBot) { // likely bots
 							v._type = BM_USERTYPE.LIKELY_BOT;
 							this.data.bots.suspected += v._pageViews.length;
@@ -496,9 +542,55 @@ BotMon.live = {
 				});
 
 				BotMon.live.gui.status.hideBusy('Done.');
+				console.log(BotMon.live.data.analytics._ipRange);
 
+
+			},
+
+			// visits from IP ranges:
+			_ipRange: {
+				ip4: [],
+				ip6: []
+			},
+			/**
+			 * Adds a visit to the IP range statistics.
+			 * 
+			 * This helps to identify IP ranges that are used by bots.
+			 * 
+			 * @param {string} ip The IP address to add.
+			 */
+			_addToIPRanges: function(ip) {
+
+				const me = BotMon.live.data.analytics;
+				const ipv = (ip.indexOf(':') > 0 ? 6 : 4);
+				
+				const ipArr = ip.split( ipv == 6 ? ':' : '.');
+				const maxSegments = (ipv == 6 ? 4 : 3);
+
+				let arr = (ipv == 6 ? me._ipRange.ip6 : me._ipRange.ip4);
+				let it = null;
+				for (let i = 0; i < Math.min(ipArr.length, maxSegments); i++) {
+					it = arr.find( a => { a.seg == ipArr[i]; } );
+					if (!it) {
+						it = {seg: ipArr[i], count: 1};
+						if (i<maxSegments) it.sub = [];
+						arr.push(it);
+					} else {
+						it.count += 1;
+					}
+					arr = it.sub;
+				}
+			},
+			_cleanIPRanges: function() {
+				const me = BotMon.live.data.analytics;
+				
+				for (let i = 0; i < 1; i++) {
+					// once for each ip range types:
+					let arr = me._ipRange.ip4;
+					if (i=1) arr = me._ipRange.ip6;
+					
+				}
 			}
-
 		},
 
 		bots: {
@@ -551,7 +643,7 @@ BotMon.live = {
 							};
 							r = true;
 							break;
-						}
+						};
 					};
 					return r;
 				});
@@ -816,22 +908,15 @@ BotMon.live = {
 					return platforms.includes(pId);
 				},
 
-				// client does not use JavaScript:
-				noJavaScript: function(visitor) {
-
-					return !(visitor._seenBy.includes('log') || visitor._seenBy.includes('tck'));
-
-				},
-
 				// are there at lest num pages loaded?
 				smallPageCount: function(visitor, num) {
 					return (visitor._pageViews.length <= Number(num));
 				},
 
-				// there are no ticks recorded for a visitor
+				// There was no entry in a specific log file for this visitor:
 				// note that this will also trigger the "noJavaScript" rule:
-				noTicks: function(visitor) {
-					return !visitor._seenBy.includes('tck');
+				noRecord: function(visitor, type) {
+					return !visitor._seenBy.includes(type);
 				},
 
 				// there are no referrers in any of the page visits:
@@ -877,6 +962,10 @@ BotMon.live = {
 
 					const ipInfo = BotMon.live.data.rules.getBotIPInfo(visitor.ip);
 
+					if (ipInfo) {
+						visitor._ipInKnownBotRange = true;
+					}
+
 					return (ipInfo !== null);
 				},
 
@@ -888,6 +977,25 @@ BotMon.live = {
 						return visitor.accept.split(',').indexOf(visitor.lang) < 0;
 					}
 					return false;
+				},
+
+				// At least x page views were recorded, but they come within less than y seconds
+				loadSpeed: function(visitor, minItems, maxTime) {
+
+					if (visitor._pageViews.length >= minItems) {
+						//console.log('loadSpeed', visitor._pageViews.length, minItems, maxTime);
+
+						const pvArr = visitor._pageViews.map(pv => pv._lastSeen).sort();
+
+						let totalTime = 0;
+						for (let i=1; i < pvArr.length; i++) {
+							totalTime += (pvArr[i] - pvArr[i-1]);
+						}
+
+						//console.log('     ', totalTime , Math.round(totalTime / (pvArr.length * 1000)), (( totalTime / pvArr.length ) <= maxTime * 1000), visitor.ip);
+
+						return (( totalTime / pvArr.length ) <= maxTime * 1000);
+					}
 				}
 			},
 
@@ -1051,7 +1159,7 @@ BotMon.live = {
 
 					for (let i=0; i < Math.min(bots.length, 4); i++) {
 						const dd = makeElement('dd');
-						dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id}, bots[i]._bot.n));
+						dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
 						dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
 						block.appendChild(dd);
 					}
@@ -1295,7 +1403,7 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));
 				}
 
-				if ((data._lastSeen - data._firstSeen) < 1) {
+				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {
 					dl.appendChild(make('dt', {}, "Seen:"));
 					dl.appendChild(make('dd', {'class': 'seen'}, data._firstSeen.toLocaleString()));
 				} else {
@@ -1339,16 +1447,28 @@ BotMon.live = {
 						}, "No referer"));
 					}
 					pgLi.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
-					pgLi.appendChild(make('span', {}, page._firstSeen.toLocaleString()));
-					pgLi.appendChild(make('span', {}, page._lastSeen.toLocaleString()));
+					pgLi.appendChild(make('span', {}, BotMon.t._formatTime(page._firstSeen)));
+
+					// get the time difference:
+					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+					if (tDiff) {
+						pgLi.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
+					} else {
+						pgLi.appendChild(make('span', {'class': 'bounce'}, "Bounce"));
+					}
+
 					pageList.appendChild(pgLi);
 				});
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
 
-				/* add bot evaluation: */
+				/* bot evaluation rating */
+				dl.appendChild(make('dt', undefined, "Bot rating:"));
+				dl.appendChild(make('dd', {'class': 'bot-rating'}, data._botVal + '/' + BotMon.live.data.rules._threshold ));
+
+				/* add bot evaluation details: */
 				if (data._eval) {
-					dl.appendChild(make('dt', {}, "Evaluation:"));
+					dl.appendChild(make('dt', {}, "Bot evaluation details:"));
 					const evalDd = make('dd');
 					const testList = make('ul',{
 						'class': 'eval'
@@ -1379,9 +1499,9 @@ BotMon.live = {
 					const tst2Li = make('li', {
 						'class': 'total'
 					});
-					tst2Li.appendChild(make('span', {}, "Total:"));
+					/*tst2Li.appendChild(make('span', {}, "Total:"));
 					tst2Li.appendChild(make('span', {}, data._botVal));
-					testList.appendChild(tst2Li);
+					testList.appendChild(tst2Li);*/
 
 					evalDd.appendChild(testList);
 					dl.appendChild(evalDd);
