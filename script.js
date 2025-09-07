@@ -598,10 +598,8 @@ BotMon.live = {
 				for (const [n, arr] of Object.entries(me._ipRange)) {
 					
 					arr.forEach( (it, i) => {
-						if (it.count <= 1) console.log(it); //arr.splice(i-1, 1)
+						if (it.count <= 1) arr.splice(i, 1);
 					});
-
-					//console.log("New array:", arr);
 
 				};
 			}

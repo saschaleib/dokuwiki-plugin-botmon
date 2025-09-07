@@ -55,6 +55,7 @@
 		}
 	],
 	"ipRanges": [
+		{"from": "3.0.0.0", "to": "3.255.255.255", "isp": "Amazon Data Services", "loc":"us"},
 		{"from": "8.127.0.0", "to": "8.223.255.254", "isp": "Alibaba", "loc":"cn"},
 		{"from": "24.240.0.0", "to": "24.243.255.254", "isp": "Charter", "loc":"us"},
 		{"from": "27.106.0.0", "to": "27.106.127.254", "isp": "Huawei", "loc":"hk"},
