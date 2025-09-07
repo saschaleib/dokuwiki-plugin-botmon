@@ -183,5 +183,23 @@
 	 "r": ["Sogou web spider"],
 	 "rx": ["Sogou web spider\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
 	 "url": "http://www.sogou.com/docs/help/webmasters.htm#07"
+	},
+	{"id": "amazon",
+	 "n": "Amazonbot",
+	 "r": ["Amazonbot"],
+	 "rx": ["Amazonbot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
+	 "url": "https://developer.amazon.com/amazonbot"
+	},
+	{"id": "sop",
+	 "n": "SitesOverPagesBot",
+	 "r": ["SitesOverPagesBot"],
+	 "rx": ["SitesOverPagesBot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
+	 "url": "https://www.sitesoverpages.com/bot"
+	},
+	{"id": "startme",
+	 "n": "StartmeBot",
+	 "r": ["StartmeBot"],
+	 "rx": ["StartmeBot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
+	 "url": "https://www.sitesoverpages.com/bot"
 	}
 ]

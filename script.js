@@ -248,24 +248,24 @@ BotMon.live = {
 				for (let i=0; i<model._visitors.length; i++) {
 					const v = model._visitors[i];
 
-					if (Math.abs(v._lastSeen - visitor.ts) < timeout) { /* ignore timed out visits */
-						if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
+					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
 
-							// bots match when their ID matches:
-							if (v._bot && v._bot.id == visitor._bot.id) {
-								return v;
-							}
+						// bots match when their ID matches:
+						if (v._bot && v._bot.id == visitor._bot.id) {
+							return v;
+						}
 
-						} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
+					} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
 
-							// visitors match when their names match:
-							if ( v.usr == visitor.usr
-							&& v.ip == visitor.ip
-							&& v.agent == visitor.agent) {
-								return v;
-							}
-						} else { /* any other visitor */
+						// visitors match when their names match:
+						if ( v.usr == visitor.usr
+						&& v.ip == visitor.ip
+						&& v.agent == visitor.agent) {
+							return v;
+						}
+					} else { /* any other visitor */
 
+						if (Math.abs(v._lastSeen - visitor.ts) < timeout) { /* ignore timed out visits */
 							if ( v.id == visitor.id) { /* match the pre-defined IDs */
 								return v;
 							} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
@@ -274,8 +274,8 @@ BotMon.live = {
 								}
 								return v;
 							}
-
 						}
+
 					}
 				}
 				return null; // nothing found
@@ -541,10 +541,11 @@ BotMon.live = {
 					}
 				});
 
-				BotMon.live.gui.status.hideBusy('Done.');
+				// clean up the ip ranges:
+				me._cleanIPRanges();
 				console.log(BotMon.live.data.analytics._ipRange);
 
-
+				BotMon.live.gui.status.hideBusy('Done.');
 			},
 
 			// visits from IP ranges:
@@ -568,28 +569,41 @@ BotMon.live = {
 				const maxSegments = (ipv == 6 ? 4 : 3);
 
 				let arr = (ipv == 6 ? me._ipRange.ip6 : me._ipRange.ip4);
-				let it = null;
-				for (let i = 0; i < Math.min(ipArr.length, maxSegments); i++) {
-					it = arr.find( a => { a.seg == ipArr[i]; } );
-					if (!it) {
-						it = {seg: ipArr[i], count: 1};
-						if (i<maxSegments) it.sub = [];
-						arr.push(it);
-					} else {
-						it.count += 1;
+
+				// find any existing segment entry:
+				it = null;
+				for (let i=0; i < arr.length; i++) {
+					const sig = arr[i];
+					if (sig.seg == ipArr[0]) {
+						it = sig;
+						break;
 					}
-					arr = it.sub;
 				}
+				
+				// create if not found:
+				if (!it) {
+					it = {seg: ipArr[0], count: 1};
+					//if (i<maxSegments) it.sub = [];
+					arr.push(it);
+
+				} else { // increase count:
+
+					it.count += 1;
+				}
+			
 			},
 			_cleanIPRanges: function() {
 				const me = BotMon.live.data.analytics;
 				
-				for (let i = 0; i < 1; i++) {
-					// once for each ip range types:
-					let arr = me._ipRange.ip4;
-					if (i=1) arr = me._ipRange.ip6;
+				for (const [n, arr] of Object.entries(me._ipRange)) {
 					
-				}
+					arr.forEach( (it, i) => {
+						if (it.count <= 1) console.log(it); //arr.splice(i-1, 1)
+					});
+
+					//console.log("New array:", arr);
+
+				};
 			}
 		},
 
@@ -1399,8 +1413,8 @@ BotMon.live = {
 					dl.appendChild(make('dt', {}, "IP-Address:"));
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + ipType}, data.ip));
 
-					dl.appendChild(make('dt', {}, "ID:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));
+					/*dl.appendChild(make('dt', {}, "ID:"));
+					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
 				}
 
 				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {
@@ -1416,8 +1430,8 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "User-Agent:"));
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
-				dl.appendChild(make('dt', {}, "Visitor Type:"));
-				dl.appendChild(make('dd', undefined, data._type ));
+				/*dl.appendChild(make('dt', {}, "Visitor Type:"));
+				dl.appendChild(make('dd', undefined, data._type ));*/
 
 				dl.appendChild(make('dt', {}, "Seen by:"));
 				dl.appendChild(make('dd', undefined, data._seenBy.join(', ') ));
@@ -1463,49 +1477,52 @@ BotMon.live = {
 				dl.appendChild(pagesDd);
 
 				/* bot evaluation rating */
-				dl.appendChild(make('dt', undefined, "Bot rating:"));
-				dl.appendChild(make('dd', {'class': 'bot-rating'}, data._botVal + '/' + BotMon.live.data.rules._threshold ));
+				if (data._type !== BM_USERTYPE.KNOWN_BOT && data._type !== BM_USERTYPE.KNOWN_USER) {
+					dl.appendChild(make('dt', undefined, "Bot rating:"));
+					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '–' ) + '/' + BotMon.live.data.rules._threshold ));
 
-				/* add bot evaluation details: */
-				if (data._eval) {
-					dl.appendChild(make('dt', {}, "Bot evaluation details:"));
-					const evalDd = make('dd');
-					const testList = make('ul',{
-						'class': 'eval'
-					});
-					data._eval.forEach( test => {
+					/* add bot evaluation details: */
+					if (data._eval) {
+						dl.appendChild(make('dt', {}, "Bot evaluation details:"));
+						const evalDd = make('dd');
+						const testList = make('ul',{
+							'class': 'eval'
+						});
+						data._eval.forEach( test => {
 
-						const tObj = BotMon.live.data.rules.getRuleInfo(test);
-						let tDesc = tObj ? tObj.desc : test;
+							const tObj = BotMon.live.data.rules.getRuleInfo(test);
+							let tDesc = tObj ? tObj.desc : test;
 
-						// special case for Bot IP range test:
-						if (tObj.func == 'fromKnownBotIP') {
-							const rangeInfo = BotMon.live.data.rules.getBotIPInfo(data.ip);
-							if (rangeInfo) {
-								tDesc += ` (${rangeInfo.isp}, ${rangeInfo.loc.toUpperCase()})`;
+							// special case for Bot IP range test:
+							if (tObj.func == 'fromKnownBotIP') {
+								const rangeInfo = BotMon.live.data.rules.getBotIPInfo(data.ip);
+								if (rangeInfo) {
+									tDesc += ` (${rangeInfo.isp}, ${rangeInfo.loc.toUpperCase()})`;
+								}
 							}
-						}
 
-						// create the entry field
-						const tstLi = make('li');
-						tstLi.appendChild(make('span', {
-							'data-testid': test
-						}, tDesc));
-						tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
-						testList.appendChild(tstLi);
-					});
+							// create the entry field
+							const tstLi = make('li');
+							tstLi.appendChild(make('span', {
+								'data-testid': test
+							}, tDesc));
+							tstLi.appendChild(make('span', {}, ( tObj ? tObj.bot : '—') ));
+							testList.appendChild(tstLi);
+						});
 
-					// add total row 
-					const tst2Li = make('li', {
-						'class': 'total'
-					});
-					/*tst2Li.appendChild(make('span', {}, "Total:"));
-					tst2Li.appendChild(make('span', {}, data._botVal));
-					testList.appendChild(tst2Li);*/
+						// add total row 
+						const tst2Li = make('li', {
+							'class': 'total'
+						});
+						/*tst2Li.appendChild(make('span', {}, "Total:"));
+						tst2Li.appendChild(make('span', {}, data._botVal));
+						testList.appendChild(tst2Li);*/
 
-					evalDd.appendChild(testList);
-					dl.appendChild(evalDd);
+						evalDd.appendChild(testList);
+						dl.appendChild(evalDd);
+					}
 				}
+				// return the element to add to the UI:
 				return dl;
 			}
 
