@@ -984,8 +984,8 @@ BotMon.live = {
 				// the parameter holds an array of exceptions, i.e. page languages that should be ignored.
 				matchLang: function(visitor, ...exceptions) {
 
-					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) >= 0) {
-						return !(visitor.accept.split(',').indexOf(visitor.lang) >= 0);
+					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) < 0) {
+						return (visitor.accept.split(',').indexOf(visitor.lang) < 0);
 					}
 					return false;
 				},
