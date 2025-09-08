@@ -41,7 +41,11 @@
 	},
 	{"n": "Edge",
 	 "id": "msedge",
-	 "rx": [ "\\sEdg\\/(\\d+)", "\\sEdge\\/(\\d+)", "EdgiOS\\/(\\d+)" ]
+	 "rx": [ "\\sEdg\\/(1\\d+)", "\\sEdge\\/(1\\d+)", "EdgiOS\\/(1\\d+)" ]
+	},
+	{"n": "Edge Legacy",
+	 "id": "oldedge",
+	 "rx": [ "\\sEdg\\/([7-9]\\d)\\.", "\\sEdge\\/([7-9]\\d)\\.", "EdgiOS\\/([7-9]\\d)\\." ]
 	},
 	{"n": "Old Chrome",
 	 "id": "chromeold",

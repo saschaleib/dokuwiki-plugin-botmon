@@ -14,7 +14,7 @@
 	 "n": "Google Ads Bot",
 	 "r": ["AdsBot-Google", "AdsBot-Google-Mobile", "Mediapartners-Google"],
 	 "rx": ["AdsBot-Google;","AdsBot-Google-Mobile;", "Mediapartners-Google\\/(\\d+\\.\\d+);"],
-	 "url": "http://www.google.com/mobile/adsbot.html"
+	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
 	{"id": "googleapi",
 	 "n": "Google API Crawler",
@@ -154,10 +154,10 @@
 	 "rx": ["ImagesiftBot[;\\s\\/]"],
 	 "url": "https://darkvisitors.com/agents/imagesiftbot"
 	},
-	{"id": "dotbot",
-	 "n": "Moz.com DotBot",
-	 "r": ["ImagesiftBot"],
-	 "rx": ["DotBot\\/(\\d\\.\\d)[\\.;\\s]"],
+	{"id": "moz",
+	 "n": "Moz.com Bots",
+	 "r": ["dotbot", "rogerbot"],
+	 "rx": ["DotBot\\/(\\d\\.\\d)[\\.;\\s]", "RogerBot\\/(\\d\\.\\d)[\\.;\\s]"],
 	 "url": "https://moz.com/help/moz-procedures/crawlers/dotbot"
 	},
 	{"id": "maui",
@@ -200,6 +200,6 @@
 	 "n": "StartmeBot",
 	 "r": ["StartmeBot"],
 	 "rx": ["StartmeBot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
-	 "url": "https://www.sitesoverpages.com/bot"
+	 "url": "https://support.start.me/en/articles/9182933-what-is-startmebot"
 	}
 ]

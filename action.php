@@ -91,7 +91,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
 			substr($conf['lang'],0,2), /* page language */
-			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE'])))) /* accepted client languages */
+			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))) /* accepted client languages */
 		);
 
 		//* create the log line */

@@ -830,8 +830,7 @@ BotMon.live = {
 							let item = {
 								'from': BotMon.t._ip2Num(it.from),
 								'to': BotMon.t._ip2Num(it.to),
-								'isp': it.isp,
-								'loc': it.loc
+								'label': it.label
 							};
 							list.push(item);
 						});
@@ -906,15 +905,15 @@ BotMon.live = {
 			// list of functions that can be called by the rules list to evaluate a visitor:
 			func: {
 
-				// check if client is one of the obsolete ones:
-				obsoleteClient: function(visitor, ...clients) {
+				// check if client is on the list passed as parameter:
+				matchesClient: function(visitor, ...clients) {
 
 					const clientId = ( visitor._client ? visitor._client.id : '');
 					return clients.includes(clientId);
 				},
 
 				// check if OS/Platform is one of the obsolete ones:
-				obsoletePlatform: function(visitor, ...platforms) {
+				matchesPlatform: function(visitor, ...platforms) {
 
 					const pId = ( visitor._platform ? visitor._platform.id : '');
 					return platforms.includes(pId);
@@ -945,7 +944,7 @@ BotMon.live = {
 				},
 
 				// test for specific client identifiers:
-				clientTest: function(visitor, ...list) {
+				/*matchesClients: function(visitor, ...list) {
 
 					for (let i=0; i<list.length; i++) {
 						if (visitor._client.id == list[i]) {
@@ -953,10 +952,10 @@ BotMon.live = {
 						}
 					};
 					return false;
-				},
+				},*/
 
 				// unusual combinations of Platform and Client:
-				combTest: function(visitor, ...combinations) {
+				combinationTest: function(visitor, ...combinations) {
 
 					for (let i=0; i<combinations.length; i++) {
 
@@ -985,8 +984,8 @@ BotMon.live = {
 				// the parameter holds an array of exceptions, i.e. page languages that should be ignored.
 				matchLang: function(visitor, ...exceptions) {
 
-					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) < 0) {
-						return visitor.accept.split(',').indexOf(visitor.lang) < 0;
+					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) >= 0) {
+						return visitor.accept.split(',').indexOf(visitor.lang) >= 0;
 					}
 					return false;
 				},
@@ -1428,6 +1427,9 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "User-Agent:"));
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
+				dl.appendChild(make('dt', {}, "Languages:"));
+				dl.appendChild(make('dd', {'class': 'langs'}, "Client accepts: [" + data.accept + "]; Page: [" + data.lang + ']'));
+
 				/*dl.appendChild(make('dt', {}, "Visitor Type:"));
 				dl.appendChild(make('dd', undefined, data._type ));*/
 
@@ -1495,7 +1497,7 @@ BotMon.live = {
 							if (tObj.func == 'fromKnownBotIP') {
 								const rangeInfo = BotMon.live.data.rules.getBotIPInfo(data.ip);
 								if (rangeInfo) {
-									tDesc += ` (${rangeInfo.isp}, ${rangeInfo.loc.toUpperCase()})`;
+									tDesc += ' (' + (rangeInfo.label ? rangeInfo.label : 'Unknown') + ')';
 								}
 							}
 
