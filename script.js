@@ -985,7 +985,7 @@ BotMon.live = {
 				matchLang: function(visitor, ...exceptions) {
 
 					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) >= 0) {
-						return visitor.accept.split(',').indexOf(visitor.lang) >= 0;
+						return !(visitor.accept.split(',').indexOf(visitor.lang) >= 0);
 					}
 					return false;
 				},
