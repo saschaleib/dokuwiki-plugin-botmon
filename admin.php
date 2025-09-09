@@ -35,30 +35,76 @@ class admin_plugin_botmon extends AdminPlugin {
 		$pluginPath = $conf['basedir'] . 'lib/plugins/' . $this->getPluginName();
 
 		/* Plugin Headline */
-		echo '<div id="botmon__admin">';
-		echo '<h1>Bot Monitoring Plugin</h1>';
+		echo '<div id="botmon__admin">
+	<h1>Bot Monitoring Plugin</h1>
+	<nav id="botmon__tabs">
+		<ul class="tabs" role="tablist">
+			<li role="presentation" class="active"><a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Today</a></li>
+		</ul>
+	</nav>';
 
-		/* tab navigation */
-		echo '<nav id="botmon__tabs">';
-		echo '<ul class="tabs" role="tablist">';
-		echo '<li role="presentation" class="active">';
-		echo '<a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Today</a></li>';
-		echo '</ul></nav>';
+	if ($this->hasOldLogFiles()) {
+		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
+	}
 
-		// Beta warning message:
-		echo '<div class="info"><strong>Please note:</strong> This plugin is still in the early stages of development and does not (yet) clean up its <code>logs</code> directory.<br>You can clean up the old log files by <a href="' . $pluginPath . '/cleanup.php" target="_blank">clicking here</a>, or by adding the cleanup script to your cron jobs.</div>';
+	echo '<article role="tabpanel" id="botmon__today"">
+		<h2 class="a11y">Today</h2>
+		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
+		<div id="botmon__today__content">
+			<details id="botmon__today__overview" open>
+				<summary>Bot overview</summary>
+				<div class="grid-3-columns">
+					<dl id="botmon__today__botsvshumans"></dl>
+					<dl id="botmon__botslist"></dl>
+					<dl id="botmon__today__botips"></dl>
+				</div>
+			</details>
+			<details id="botmon__today__webmetrics">
+				<summary>Web metrics</summary>
+				<div class="grid-3-columns">
+					<dl id="botmon__today__wm_overview"></dl>
+					<dl></dl>
+					<dl></dl>
+				</div>
+			</details>
+			<details id="botmon__today__visitors">
+				<summary>Visitor logs</summary>
+				<div id="botmon__today__visitorlists"></div>
+			</details>
+		</div>
+		<footer aria-live="polite">
+			<img src="' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator">
+			<span id="botmon__today__status">Initialising&nbsp;&hellip;</span>
+		</footer>
+	</article>
+</div><!-- End of BotMon Admin Tool -->';
 
-		/* Live tab */
-		echo '<article role="tabpanel" id="botmon__today"">';
-		echo '<h2 class="a11y">Today</h2>';
-		echo '<header id="botmon__today__title">Loading&nbsp;&hellip;</header>';
-		echo '<div id="botmon__today__content">';
-		echo '<details id="botmon__today__visitors"><summary>Visitor logs</summary>';
-		echo '<div id="botmon__today__visitorlists"></div>';
-		echo '</details></div>';
-		echo '<footer aria-live="polite"><img src="' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator"><span id="botmon__today__status">Initialising&nbsp;&hellip;</span></footer>';
-		echo '</article>';
-		echo '</div><!-- End of BotMon Admin Tool -->';
+	}
 
+	/**
+	 * Check if there are old log files that can be deleted.
+	 * 
+	 * @return bool true if there are old log files, false otherwise
+	 */
+	private function hasOldLogFiles() {
+		
+		$today = gmdate('Y-m-d');
+		$yesterday = gmdate('Y-m-d', time() - 86400);
+
+		// scan the log directory and delete all files except for today and yesterday:
+		$dir = scandir(getcwd() . '/lib/plugins/botmon/logs');
+		foreach($dir as $file) {
+			$fName = pathinfo($file, PATHINFO_BASENAME);
+			$bName = strtok($fName, '.');
+
+			if ($bName == '' || $bName == 'logfiles') {
+				// ignore
+			} else if ($bName == $today || $bName == $yesterday) {
+				// skip
+			} else {
+				return true;
+			}
+		}
+		return false;
 	}
 } 

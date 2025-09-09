@@ -23,3 +23,4 @@ foreach($dir as $file) {
 		}
 	}
 }
+echo "Done.\n";

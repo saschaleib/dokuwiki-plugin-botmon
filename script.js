@@ -541,10 +541,6 @@ BotMon.live = {
 					}
 				});
 
-				// clean up the ip ranges:
-				me._cleanIPRanges();
-				console.log(BotMon.live.data.analytics._ipRange);
-
 				BotMon.live.gui.status.hideBusy('Done.');
 			},
 
@@ -562,6 +558,7 @@ BotMon.live = {
 			 */
 			_addToIPRanges: function(ip) {
 
+				// #TODO: handle nestled ranges!
 				const me = BotMon.live.data.analytics;
 				const ipv = (ip.indexOf(':') > 0 ? 6 : 4);
 				
@@ -592,16 +589,39 @@ BotMon.live = {
 				}
 			
 			},
-			_cleanIPRanges: function() {
-				const me = BotMon.live.data.analytics;
-				
-				for (const [n, arr] of Object.entries(me._ipRange)) {
-					
-					arr.forEach( (it, i) => {
-						if (it.count <= 1) arr.splice(i, 1);
-					});
+			getTopBotIPRanges: function(max) {
 
-				};
+				const me = BotMon.live.data.analytics;
+
+				const kMinHits = 2;
+
+				// combine the ip lists, removing all lower volume branches:
+				let ipTypes = [4,6];
+				const tmpList = [];
+				for (let i=0; i<ipTypes.length; i++) {
+					const ipType = ipTypes[i];
+					(ipType == 6 ? me._ipRange.ip6 : me._ipRange.ip4).forEach( it => {
+						if (it.count > kMinHits) {
+							it.type = ipType;
+							tmpList.push(it);
+						}
+						});
+					tmpList.sort( (a,b) => b.count - a.count);
+				}
+
+				// reduce to only the top (max) items and create the target format:
+				// #TODO: handle nestled ranges!
+				let rList = [];
+				for (let j=0; Math.min(max, tmpList.length) > j; j++) {
+					const rangeInfo = tmpList[j];
+					rList.push({
+						'ip': rangeInfo.seg + ( rangeInfo.type == 4 ? '.x.x.x' : '::x'),
+						'typ': rangeInfo.type,
+						'num': rangeInfo.count
+					});
+				}
+				
+				return rList;
 			}
 		},
 
@@ -612,7 +632,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known bots …");
-				const url = BotMon._baseDir + 'data/known-bots.json';
+				const url = BotMon._baseDir + 'config/known-bots.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -687,7 +707,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known clients");
-				const url = BotMon._baseDir + 'data/known-clients.json';
+				const url = BotMon._baseDir + 'config/known-clients.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -747,7 +767,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known platforms");
-				const url = BotMon._baseDir + 'data/known-platforms.json';
+				const url = BotMon._baseDir + 'config/known-platforms.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -806,7 +826,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
-				const url = BotMon._baseDir + 'data/rules.json';
+				const url = BotMon._baseDir + 'config/rules.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1138,52 +1158,105 @@ BotMon.live = {
 			make: function() {
 
 				const data = BotMon.live.data.analytics.data;
-				const parent = document.getElementById('botmon__today__content');
 
 				// shortcut for neater code:
 				const makeElement = BotMon.t._makeElement;
 
-				if (parent) {
+				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
+				if (botsVsHumans) {
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bots vs. Humans (page views)"));
 
-					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 100);
-
-					jQuery(parent).prepend(jQuery(`
-						<details id="botmon__today__overview" open>
-							<summary>Overview</summary>
-							<div class="grid-3-columns">
-								<dl>
-									<dt>Web metrics</dt>
-									<dd><span>Total page views:</span><strong>${data.totalPageViews}</strong></dd>
-									<dd><span>Total visitors (est.):</span><span>${data.totalVisits}</span></dd>
-									<dd><span>Bounce rate (est.):</span><span>${bounceRate}%</span></dd>
-								</dl>
-								<dl>
-									<dt>Bots vs. Humans (page views)</dt>
-									<dd><span>Registered users:</span><strong>${data.bots.users}</strong></dd>
-									<dd><span>Probably humans:</span><strong>${data.bots.human}</strong></dd>
-									<dd><span>Suspected bots:</span><strong>${data.bots.suspected}</strong></dd>
-									<dd><span>Known bots:</span><strong>${data.bots.known}</strong></dd>
-								</dl>
-								<dl id="botmon__botslist"></dl>
-							</div>
-						</details>
-					`));
-
-					// update known bots list:
-					const block = document.getElementById('botmon__botslist');
-					block.innerHTML = "<dt>Top known bots (page views)</dt>";
-
-					let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
-						return b._pageViews.length - a._pageViews.length;
-					});
-
-					for (let i=0; i < Math.min(bots.length, 4); i++) {
+					for (let i = 3; i >= 0; i--) {
 						const dd = makeElement('dd');
-						dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
-						dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
-						block.appendChild(dd);
+						let title = '';
+						let value = '';
+						switch(i) {
+							case 0:
+								title = "Registered users:";
+								value = data.bots.users;
+								break;
+							case 1:
+								title = "Probably humans:";
+								value = data.bots.human;
+								break;
+							case 2:
+								title = "Suspected bots:";
+								value = data.bots.suspected;
+								break;
+							case 3:
+								title = "Known bots:";
+								value = data.bots.known;
+								break;
+							default:
+								console.warn(`Unknown list type ${i}.`);
+						}
+						dd.appendChild(makeElement('span', {}, title));
+						dd.appendChild(makeElement('strong', {}, value));
+						botsVsHumans.appendChild(dd);
 					}
 				}
+
+				// update known bots list:
+				const botlist = document.getElementById('botmon__botslist');
+				botlist.innerHTML = "<dt>Top 5 known bots (page views)</dt>";
+
+				let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
+					return b._pageViews.length - a._pageViews.length;
+				});
+
+				for (let i=0; i < Math.min(bots.length, 5); i++) {
+					const dd = makeElement('dd');
+					dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
+					dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
+					botlist.appendChild(dd);
+				}
+
+				// update the suspected bot IP ranges list:
+				const botIps = document.getElementById('botmon__today__botips');
+				if (botIps) {
+					botIps.appendChild(makeElement('dt', {}, "Top 5 suspected bots’ IP ranges"));
+
+					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(5);
+					ipList.forEach( (ipInfo) => {
+						const li = makeElement('dd');
+						li.appendChild(makeElement('span', {'class': 'ip ip' + ipInfo.typ }, ipInfo.ip));
+						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
+						botIps.append(li)
+					})
+				}
+
+				// update the webmetrics overview:
+				const wmoverview = document.getElementById('botmon__today__wm_overview');
+				if (wmoverview) {
+					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 100);
+
+					wmoverview.appendChild(makeElement('dt', {}, "Overview"));
+					for (let i = 0; i < 3; i++) { 
+						const dd = makeElement('dd');
+						let title = '';
+						let value = '';
+						switch(i) {
+							case 0:
+								title = "Total page views:";
+								value = data.totalPageViews;
+								break;
+							case 1:
+								title = "Total visitors (est.):";
+								value = data.totalVisits;
+								break;
+							case 2:
+								title = "Bounce rate (est.):";
+								value = bounceRate + '%';
+								break;
+							default:
+								console.warn(`Unknown list type ${i}.`);
+						}
+						dd.appendChild(makeElement('span', {}, title));
+						dd.appendChild(makeElement('strong', {}, value));
+						wmoverview.appendChild(dd);
+					}
+				}
+
 			}
 		},
 

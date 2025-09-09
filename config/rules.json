@@ -29,9 +29,9 @@
 		 "id": "noRefs", "desc": "No referer field",
 		 "bot": 30
 		},
-		{"func": "matchLang", "params": ["en"],
-		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language (except English pages)",
-		 "bot": 20
+		{"func": "matchLang", "params": [],
+		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
+		 "bot": 30
 		},
 		{"func": "matchesClient", "params": ["brave"],
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
@@ -54,12 +54,12 @@
 		 "bot": 80
 		},
 		{"func": "noAcceptLang",
-		 "id": "noAcc", "desc": "Client has no, or an empty, “Accept-Language” header",
+		 "id": "noAcc", "desc": "No “Accept-Language” header",
 		 "bot": 40
 		}
 	],
 	"ipRanges": [
-		{"from": "3.0.0.0", "to": "3.255.255.255", "label": "Amazon Data Services [US]"},
+		{"from": "3.0.0.0", "to": "3.255.255.254", "label": "Amazon Data Services [US]"},
 		{"from": "8.127.0.0", "to": "8.223.255.254", "label": "Alibaba [CN]"},
 		{"from": "24.240.0.0", "to": "24.243.255.254", "label": "Charter [US]"},
 		{"from": "27.106.0.0", "to": "27.106.127.254", "label": "Huawei [US]"},
@@ -70,8 +70,8 @@
 		{"from": "84.37.35.0", "to": "84.37.255.254", "label": "GTT.net [US]"},
 		{"from": "94.74.64.0", "to": "94.74.127.254", "label": "Huawei [HK]"},
 		{"from": "101.0.0.0", "to": "101.255.255.254", "label": "ChinaNet [CN]"},
-		{"from": "110.238.96.0", "to": "110.238.127.255", "label": "Huawei [SG]"},
-		{"from": "111.119.192.0", "to": "111.119.255.255", "label": "Huawei [SG]"},
+		{"from": "110.238.96.0", "to": "110.238.127.254", "label": "Huawei [SG]"},
+		{"from": "111.119.192.0", "to": "111.119.255.254", "label": "Huawei [SG]"},
 		{"from": "119.0.0.0", "to": "101.207.255.254", "label": "Unicom [CN]"},
 		{"from": "121.91.168.", "to": "121.91.175.254", "label": "Huawei [HK]"},
 		{"from": "122.8.0.0", "to": "122.8.255.254", "label": "CN-ISP [CN]"},
@@ -82,14 +82,17 @@
 		{"from": "159.138.0.0", "to": "159.138.225.254", "label": "Huawei [TH]"},
 		{"from": "162.128.0.0", "to": "162.128.255.254", "label": "Zenlayer [SG]"},
 		{"from": "166.108.192.0", "to": "166.108.255.254", "label": "Huawei [SG]"},
-		{"from": "177.0.0.0", "to": "177.255.255.255", "label": "BrasilNET [BR]"},
+		{"from": "177.0.0.0", "to": "177.255.255.254", "label": "BrasilNET [BR]"},
+		{"from": "179.0.0.0", "to": "179.255.255.254", "label": "BrasilNET [BR]"},
 		{"from": "183.87.32.0", "to": "183.87.159.254", "label": "Huawei [HK]"},
-		{"from": "187.180.0.0", "to": "187.183.255.254", "label": "Claro [BR]"},
-		{"from": "188.239.0.0", "to": "188.239.63.254", "label": "Huawei [SG]"},
-		{"from": "189.127.255.255", "to": "189.127.255.255", "label": "Huawei BR/HK"},
-		{"from": "190.92.192.0", "to": "190.92.255.254", "label": "Huawei [HK]"},
+		{"from": "186.0.0.0", "to": "186.255.255.254", "label": "South-American ISPs (186.x)"},
+		{"from": "187.0.0.0", "to": "187.255.255.254", "label": "South-American ISPs (187.x)"},
+		{"from": "188.0.0.0", "to": "188.255.255.254", "label": "South-American ISPs (188.x)"},
+		{"from": "189.0.0.0", "to": "189.255.255.254", "label": "South-American ISPs (189.x)"},
+		{"from": "190.0.0.0", "to": "190.255.255.254", "label": "South-American ISPs (190.x)"},
 		{"from": "192.124.170.0", "to": "192.124.182.254", "label": "Relcom  [CZ]"},
 		{"from": "2001:4800::::::", "to": "2001:4fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Rackspace/Google [US]"},
+		{"from": "2001:0ee0::::::", "to": "2001:ee3:ffff:ffff:ffff:ffff:ffff:ffff", "mask": 30, "label": "VNPT [VN]"},
 		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Amazon Cloud [US]"},
 		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Inspire [BR]"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Netcup [DE]"}
