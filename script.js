@@ -990,6 +990,15 @@ BotMon.live = {
 					return false;
 				},
 
+				// Is there an accept-language field defined at all?
+				noAcceptLang: function(visitor) {
+
+					if (!visitor.accept || visitor.accept.length <= 0) { // no accept-languages header
+						return true;
+					}
+					// TODO: parametrize this!
+					return false;
+				},
 				// At least x page views were recorded, but they come within less than y seconds
 				loadSpeed: function(visitor, minItems, maxTime) {
 

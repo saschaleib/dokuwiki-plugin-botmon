@@ -201,5 +201,11 @@
 	 "r": ["StartmeBot"],
 	 "rx": ["StartmeBot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
 	 "url": "https://support.start.me/en/articles/9182933-what-is-startmebot"
+	},
+	{"id": "bitsight",
+	 "n": "BitSightBot",
+	 "r": ["BitSightBot"],
+	 "rx": ["BitSightBot\\/(\\d+\\.\\d+)"],
+	 "url": "https://darkvisitors.com/agents/bitsightbot"
 	}
 ]
