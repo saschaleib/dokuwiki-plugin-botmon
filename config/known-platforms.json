@@ -42,5 +42,9 @@
 	{"n": "Chromium",
 	 "id": "chromium",
 	 "rx": [ "Chromebook", "\\sCrOS\\s" ]
+	},
+	{"n": "Windows Server",
+	 "id": "winsrvr",
+	 "rx": [ "Windows Server (\\d+)[\\s\\);,\\.]"]
 	}
 ]

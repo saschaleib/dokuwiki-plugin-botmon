@@ -4,17 +4,10 @@
 		margin: .25rem 0;
 	}
 
-	/* grid layout classes (taken from the Ad-Hoc Wrap plugin) */
-	.grid-2-columns,
-	.grid-3-columns {
+	/* grid layout for the overview: */
+	.botmon_overview_grid {
 		display: grid;
-	}
-	.grid-2-columns {
-		grid-template-columns: 1fr 1fr;
-		grid-gap: 0 .5em;
-	}
-	.grid-3-columns {
-		grid-template-columns: 1fr 1fr 1fr;
+		grid-template-columns: 1fr 1fr 1fr 1fr;
 		grid-gap: 0 .33em;
 	}
 
@@ -198,9 +191,9 @@
 						display: inline-block;
 						background-color: transparent;
 					}
-					&.bot-rating {
+					/*&.bot-rating {
 						text-align: right;
-					}
+					}*/
 				}
 				dd.pages {
 					& {
@@ -296,7 +289,8 @@
 			span.platform_linux::before, dd.platform_linux::before { background-image: url('img/linux.svg') }
 			span.platform_ios::before, dd.platform_ios::before { background-image: url('img/ios.svg') }
 			span.platform_android::before, dd.platform_android::before { background-image: url('img/android.svg') }
-			span.platform_winold::before, dd.platform_winold::before { background-image: url('img/winold.png') }
+			span.platform_winold::before, dd.platform_winold::before,
+			span.platform_winsrvr:before, dd.platform_winsrvr::before { background-image: url('img/winold.png') }
 			span.platform_macosold::before, dd.platform_macosold::before { background-image: url('img/macos.svg') }
 			span.platform_tizen::before, dd.platform_tizen::before { background-image: url('img/tizen.png') }
 			span.platform_hmos::before, dd.platform_hmos::before { background-image: url('img/hmos.svg') }
@@ -324,6 +318,243 @@
 			span.ip6::before, dd.ip6::before { background-image: url('img/ip6.svg') }
 			span.ip4::before, dd.ip4::before { background-image: url('img/ip4.svg') }
 			span.ip0::before, dd.ip0::before { background-image: url('img/localhost.svg') }
+
+			/* Country flags */
+			/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
+			span.country::before, dd.country::before {
+				content: '';
+				display: inline-block;
+				height: 16px; width: 16px;
+				background:url(img/flags.png) no-repeat center;
+    			background-position: 0 0;
+			}
+			span.ctry_ad::before, dd.ctry_ad::before { background-position-y: -353px }
+			span.ctry_ae::before, dd.ctry_ae::before { background-position-y: -369px }
+			span.ctry_af::before, dd.ctry_af::before { background-position-y: -385px }
+			span.ctry_ag::before, dd.ctry_ag::before { background-position-y: -401px }
+			span.ctry_ai::before, dd.ctry_ai::before { background-position-y: -417px }
+			span.ctry_al::before, dd.ctry_al::before { background-position-y: -433px }
+			span.ctry_am::before, dd.ctry_am::before { background-position-y: -449px }
+			span.ctry_ao::before, dd.ctry_ao::before { background-position-y: -465px }
+			span.ctry_aq::before, dd.ctry_aq::before { background-position-y: -481px }
+			span.ctry_ar::before, dd.ctry_ar::before { background-position-y: -497px }
+			span.ctry_as::before, dd.ctry_as::before { background-position-y: -513px }
+			span.ctry_at::before, dd.ctry_at::before { background-position-y: -529px }
+			span.ctry_au::before, dd.ctry_au::before { background-position-y: -545px }
+			span.ctry_aw::before, dd.ctry_aw::before { background-position-y: -561px }
+			span.ctry_ax::before, dd.ctry_ax::before { background-position-y: -577px }
+			span.ctry_az::before, dd.ctry_az::before { background-position-y: -593px }
+			span.ctry_ba::before, dd.ctry_ba::before { background-position-y: -609px }
+			span.ctry_bb::before, dd.ctry_bb::before { background-position-y: -625px }
+			span.ctry_bd::before, dd.ctry_bd::before { background-position-y: -641px }
+			span.ctry_be::before, dd.ctry_be::before { background-position-y: -657px }
+			span.ctry_bf::before, dd.ctry_bf::before { background-position-y: -673px }
+			span.ctry_bg::before, dd.ctry_bg::before { background-position-y: -689px }
+			span.ctry_bh::before, dd.ctry_bh::before { background-position-y: -705px }
+			span.ctry_bi::before, dd.ctry_bi::before { background-position-y: -721px }
+			span.ctry_bj::before, dd.ctry_bj::before { background-position-y: -737px }
+			span.ctry_bm::before, dd.ctry_bm::before { background-position-y: -753px }
+			span.ctry_bn::before, dd.ctry_bn::before { background-position-y: -769px }
+			span.ctry_bo::before, dd.ctry_bo::before { background-position-y: -785px }
+			span.ctry_br::before, dd.ctry_br::before { background-position-y: -801px }
+			span.ctry_bs::before, dd.ctry_bs::before { background-position-y: -817px }
+			span.ctry_bt::before, dd.ctry_bt::before { background-position-y: -833px }
+			span.ctry_bw::before, dd.ctry_bw::before { background-position-y: -849px }
+			span.ctry_by::before, dd.ctry_by::before { background-position-y: -865px }
+			span.ctry_bz::before, dd.ctry_bz::before { background-position-y: -881px }
+			span.ctry_ca::before, dd.ctry_ca::before { background-position-y: -897px }
+			span.ctry_cd::before, dd.ctry_cd::before { background-position-y: -913px }
+			span.ctry_cf::before, dd.ctry_cf::before { background-position-y: -929px }
+			span.ctry_cg::before, dd.ctry_cg::before { background-position-y: -945px }
+			span.ctry_ch::before, dd.ctry_ch::before { background-position-y: -961px }
+			span.ctry_ci::before, dd.ctry_ci::before { background-position-y: -977px }
+			span.ctry_ck::before, dd.ctry_ck::before { background-position-y: -993px }
+			span.ctry_cl::before, dd.ctry_cl::before { background-position-y: -1009px }
+			span.ctry_cm::before, dd.ctry_cm::before { background-position-y: -1025px }
+			span.ctry_cn::before, dd.ctry_cn::before { background-position-y: -1041px }
+			span.ctry_co::before, dd.ctry_co::before { background-position-y: -1057px }
+			span.ctry_cr::before, dd.ctry_cr::before { background-position-y: -1073px }
+			span.ctry_cu::before, dd.ctry_cu::before { background-position-y: -1089px }
+			span.ctry_cv::before, dd.ctry_cv::before { background-position-y: -1105px }
+			span.ctry_cy::before, dd.ctry_cy::before { background-position-y: -1121px }
+			span.ctry_cz::before, dd.ctry_cz::before { background-position-y: -1137px }
+			span.ctry_de::before, dd.ctry_de::before { background-position-y: -1153px }
+			span.ctry_dj::before, dd.ctry_dj::before { background-position-y: -1169px }
+			span.ctry_dk::before, dd.ctry_dk::before { background-position-y: -1185px }
+			span.ctry_dm::before, dd.ctry_dm::before { background-position-y: -1201px }
+			span.ctry_do::before, dd.ctry_do::before { background-position-y: -1217px }
+			span.ctry_dz::before, dd.ctry_dz::before { background-position-y: -1233px }
+			span.ctry_ec::before, dd.ctry_ec::before { background-position-y: -1249px }
+			span.ctry_ee::before, dd.ctry_ee::before { background-position-y: -1265px }
+			span.ctry_eg::before, dd.ctry_eg::before { background-position-y: -1281px }
+			span.ctry_eh::before, dd.ctry_eh::before { background-position-y: -1297px }
+			span.ctry_er::before, dd.ctry_er::before { background-position-y: -1313px }
+			span.ctry_es::before, dd.ctry_es::before { background-position-y: -1329px }
+			span.ctry_et::before, dd.ctry_et::before { background-position-y: -1345px }
+			span.ctry_fi::before, dd.ctry_fi::before { background-position-y: -1361px }
+			span.ctry_fj::before, dd.ctry_fj::before { background-position-y: -1377px }
+			span.ctry_fm::before, dd.ctry_fm::before { background-position-y: -1393px }
+			span.ctry_fo::before, dd.ctry_fo::before { background-position-y: -1409px }
+			span.ctry_yt::before, dd.ctry_yt::before { background-position-y: -1425px }
+			span.ctry_ga::before, dd.ctry_ga::before { background-position-y: -1441px }
+			span.ctry_sh::before, dd.ctry_sh::before { background-position-y: -1457px }
+			span.ctry_gd::before, dd.ctry_gd::before { background-position-y: -1473px }
+			span.ctry_ge::before, dd.ctry_ge::before { background-position-y: -1489px }
+			span.ctry_gg::before, dd.ctry_gg::before { background-position-y: -1505px }
+			span.ctry_gh::before, dd.ctry_gh::before { background-position-y: -1521px }
+			span.ctry_gi::before, dd.ctry_gi::before { background-position-y: -1537px }
+			span.ctry_gl::before, dd.ctry_gl::before { background-position-y: -1553px }
+			span.ctry_gm::before, dd.ctry_gm::before { background-position-y: -1569px }
+			span.ctry_gn::before, dd.ctry_gn::before { background-position-y: -1585px }
+			span.ctry_gp::before, dd.ctry_gp::before { background-position-y: -1601px }
+			span.ctry_gq::before, dd.ctry_gq::before { background-position-y: -1617px }
+			span.ctry_gr::before, dd.ctry_gr::before { background-position-y: -1633px }
+			span.ctry_gt::before, dd.ctry_gt::before { background-position-y: -1649px }
+			span.ctry_gu::before, dd.ctry_gu::before { background-position-y: -1665px }
+			span.ctry_gw::before, dd.ctry_gw::before { background-position-y: -1681px }
+			span.ctry_gy::before, dd.ctry_gy::before { background-position-y: -1697px }
+			span.ctry_hk::before, dd.ctry_hk::before { background-position-y: -1713px }
+			span.ctry_hn::before, dd.ctry_hn::before { background-position-y: -1729px }
+			span.ctry_hr::before, dd.ctry_hr::before { background-position-y: -1745px }
+			span.ctry_ht::before, dd.ctry_ht::before { background-position-y: -1761px }
+			span.ctry_hu::before, dd.ctry_hu::before { background-position-y: -1777px }
+			span.ctry_mc::before, dd.ctry_mc::before { background-position-y: -1793px }
+			span.ctry_ie::before, dd.ctry_ie::before { background-position-y: -1809px }
+			span.ctry_il::before, dd.ctry_il::before { background-position-y: -1825px }
+			span.ctry_im::before, dd.ctry_im::before { background-position-y: -1841px }
+			span.ctry_in::before, dd.ctry_in::before { background-position-y: -1857px }
+			span.ctry_iq::before, dd.ctry_iq::before { background-position-y: -1873px }
+			span.ctry_ir::before, dd.ctry_ir::before { background-position-y: -1889px }
+			span.ctry_is::before, dd.ctry_is::before { background-position-y: -1905px }
+			span.ctry_it::before, dd.ctry_it::before { background-position-y: -1921px }
+			span.ctry_je::before, dd.ctry_je::before { background-position-y: -1937px }
+			span.ctry_jm::before, dd.ctry_jm::before { background-position-y: -1953px }
+			span.ctry_jo::before, dd.ctry_jo::before { background-position-y: -1969px }
+			span.ctry_jp::before, dd.ctry_jp::before { background-position-y: -1985px }
+			span.ctry_ke::before, dd.ctry_ke::before { background-position-y: -2001px }
+			span.ctry_kg::before, dd.ctry_kg::before { background-position-y: -2017px }
+			span.ctry_kh::before, dd.ctry_kh::before { background-position-y: -2033px }
+			span.ctry_ki::before, dd.ctry_ki::before { background-position-y: -2049px }
+			span.ctry_km::before, dd.ctry_km::before { background-position-y: -2065px }
+			span.ctry_kn::before, dd.ctry_kn::before { background-position-y: -2081px }
+			span.ctry_kp::before, dd.ctry_kp::before { background-position-y: -2097px }
+			span.ctry_kr::before, dd.ctry_kr::before { background-position-y: -2113px }
+			span.ctry_kw::before, dd.ctry_kw::before { background-position-y: -2129px }
+			span.ctry_ky::before, dd.ctry_ky::before { background-position-y: -2145px }
+			span.ctry_kz::before, dd.ctry_kz::before { background-position-y: -2161px }
+			span.ctry_la::before, dd.ctry_la::before { background-position-y: -2177px }
+			span.ctry_lb::before, dd.ctry_lb::before { background-position-y: -2193px }
+			span.ctry_lc::before, dd.ctry_lc::before { background-position-y: -2209px }
+			span.ctry_li::before, dd.ctry_li::before { background-position-y: -2225px }
+			span.ctry_lk::before, dd.ctry_lk::before { background-position-y: -2241px }
+			span.ctry_lr::before, dd.ctry_lr::before { background-position-y: -2257px }
+			span.ctry_ls::before, dd.ctry_ls::before { background-position-y: -2273px }
+			span.ctry_lt::before, dd.ctry_lt::before { background-position-y: -2289px }
+			span.ctry_lu::before, dd.ctry_lu::before { background-position-y: -2305px }
+			span.ctry_lv::before, dd.ctry_lv::before { background-position-y: -2321px }
+			span.ctry_ly::before, dd.ctry_ly::before { background-position-y: -2337px }
+			span.ctry_ma::before, dd.ctry_ma::before { background-position-y: -2353px }
+			span.ctry_md::before, dd.ctry_md::before { background-position-y: -2369px }
+			span.ctry_me::before, dd.ctry_me::before { background-position-y: -2385px }
+			span.ctry_mg::before, dd.ctry_mg::before { background-position-y: -2401px }
+			span.ctry_mh::before, dd.ctry_mh::before { background-position-y: -2417px }
+			span.ctry_mk::before, dd.ctry_mk::before { background-position-y: -2433px }
+			span.ctry_ml::before, dd.ctry_ml::before { background-position-y: -2449px }
+			span.ctry_mm::before, dd.ctry_mm::before { background-position-y: -2465px }
+			span.ctry_mn::before, dd.ctry_mn::before { background-position-y: -2481px }
+			span.ctry_mo::before, dd.ctry_mo::before { background-position-y: -2497px }
+			span.ctry_mq::before, dd.ctry_mq::before { background-position-y: -2513px }
+			span.ctry_mr::before, dd.ctry_mr::before { background-position-y: -2529px }
+			span.ctry_ms::before, dd.ctry_ms::before { background-position-y: -2545px }
+			span.ctry_mt::before, dd.ctry_mt::before { background-position-y: -2561px }
+			span.ctry_mu::before, dd.ctry_mu::before { background-position-y: -2577px }
+			span.ctry_mv::before, dd.ctry_mv::before { background-position-y: -2593px }
+			span.ctry_mw::before, dd.ctry_mw::before { background-position-y: -2609px }
+			span.ctry_mx::before, dd.ctry_mx::before { background-position-y: -2625px }
+			span.ctry_my::before, dd.ctry_my::before { background-position-y: -2641px }
+			span.ctry_mz::before, dd.ctry_mz::before { background-position-y: -2657px }
+			span.ctry_na::before, dd.ctry_na::before { background-position-y: -2673px }
+			span.ctry_nc::before, dd.ctry_nc::before { background-position-y: -2689px }
+			span.ctry_ne::before, dd.ctry_ne::before { background-position-y: -2705px }
+			span.ctry_ng::before, dd.ctry_ng::before { background-position-y: -2721px }
+			span.ctry_ni::before, dd.ctry_ni::before { background-position-y: -2737px }
+			span.ctry_bq::before, dd.ctry_bq::before { background-position-y: -2753px }
+			span.ctry_bv::before, dd.ctry_bv::before { background-position-y: -2769px }
+			span.ctry_np::before, dd.ctry_np::before { background-position-y: -2785px }
+			span.ctry_nr::before, dd.ctry_nr::before { background-position-y: -2801px }
+			span.ctry_nz::before, dd.ctry_nz::before { background-position-y: -2817px }
+			span.ctry_om::before, dd.ctry_om::before { background-position-y: -2833px }
+			span.ctry_pa::before, dd.ctry_pa::before { background-position-y: -2849px }
+			span.ctry_pe::before, dd.ctry_pe::before { background-position-y: -2865px }
+			span.ctry_pf::before, dd.ctry_pf::before { background-position-y: -2881px }
+			span.ctry_pg::before, dd.ctry_pg::before { background-position-y: -2897px }
+			span.ctry_ph::before, dd.ctry_ph::before { background-position-y: -2913px }
+			span.ctry_pk::before, dd.ctry_pk::before { background-position-y: -2929px }
+			span.ctry_pl::before, dd.ctry_pl::before { background-position-y: -2945px }
+			span.ctry_pr::before, dd.ctry_pr::before { background-position-y: -2961px }
+			span.ctry_ps::before, dd.ctry_ps::before { background-position-y: -2977px }
+			span.ctry_pt::before, dd.ctry_pt::before { background-position-y: -2993px }
+			span.ctry_pw::before, dd.ctry_pw::before { background-position-y: -3009px }
+			span.ctry_py::before, dd.ctry_py::before { background-position-y: -3025px }
+			span.ctry_qa::before, dd.ctry_qa::before { background-position-y: -3041px }
+			span.ctry_re::before, dd.ctry_re::before { background-position-y: -3057px }
+			span.ctry_ro::before, dd.ctry_ro::before { background-position-y: -3073px }
+			span.ctry_rs::before, dd.ctry_rs::before { background-position-y: -3089px }
+			span.ctry_ru::before, dd.ctry_ru::before { background-position-y: -3105px }
+			span.ctry_rw::before, dd.ctry_rw::before { background-position-y: -3121px }
+			span.ctry_sa::before, dd.ctry_sa::before { background-position-y: -3137px }
+			span.ctry_sb::before, dd.ctry_sb::before { background-position-y: -3153px }
+			span.ctry_sc::before, dd.ctry_sc::before { background-position-y: -3169px }
+			span.ctry_sd::before, dd.ctry_sd::before { background-position-y: -3185px }
+			span.ctry_se::before, dd.ctry_se::before { background-position-y: -3201px }
+			span.ctry_sg::before, dd.ctry_sg::before { background-position-y: -3217px }
+			span.ctry_si::before, dd.ctry_si::before { background-position-y: -3233px }
+			span.ctry_sk::before, dd.ctry_sk::before { background-position-y: -3249px }
+			span.ctry_sl::before, dd.ctry_sl::before { background-position-y: -3265px }
+			span.ctry_sm::before, dd.ctry_sm::before { background-position-y: -3281px }
+			span.ctry_sn::before, dd.ctry_sn::before { background-position-y: -3297px }
+			span.ctry_so::before, dd.ctry_so::before { background-position-y: -3313px }
+			span.ctry_sr::before, dd.ctry_sr::before { background-position-y: -3329px }
+			span.ctry_st::before, dd.ctry_st::before { background-position-y: -3345px }
+			span.ctry_sv::before, dd.ctry_sv::before { background-position-y: -3361px }
+			span.ctry_sy::before, dd.ctry_sy::before { background-position-y: -3377px }
+			span.ctry_sz::before, dd.ctry_sz::before { background-position-y: -3393px }
+			span.ctry_tc::before, dd.ctry_tc::before { background-position-y: -3409px }
+			span.ctry_td::before, dd.ctry_td::before { background-position-y: -3425px }
+			span.ctry_tg::before, dd.ctry_tg::before { background-position-y: -3441px }
+			span.ctry_th::before, dd.ctry_th::before { background-position-y: -3457px }
+			span.ctry_tj::before, dd.ctry_tj::before { background-position-y: -3473px }
+			span.ctry_tl::before, dd.ctry_tl::before { background-position-y: -3489px }
+			span.ctry_tm::before, dd.ctry_tm::before { background-position-y: -3505px }
+			span.ctry_tn::before, dd.ctry_tn::before { background-position-y: -3521px }
+			span.ctry_to::before, dd.ctry_to::before { background-position-y: -3537px }
+			span.ctry_tr::before, dd.ctry_tr::before { background-position-y: -3553px }
+			span.ctry_tt::before, dd.ctry_tt::before { background-position-y: -3569px }
+			span.ctry_tv::before, dd.ctry_tv::before { background-position-y: -3585px }
+			span.ctry_tw::before, dd.ctry_tw::before { background-position-y: -3601px }
+			span.ctry_tz::before, dd.ctry_tz::before { background-position-y: -3617px }
+			span.ctry_ua::before, dd.ctry_ua::before { background-position-y: -3633px }
+			span.ctry_ug::before, dd.ctry_ug::before { background-position-y: -3649px }
+			span.ctry_us::before, dd.ctry_us::before { background-position-y: -3665px }
+			span.ctry_uy::before, dd.ctry_uy::before { background-position-y: -3681px }
+			span.ctry_uz::before, dd.ctry_uz::before { background-position-y: -3697px }
+			span.ctry_va::before, dd.ctry_va::before { background-position-y: -3713px }
+			span.ctry_vc::before, dd.ctry_vc::before { background-position-y: -3729px }
+			span.ctry_ve::before, dd.ctry_ve::before { background-position-y: -3745px }
+			span.ctry_vg::before, dd.ctry_vg::before { background-position-y: -3761px }
+			span.ctry_vi::before, dd.ctry_vi::before { background-position-y: -3777px }
+			span.ctry_vn::before, dd.ctry_vn::before { background-position-y: -3793px }
+			span.ctry_vu::before, dd.ctry_vu::before { background-position-y: -3809px }
+			span.ctry_ws::before, dd.ctry_ws::before { background-position-y: -3825px }
+			span.ctry_ye::before, dd.ctry_ye::before { background-position-y: -3841px }
+			span.ctry_za::before, dd.ctry_za::before { background-position-y: -3857px }
+			span.ctry_zm::before, dd.ctry_zm::before { background-position-y: -3873px }
+			span.ctry_zw::before, dd.ctry_zw::before { background-position-y: -3889px }
+			span.ctry_sx::before, dd.ctry_sx::before { background-position-y: -3905px }
+			span.ctry_cw::before, dd.ctry_cw::before { background-position-y: -3921px }
+			span.ctry_ss::before, dd.ctry_ss::before { background-position-y: -3937px }
+			span.ctry_nu::before, dd.ctry_nu::before { background-position-y: -3953px }
+
 
 			/* user agent */
 			span.agent::before { background-image: url('img/info.svg') }
@@ -446,8 +677,7 @@
 /* layout overrides for narrow screens: */
 @media (max-width: 670px) {
 	#botmon__admin {
-		.grid-2-columns,
-		.grid-3-columns {
+		.botmon_overview_grid {
 			grid-template-columns: 100%;
 		}
 	}

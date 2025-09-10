@@ -207,5 +207,11 @@
 	 "r": ["BitSightBot"],
 	 "rx": ["BitSightBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://darkvisitors.com/agents/bitsightbot"
+	},
+	{"id": "terracotta",
+	 "n": "TerraCotta Bot",
+	 "r": ["TerraCotta"],
+	 "rx": ["TerraCotta"],
+	 "url": "https://github.com/CeramicTeam/CeramicTerracotta"
 	}
 ]

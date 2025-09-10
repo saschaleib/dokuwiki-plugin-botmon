@@ -9,7 +9,7 @@
 		 "id": "oldClient", "desc": "Obsolete browser version",
 		 "bot": 40
 		},
-		{"func": "matchesPlatform", "params": ["winold", "macosold"],
+		{"func": "matchesPlatform", "params": ["winold", "macosold","winsrvr"],
 		 "id": "oldOS", "desc": "Obsolete platform version",
 		 "bot": 40
 		},
@@ -55,6 +55,14 @@
 		},
 		{"func": "noAcceptLang",
 		 "id": "noAcc", "desc": "No “Accept-Language” header",
+		 "bot": 40
+		},
+		{"func": "matchesCountry", "params": ["BR", "CN", "RU", "US", "MX", "SG", "IN", "UY"],
+		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
+		 "bot": 40
+		},
+		{"func": "notFromCountry", "params": ["DE", "AT", "CH", "LI", "LU", "BE"],
+		 "id": "notFromHere", "desc": "Location is not in one of the site’s target countries.",
 		 "bot": 40
 		}
 	],

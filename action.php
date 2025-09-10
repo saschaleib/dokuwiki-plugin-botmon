@@ -2,6 +2,7 @@
 
 use dokuwiki\Extension\EventHandler;
 use dokuwiki\Extension\Event;
+use dokuwiki\Logger;
 
 /**
  * Action Component for the Bot Monitoring Plugin
@@ -81,6 +82,18 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		// clean the page ID
 		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
 
+		// collect GeoIP information (if available):
+		$geoIp = 'XX'; /* User-defined code for unknown country */
+		try {
+			if (extension_loaded('geoip') && geoip_db_avail(GEOIP_COUNTRY_EDITION)) {
+				$geoIp = geoip_country_code_by_name($_SERVER['REMOTE_ADDR']);
+			} else {
+				Logger::debug('BotMon Plugin: GeoIP module not available');
+			}
+		} catch (Exception $e) {
+			Logger::error('BotMon Plugin: GeoIP Error', $e->getMessage());
+		}
+
 		// create the log array:
 		$logArr = Array(
 			$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
@@ -91,7 +104,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
 			substr($conf['lang'],0,2), /* page language */
-			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))) /* accepted client languages */
+			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
+			$geoIp /* GeoIP country code */
 		);
 
 		//* create the log line */

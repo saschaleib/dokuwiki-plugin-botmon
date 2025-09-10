@@ -311,6 +311,19 @@ BotMon.live = {
 				nv._type = ( bot ? BM_USERTYPE.KNOWN_BOT : ( nv.usr && nv.usr !== '' ? BM_USERTYPE.KNOWN_USER : BM_USERTYPE.UNKNOWN ) );
 				if (!nv._firstSeen) nv._firstSeen = nv.ts;
 				nv._lastSeen = nv.ts;
+				if (!nv.geo ||nv.geo === '') nv.geo = 'ZZ';
+
+				// country name:
+				try {
+					nv._country = "Undefined";
+					if (nv.geo && nv.geo !== '') {
+						const countryName = new Intl.DisplayNames(['en', BotMon._lang], {type: 'region'});
+						nv._country = countryName.of(nv.geo) ?? "Unknown";
+					}
+				} catch (err) {
+					console.error(err);
+					nv._country = 'Error';
+				}
 
 				// check if it already exists:
 				let visitor = model.findVisitor(nv);
@@ -539,6 +552,9 @@ BotMon.live = {
 						// TODO: find suspected bots
 						
 					}
+
+					// add to the country lists:
+					me._addToCountries(v.geo, v._country, v._type);
 				});
 
 				BotMon.live.gui.status.hideBusy('Done.');
@@ -622,6 +638,108 @@ BotMon.live = {
 				}
 				
 				return rList;
+			},
+
+			/* countries of visits */
+			_countries: {
+				'user': [],
+				'human': [],
+				'likelyBot': [],
+				'known_bot': []
+
+			},
+			/**
+			 * Adds a country code to the statistics.
+			 * 
+			 * @param {string} iso The ISO 3166-1 alpha-2 country code.
+			 */
+			_addToCountries: function(iso, name, type) {
+
+				const me = BotMon.live.data.analytics;
+
+				// find the correct array:
+				let arr = null;
+				switch (type) {
+					
+					case BM_USERTYPE.KNOWN_USER:
+						arr = me._countries.user;
+						break;
+					case BM_USERTYPE.HUMAN:
+						arr = me._countries.human;
+						break;
+					case BM_USERTYPE.LIKELY_BOT:
+						arr = me._countries.likelyBot;
+						break;
+					case BM_USERTYPE.KNOWN_BOT:
+						arr = me._countries.known_bot;
+						break;
+					default:
+						console.warn(`Unknown user type ${type} in function _addToCountries.`);
+				}
+
+				if (arr) {
+					let cRec = arr.find( it => it.iso == iso);
+					if (!cRec) {
+						cRec = {
+							'iso': iso,
+							'name': name,
+							'count': 1
+						};
+						arr.push(cRec);
+					} else {
+						cRec.count += 1;
+					}
+				}
+			},
+
+			/**
+			 * Returns a list of countries with visit counts, sorted by visit count in descending order.
+			 * 
+			 * @param {BM_USERTYPE} type The type of visitors to return.
+			 * @param {number} max The maximum number of entries to return.
+			 * @return {Array} A list of objects with properties 'iso' (ISO 3166-1 alpha-2 country code) and 'count' (visit count).
+			 */
+			getCountryList: function(type, max) {
+
+				const me = BotMon.live.data.analytics;
+
+				// find the correct array:
+				let arr = null;
+				switch (type) {
+					
+					case BM_USERTYPE.KNOWN_USER:
+						arr = me._countries.user;
+						break;
+					case BM_USERTYPE.HUMAN:
+						arr = me._countries.human;
+						break;
+					case BM_USERTYPE.LIKELY_BOT:
+						arr = me._countries.likelyBot;
+						break;
+					case BM_USERTYPE.KNOWN_BOT:
+						arr = me._countries.known_bot;
+						break;
+					default:
+						console.warn(`Unknown user type ${type} in function getCountryList.`);
+				}
+				
+				if (arr) {
+					// sort by visit count:
+					arr.sort( (a,b) => b.count - a.count);
+
+					// reduce to only the top (max) items and create the target format:
+					let rList = [];
+					for (let i=0; Math.min(max, arr.length) > i; i++) {
+						const cRec = arr[i];
+						rList.push({
+							'iso': cRec.iso,
+							'name': cRec.name,
+							'count': cRec.count
+						});
+					}
+					return rList;
+				}
+				return [];
 			}
 		},
 
@@ -1036,6 +1154,26 @@ BotMon.live = {
 
 						return (( totalTime / pvArr.length ) <= maxTime * 1000);
 					}
+				},
+
+				// Country code matches one of those in the list:
+				matchesCountry: function(visitor, ...countries) {
+
+					// ingore if geoloc is not set or unknown:
+					if (visitor.geo && visitor.geo !== 'ZZ') {
+						return (countries.indexOf(visitor.geo) >= 0);
+					}
+					return false;
+				},
+
+				// Country does not match one of the given codes.
+				notFromCountry: function(visitor, ...countries) {
+
+					// ingore if geoloc is not set or unknown:
+					if (visitor.geo && visitor.geo !== 'ZZ') {
+						return (countries.indexOf(visitor.geo) < 0);
+					}
+					return false;
 				}
 			},
 
@@ -1065,6 +1203,11 @@ BotMon.live = {
 
 		},
 
+	/**
+	 * Loads a log file (server, page load, or ticker) and parses it.
+	 * @param {String} type - the type of the log file to load (srv, log, or tck)
+	 * @param {Function} [onLoaded] - an optional callback function to call after loading is finished.
+	 */
 		loadLogFile: async function(type, onLoaded = undefined) {
 			//console.info('BotMon.live.data.loadLogFile(',type,')');
 
@@ -1074,7 +1217,7 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo'];
 					break;
 				case "log":
 					typeName = "Page load";
@@ -1164,7 +1307,7 @@ BotMon.live = {
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Bots vs. Humans (page views)"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bots vs. Humans"));
 
 					for (let i = 3; i >= 0; i--) {
 						const dd = makeElement('dd');
@@ -1198,13 +1341,13 @@ BotMon.live = {
 
 				// update known bots list:
 				const botlist = document.getElementById('botmon__botslist');
-				botlist.innerHTML = "<dt>Top 5 known bots (page views)</dt>";
+				botlist.innerHTML = "<dt>Known bots (top 4)</dt>";
 
 				let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
 					return b._pageViews.length - a._pageViews.length;
 				});
 
-				for (let i=0; i < Math.min(bots.length, 5); i++) {
+				for (let i=0; i < Math.min(bots.length, 4); i++) {
 					const dd = makeElement('dd');
 					dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
 					dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
@@ -1214,15 +1357,28 @@ BotMon.live = {
 				// update the suspected bot IP ranges list:
 				const botIps = document.getElementById('botmon__today__botips');
 				if (botIps) {
-					botIps.appendChild(makeElement('dt', {}, "Top 5 suspected bots’ IP ranges"));
+					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 4)"));
 
-					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(5);
+					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(4);
 					ipList.forEach( (ipInfo) => {
 						const li = makeElement('dd');
 						li.appendChild(makeElement('span', {'class': 'ip ip' + ipInfo.typ }, ipInfo.ip));
 						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
 						botIps.append(li)
-					})
+					});
+				}
+
+				// update the top bot countries list:
+				const botCountries = document.getElementById('botmon__today__countries');
+				if (botCountries) {
+					botCountries.appendChild(makeElement('dt', {}, "Bot Countries (top 4)"));
+					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 4);
+					countryList.forEach( (cInfo) => {
+						const cLi = makeElement('dd');
+						cLi.appendChild(makeElement('span', {'class': 'country ctry_' + cInfo.iso }, cInfo.name));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						botCountries.appendChild(cLi);
+					});
 				}
 
 				// update the webmetrics overview:
@@ -1398,6 +1554,17 @@ BotMon.live = {
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
+
+				// country flag:
+				if (data.geo && data.geo !=='') {
+					span1.appendChild(make('span', {
+						'class': 'icon country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + data._country
+					}, data._country));
+				}
+
+				// identifier:
 				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
 
 					const botName = ( data._bot && data._bot.n ? data._bot.n : "Unknown");
@@ -1420,7 +1587,6 @@ BotMon.live = {
 						'class': 'ipaddr ip' + ipType,
 						'title': "IP-Address: " + data.ip
 					}, data.ip));
-
 				}
 
 				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* Not for bots */
@@ -1512,6 +1678,15 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "Languages:"));
 				dl.appendChild(make('dd', {'class': 'langs'}, "Client accepts: [" + data.accept + "]; Page: [" + data.lang + ']'));
 
+				if (data.geo && data.geo !=='') {
+					dl.appendChild(make('dt', {}, "Location:"));
+					dl.appendChild(make('dd', {
+						'class': 'country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + data._country
+					}, data._country + ' (' + data.geo + ')'));
+				}
+
 				/*dl.appendChild(make('dt', {}, "Visitor Type:"));
 				dl.appendChild(make('dd', undefined, data._type ));*/
 
@@ -1550,7 +1725,9 @@ BotMon.live = {
 					if (tDiff) {
 						pgLi.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
 					} else {
-						pgLi.appendChild(make('span', {'class': 'bounce'}, "Bounce"));
+						pgLi.appendChild(make('span', {
+							'class': 'bounce',
+							'title': "Visitor bounced"}, "Bounce"));
 					}
 
 					pageList.appendChild(pgLi);
@@ -1561,7 +1738,7 @@ BotMon.live = {
 				/* bot evaluation rating */
 				if (data._type !== BM_USERTYPE.KNOWN_BOT && data._type !== BM_USERTYPE.KNOWN_USER) {
 					dl.appendChild(make('dt', undefined, "Bot rating:"));
-					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '–' ) + '/' + BotMon.live.data.rules._threshold ));
+					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '–' ) + ' (of ' + BotMon.live.data.rules._threshold + ')'));
 
 					/* add bot evaluation details: */
 					if (data._eval) {

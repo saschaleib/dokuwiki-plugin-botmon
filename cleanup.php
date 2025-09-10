@@ -14,7 +14,7 @@ foreach($dir as $file) {
 	if ($bName == '' || $bName == 'logfiles') {
 		//echo "File “{$fName}” ignored.";
 	} else if ($bName == $today || $bName == $yesterday) {
-		//echo "File “{$fName}” skipped.\n";
+		echo "File “{$fName}” skipped.\n";
 	} else {
 		if (unlink('logs/' . $file)) {
 			echo "File “{$fName}” deleted.\n";
