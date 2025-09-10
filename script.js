@@ -807,7 +807,7 @@ BotMon.live = {
 					'id': 'other',
 					'name': "Others",
 					'count': 0
-				}
+				};
 				for (let i=0; i < me._browsers.length; i++) {
 					if (i < max2) {
 						rArr.push({
@@ -824,12 +824,12 @@ BotMon.live = {
 
 				if (me._browsers.length > (max-1)) {
 					rArr.push(others);
-				}
+				};
 
 				// update percentages:
 				rArr.forEach( it => {
 					it.pct = Math.round(it.count * 100 / total);
-				})
+				});
 
 				return rArr;
 			},
@@ -848,7 +848,7 @@ BotMon.live = {
 					'id': 'other',
 					'name': "Others",
 					'count': 0
-				}
+				};
 				for (let i=0; i < me._platforms.length; i++) {
 					if (i < max2) {
 						rArr.push({
@@ -865,12 +865,12 @@ BotMon.live = {
 
 				if (me._platforms.length > (max-1)) {
 					rArr.push(others);
-				}
+				};
 
 				// update percentages:				
 				rArr.forEach( it => {
 					it.pct = Math.round(it.count * 100 / total);
-				})
+				});
 
 				return rArr;
 			}
@@ -1071,7 +1071,6 @@ BotMon.live = {
 			// return the platform name for a given ID:
 			getName: function(id) {
 				const it = BotMon.live.data.platforms._list.find( pf => pf.id == id);
-				console.log(it);
 				return ( it ? it.n : 'Unknown' );
 			},
 
