@@ -9,8 +9,12 @@
 		 "id": "oldClient", "desc": "Obsolete browser version",
 		 "bot": 40
 		},
-		{"func": "matchesPlatform", "params": ["winold", "macosold","winsrvr"],
+		{"func": "matchesPlatform", "params": ["winold", "macosold"],
 		 "id": "oldOS", "desc": "Obsolete platform version",
+		 "bot": 40
+		},
+		{"func": "matchesPlatform", "params": ["winsrvr", "bsd"],
+		 "id": "serverOS", "desc": "Server OS",
 		 "bot": 40
 		},
 		{"func": "smallPageCount", "params": [1],
@@ -59,11 +63,11 @@
 		},
 		{"func": "matchesCountry", "params": ["BR", "CN", "RU", "US", "MX", "SG", "IN", "UY"],
 		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
-		 "bot": 40
+		 "bot": 50
 		},
 		{"func": "notFromCountry", "params": ["DE", "AT", "CH", "LI", "LU", "BE"],
-		 "id": "notFromHere", "desc": "Location is not in one of the site’s target countries.",
-		 "bot": 40
+		 "id": "notFromHere", "desc": "Location is not among the site’s main target countries.",
+		 "bot": 20
 		}
 	],
 	"ipRanges": [
@@ -99,6 +103,7 @@
 		{"from": "189.0.0.0", "to": "189.255.255.254", "label": "South-American ISPs (189.x)"},
 		{"from": "190.0.0.0", "to": "190.255.255.254", "label": "South-American ISPs (190.x)"},
 		{"from": "192.124.170.0", "to": "192.124.182.254", "label": "Relcom  [CZ]"},
+		{"from": "195.37.0.0", "to": "195.37.255.255", "label": "DFN [DE]"},
 		{"from": "2001:4800::::::", "to": "2001:4fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Rackspace/Google [US]"},
 		{"from": "2001:0ee0::::::", "to": "2001:ee3:ffff:ffff:ffff:ffff:ffff:ffff", "mask": 30, "label": "VNPT [VN]"},
 		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Amazon Cloud [US]"},

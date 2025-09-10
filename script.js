@@ -482,6 +482,7 @@ BotMon.live = {
 			data: {
 				totalVisits: 0,
 				totalPageViews: 0,
+				humanPageViews: 0,
 				bots: {
 					known: 0,
 					suspected: 0,
@@ -535,11 +536,6 @@ BotMon.live = {
 						v._eval = e.rules;
 						v._botVal = e.val;
 
-						// add each page view to IP range information (unless it is already from a known bot IP range):
-						v._pageViews.forEach( pv => {
-							me._addToIPRanges(pv.ip);
-						});
-
 						if (e.isBot) { // likely bots
 							v._type = BM_USERTYPE.LIKELY_BOT;
 							this.data.bots.suspected += v._pageViews.length;
@@ -548,13 +544,26 @@ BotMon.live = {
 							v._type = BM_USERTYPE.HUMAN;
 							this.data.bots.human += v._pageViews.length;
 							this.groups.humans.push(v);
-						}
-						// TODO: find suspected bots
-						
+						}						
 					}
 
-					// add to the country lists:
-					me._addToCountries(v.geo, v._country, v._type);
+					// perform actions depending on the visitor type:
+					if (v._type == BM_USERTYPE.KNOWN_BOT || v._type == BM_USERTYPE.LIKELY_BOT) { /* bots only */
+						
+						// add bot views to IP range information:
+						v._pageViews.forEach( pv => {
+							me.addToIPRanges(pv.ip);
+						});
+
+						// add to the country lists:
+						me.addToCountries(v.geo, v._country, v._type);
+
+					} else { /* humans only */
+
+						// add browser and platform statistics:
+						me.addBrowserPlatform(v);
+					}
+	
 				});
 
 				BotMon.live.gui.status.hideBusy('Done.');
@@ -572,7 +581,7 @@ BotMon.live = {
 			 * 
 			 * @param {string} ip The IP address to add.
 			 */
-			_addToIPRanges: function(ip) {
+			addToIPRanges: function(ip) {
 
 				// #TODO: handle nestled ranges!
 				const me = BotMon.live.data.analytics;
@@ -653,7 +662,7 @@ BotMon.live = {
 			 * 
 			 * @param {string} iso The ISO 3166-1 alpha-2 country code.
 			 */
-			_addToCountries: function(iso, name, type) {
+			addToCountries: function(iso, name, type) {
 
 				const me = BotMon.live.data.analytics;
 
@@ -674,7 +683,7 @@ BotMon.live = {
 						arr = me._countries.known_bot;
 						break;
 					default:
-						console.warn(`Unknown user type ${type} in function _addToCountries.`);
+						console.warn(`Unknown user type ${type} in function addToCountries.`);
 				}
 
 				if (arr) {
@@ -740,6 +749,130 @@ BotMon.live = {
 					return rList;
 				}
 				return [];
+			},
+
+			/* browser and platform of human visitors */
+			_browsers: [],
+			_platforms: [],
+
+			addBrowserPlatform: function(visitor) {
+				//console.info('addBrowserPlatform', visitor);
+
+				const me = BotMon.live.data.analytics;
+
+				// add to browsers list:
+				let browserRec = ( visitor._client ? visitor._client : {'id': 'unknown'});
+				if (visitor._client) {
+					let bRec = me._browsers.find( it => it.id == browserRec.id);
+					if (!bRec) {
+						bRec = {
+							'id': browserRec.id,
+							'count': 1
+						};
+						me._browsers.push(bRec);
+					} else {
+						bRec.count += 1;
+					}
+				}
+
+				// add to platforms list:
+				let platformRec = ( visitor._platform ? visitor._platform : {'id': 'unknown'});
+				if (visitor._platform) {
+					let pRec = me._platforms.find( it => it.id == platformRec.id);
+					if (!pRec) {
+						pRec = {
+							'id': platformRec.id,
+							'count': 1
+						};
+						me._platforms.push(pRec);
+					} else {
+						pRec.count += 1;
+					}
+				}
+
+			},
+
+			getTopBrowsers: function(max) {
+			
+				const me = BotMon.live.data.analytics;
+				
+				me._browsers.sort( (a,b) => b.count - a.count);
+
+				// how many browsers to show:
+				const max2 = ( me._browsers.length >= max ? max-1 : max );
+
+				const rArr = []; // return array
+				let total = 0;
+				const others = {
+					'id': 'other',
+					'name': "Others",
+					'count': 0
+				}
+				for (let i=0; i < me._browsers.length; i++) {
+					if (i < max2) {
+						rArr.push({
+							'id': me._browsers[i].id,
+							'name': BotMon.live.data.clients.getName(me._browsers[i].id),
+							'count': me._browsers[i].count
+						});
+						total += me._browsers[i].count;
+					} else {
+						others.count += me._browsers[i].count;
+						total += me._browsers[i].count;
+					}
+				};
+
+				if (me._browsers.length > (max-1)) {
+					rArr.push(others);
+				}
+
+				// update percentages:
+				rArr.forEach( it => {
+					it.pct = Math.round(it.count * 100 / total);
+				})
+
+				return rArr;
+			},
+
+			getTopPlatforms: function(max) {
+
+				const me = BotMon.live.data.analytics;
+				
+				me._platforms.sort( (a,b) => b.count - a.count);
+				// how many browsers to show:
+				const max2 = ( me._platforms.length >= max ? max-1 : max );
+
+				const rArr = []; // return array
+				let total = 0;
+				const others = {
+					'id': 'other',
+					'name': "Others",
+					'count': 0
+				}
+				for (let i=0; i < me._platforms.length; i++) {
+					if (i < max2) {
+						rArr.push({
+							'id': me._platforms[i].id,
+							'name': BotMon.live.data.platforms.getName(me._platforms[i].id),
+							'count': me._platforms[i].count
+						});
+						total += me._platforms[i].count;
+					} else {
+						others.count += me._platforms[i].count;
+						total += me._platforms[i].count;
+					}
+				};
+
+				if (me._platforms.length > (max-1)) {
+					rArr.push(others);
+				}
+
+				// update percentages:				
+				rArr.forEach( it => {
+					it.pct = Math.round(it.count * 100 / total);
+				})
+
+				return rArr;
 			}
 		},
 
@@ -800,9 +933,9 @@ BotMon.live = {
 
 				// check for unknown bots:
 				if (!botInfo) {
-					const botmatch = agent.match(/[^\s](\w*bot)[\/\s;\),$]/i);
+					const botmatch = agent.match(/([\s\d\w]*bot|[\s\d\w]*crawler|[\s\d\w]*spider)[\/\s;\),\\.$]/i);
 					if(botmatch) {
-						botInfo = {'id': "other", 'n': "Other", "bot": botmatch[0] };
+						botInfo = {'id': ( botmatch[1] || "other_" ), 'n': "Other" + ( botmatch[1] ? " (" + botmatch[1] + ")" : "" ) , "bot": botmatch[1] };
 					}
 				}
 
@@ -870,6 +1003,12 @@ BotMon.live = {
 				return match;
 			},
 
+			// return the browser name for a browser ID:
+			getName: function(id) {
+				const it = BotMon.live.data.clients._list.find(client => client.id == id);
+				return it.n;
+			},
+
 			// indicates if the list is loaded and ready to use:
 			_ready: false,
 
@@ -929,6 +1068,14 @@ BotMon.live = {
 				return match;
 			},
 
+			// return the platform name for a given ID:
+			getName: function(id) {
+				const it = BotMon.live.data.platforms._list.find( pf => pf.id == id);
+				console.log(it);
+				return ( it ? it.n : 'Unknown' );
+			},
+
+
 			// indicates if the list is loaded and ready to use:
 			_ready: false,
 
@@ -944,7 +1091,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
-				const url = BotMon._baseDir + 'config/rules.json';
+				const url = BotMon._baseDir + 'config/botmon-config.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1410,6 +1557,46 @@ BotMon.live = {
 						dd.appendChild(makeElement('span', {}, title));
 						dd.appendChild(makeElement('strong', {}, value));
 						wmoverview.appendChild(dd);
+					}
+				}
+
+				// update the webmetrics clients list:
+				const wmclients = document.getElementById('botmon__today__wm_clients');
+				if (wmclients) {
+
+					wmclients.appendChild(makeElement('dt', {}, "Browsers (humans only)"));
+
+					const clientList = BotMon.live.data.analytics.getTopBrowsers(5);
+					if (clientList) {
+						clientList.forEach( (cInfo) => {
+							const cDd = makeElement('dd');
+							cDd.appendChild(makeElement('span', {'class': 'has_icon client_' + cInfo.id }, ( cInfo.name ? cInfo.name : cInfo.id)));
+							cDd.appendChild(makeElement('span', {
+								'class': 'count',
+								'title': cInfo.count + " page views"
+							}, Math.round(cInfo.pct) + '%'));
+							wmclients.appendChild(cDd);
+						});
+					}
+				}
+
+				// update the webmetrics platforms list:
+				const wmplatforms = document.getElementById('botmon__today__wm_platforms');
+				if (wmplatforms) {
+
+					wmplatforms.appendChild(makeElement('dt', {}, "Platforms (humans only)"));
+
+					const pfList = BotMon.live.data.analytics.getTopPlatforms(5);
+					if (pfList) {
+						pfList.forEach( (pInfo) => {
+							const pDd = makeElement('dd');
+							pDd.appendChild(makeElement('span', {'class': 'has_icon client_' + pInfo.id }, ( pInfo.name ? pInfo.name : pInfo.id)));
+							pDd.appendChild(makeElement('span', {
+								'class': 'count',
+								'title': pInfo.count + " page views"
+							}, Math.round(pInfo.pct) + '%'));
+							wmplatforms.appendChild(pDd);
+						});
 					}
 				}
 

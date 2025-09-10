@@ -44,7 +44,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	</nav>';
 
 	if ($this->hasOldLogFiles()) {
-		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
+		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="/' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
 	}
 
 	echo '<article role="tabpanel" id="botmon__today"">
@@ -64,8 +64,8 @@ class admin_plugin_botmon extends AdminPlugin {
 				<summary>Web metrics</summary>
 				<div class="botmon_overview_grid">
 					<dl id="botmon__today__wm_overview"></dl>
-					<dl></dl>
-					<dl></dl>
+					<dl id="botmon__today__wm_clients"></dl>
+					<dl id="botmon__today__wm_platforms"></dl>
 					<dl></dl>
 				</div>
 			</details>
@@ -75,7 +75,7 @@ class admin_plugin_botmon extends AdminPlugin {
 			</details>
 		</div>
 		<footer aria-live="polite">
-			<img src="' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator">
+			<img src="/' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator">
 			<span id="botmon__today__status">Initialising&nbsp;&hellip;</span>
 		</footer>
 	</article>
