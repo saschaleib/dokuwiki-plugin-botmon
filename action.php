@@ -24,8 +24,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	}
 
 	/* session information */
-	private $sessionId = '0';
-	private $sessionType = 'null';
+	private $sessionId = null;
+	private $sessionType = '';
 
 	/**
 	 * Inserts tracking code to the page header
@@ -125,9 +125,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	private function getSessionInfo() {
 
-		$this->sessionId = '1';
-		$this->sessionType = 'set';
-
 		// what is the session identifier?
 		if (isset($_SESSION)) {
 			$sesKeys = array_keys($_SESSION); /* DokuWiki Session ID preferred */
@@ -139,15 +136,15 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 				}
 			}
 		}
-		if ($this->sessionId == '') { /* no DokuWiki Session ID, try PHP session ID */
+		if (!$this->sessionId) { /* no DokuWiki Session ID, try PHP session ID */
 			$this->sessionId = session_id();
 			$this->sessionType = 'php';
 		}
-		if ($this->sessionId == '') { /* no PHP session ID, try IP address */
+		if (!$this->sessionId) { /* no PHP session ID, try IP address */
 			$this->sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
 			$this->sessionType = 'ip';
 		}
-		if ($this->sessionId == '') { /* if everything else fails, just us a random ID */
+		if (!$this->sessionId) { /* if everything else fails, just us a random ID */
 			$this->sessionId = rand(1000000, 9999999);
 			$this->sessionType = 'rand';
 		}
