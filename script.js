@@ -1619,7 +1619,7 @@ BotMon.live = {
 				const wmclients = document.getElementById('botmon__today__wm_clients');
 				if (wmclients) {
 
-					wmclients.appendChild(makeElement('dt', {}, "Browsers (humans only)"));
+					wmclients.appendChild(makeElement('dt', {}, "Top browsers (humans only)"));
 
 					const clientList = BotMon.live.data.analytics.getTopBrowsers(5);
 					if (clientList) {
@@ -1639,7 +1639,7 @@ BotMon.live = {
 				const wmplatforms = document.getElementById('botmon__today__wm_platforms');
 				if (wmplatforms) {
 
-					wmplatforms.appendChild(makeElement('dt', {}, "Platforms (humans only)"));
+					wmplatforms.appendChild(makeElement('dt', {}, "Top platforms (humans only)"));
 
 					const pfList = BotMon.live.data.analytics.getTopPlatforms(5);
 					if (pfList) {
