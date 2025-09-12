@@ -24,8 +24,9 @@ botmon_client = {
 			const visit = {
 				'pg': JSINFO.id,
 				'u': document._botmon.user || null,
-				'lg': navigator.language,
+				'lg': navigator.language.substring(0,2),
 				'lt': ( document._botmon ? Date.now() - document._botmon.t0 : null),
+				'id': (document._botmon.session || 'null').replaceAll('\"', ''),
 				'r': document.referrer /*,
 				'tz': new Date().getTimezoneOffset(),
 				'url': window.location.href,
@@ -55,10 +56,15 @@ botmon_client = {
 		//console.info('botmon_client._onHeartbeat', url);
 
 		let uid = document._botmon.user || null;
+		let sessionId = (document._botmon.session || 'null').replaceAll('\"', '')
 
 		try {
-			const response = await fetch(url + '?p=' + encodeURIComponent(JSINFO.id) + '&t=' + Date.now() + ( uid ? '&u=' + encodeURIComponent(uid) : ''), {
-				method: 'HEAD'
+			const req = '?p=' + encodeURIComponent(JSINFO.id)
+					+ '&t=' + encodeURIComponent(Date.now())
+					+ ( sessionId ? '&id=' + encodeURIComponent(sessionId) : '')
+					+ ( uid ? '&u=' + encodeURIComponent(uid) : '');
+			const response = await fetch(url + req, {
+				/*method: 'HEAD'*/
 			});
 			if (!response.ok) {
 				throw new Error(response.status + ' ' + response.statusText + ' - ' + url);

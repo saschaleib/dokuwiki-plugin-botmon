@@ -1,22 +1,12 @@
 <?php /* BOTMON PLUGIN HEARTBEAT TICKER SCRIPT */
 
-	// Note: this script is called in HEAD mode, therefore it can not return any payload.
+	// Note: this script is normally called in HEAD mode, therefore it can not return any payload.
 
-	// select the session identifier?
-	$sessionId = $_COOKIE['DokuWiki']  ?? '';
-	$sessionType = 'dw';
-	if ($sessionId == '') {
-		$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
-		if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
-			$sessionId = 'localhost';
-		}
-		$sessionType = 'ip';
-	}
+	// what is the session identifier?
+	$sessionId = preg_replace('/[\x00-\x1F{};\"\']/', "\u{FFFD}", $_GET['id']) /* clean json parameter */
+		?? session_id()
+		?? $_SERVER['REMOTE_ADDR'];
 
-	// check if valid session id string:
-	if (strlen($sessionId) < 46 && !preg_match('/^[\w\d\.:]+$/', $sessionId)) {
-		$sessionId = 'invalid-session-id';
-	}
 
 	// clean the page ID
 	$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $_GET['p'] ?? '');

@@ -7,27 +7,16 @@ if (!$json) {
 	die("Invalid JSON Data.");
 }
 
-// select the session identifier?
-$sessionId = $_COOKIE['DokuWiki']  ?? '';
-$sessionType = 'dw';
-if ($sessionId == '') {
-	$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
-	if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
-		$sessionId = 'localhost';
-	}
-	$sessionType = 'ip';
-}
-
-// check if valid session id string:
-if (strlen($sessionId) < 46 && !preg_match('/^[\w\d\.:]+$/', $sessionId)) {
-	$sessionId = 'invalid-session-id';
-}
+// what is the session identifier?
+$sessionId = preg_replace('/[\x00-\x1F{};\"\']/', "\u{FFFD}",  $json['id']) /* clean json parameter */
+	?? session_id()
+	?? $_SERVER['REMOTE_ADDR'];
 
 // clean the page ID
-$pageId = preg_replace('/[\x00-\x1F{};]/', "\u{FFFD}", $json['pg'] ?? '');
+$pageId = preg_replace('/[\x00-\x1F{};\"\']/', "\u{FFFD}", $json['pg'] ?? '');
 
 // clean the user-name
-$userName = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $json['u'] ?? '');
+$userName = preg_replace('/[\x00-\x1F\"]/', "\u{FFFD}", $json['u'] ?? '');
 
 // check load time
 $loadTime = $json['lt'] ?? '';
