@@ -24,8 +24,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	}
 
 	/* session information */
-	private $sessionId = 'unset';
-	private $sessionType = '';
+	private $sessionId = '0';
+	private $sessionType = 'null';
 
 	/**
 	 * Inserts tracking code to the page header
@@ -124,6 +124,9 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	}
 
 	private function getSessionInfo() {
+
+		$this->sessionId = '1';
+		$this->sessionType = 'set';
 
 		// what is the session identifier?
 		if (isset($_SESSION)) {
