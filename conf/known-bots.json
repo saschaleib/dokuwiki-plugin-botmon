@@ -1,17 +1,17 @@
 [	{"id": "bingbot",
-	 "n": "Bing Bot",
+	 "n": "BingBot",
 	 "r": ["bingbot"],
 	 "rx": ["\\sbingbot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.bing.com/bingbot.htm"
 	},
 	{"id": "googlebot",
-	 "n": "Google Bot",
+	 "n": "GoogleBot",
 	 "r": ["Googlebot"],
 	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)"],
 	 "url": "http://www.google.com/bot.html"
 	},
 	{"id": "googleads",
-	 "n": "Google Ads Bot",
+	 "n": "Google Ads",
 	 "r": ["AdsBot-Google", "AdsBot-Google-Mobile", "Mediapartners-Google"],
 	 "rx": ["AdsBot-Google;","AdsBot-Google-Mobile;", "Mediapartners-Google\\/(\\d+\\.\\d+);"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
@@ -35,31 +35,31 @@
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
 	},
 	{"id": "ddg",
-	 "n": "DuckDuckGo Bots",
+	 "n": "DuckDuckGo",
 	 "r": ["DuckDuckBot","DuckAssistBot","DuckDuckGo-Favicons-Bot"],
 	 "rx": ["DuckDuckBot\\/(\\d+\\.\\d+);", "DuckAssistBot\\/(\\d+\\.\\d+);", "DuckDuckGo-Favicons-Bot\\/(\\d+\\.\\d+);"],
 	 "url": "https://duckduckgo.com/duckduckbot.html"
 	},
 	{"id": "openai",
-	 "n": "OpenAI/ChatGPT Bots",
+	 "n": "OpenAI/ChatGPT",
 	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
 	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "claude",
-	 "n": "Anthropic Claude Bots",
+	 "n": "Anthropic Claude",
 	 "r": ["ClaudeBot", "Claude-User", "Claude-SearchBot"],
 	 "rx": ["ClaudeBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://darkvisitors.com/agents/claudebot"
 	},
 	{"id": "perplexity",
-	 "n": "Perplexity Crawlers",
+	 "n": "Perplexity",
 	 "r": ["PerplexityBot", "Perplexity‑User"],
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
 	{"id": "metabots",
-	 "n": "Meta/Facebook Bots",
+	 "n": "Meta/Facebook",
 	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
 	 "rx": ["facebook\\w+\\/(\\d+\\.\\d+)", "meta-\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
@@ -71,43 +71,43 @@
 	 "url": "https://help.qwant.com/bot/"
 	},
 	{"id": "yandex",
-	 "n": "Yandex Bots",
+	 "n": "Yandex", "geo": "CN",
 	 "r": ["YandexBot", "YandexAdNet", "YandexBlogs", "YandexImages", "YandexImageResizer", "YandexMarket", "YandexMedia", "YandexOntoDB", "YandexSitelinks","YandexSpravBot", "YandexVertis", "YandexVerticals", "YandexVideo", "YandexWebmaster", "YandexComBot"],
 	 "rx": ["Yandex\\w+\\/(\\d+\\.\\d+);"],
 	 "url": "http://yandex.com/bots"
 	},
 	{"id": "seznambot",
-	 "n": "SeznamBot (CZ)",
+	 "n": "SeznamBot", "geo": "CZ",
 	 "r": ["SeznamBot"],
 	 "rx": ["SeznamBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://o-seznam.cz/napoveda/vyhledavani/en/seznambot-crawler/"
 	},
 	{"id": "ahrefs",
-	 "n": "Ahrefs Bots (SEO/marketing)",
+	 "n": "Ahrefs",
 	 "r": ["AhrefsBot", "AhrefsSiteAudit"],
 	 "rx": ["AhrefsBot\\/(\\d+\\.\\d+);", "AhrefsSiteAudit\\/(\\d+\\.\\d+);"],
 	 "url": "https://ahrefs.com/robot/"
 	},
 	{"id": "ccbot",
-	 "n": "Common Crawl Bot (AI-Scraper)",
+	 "n": "CommonCrawl Bot",
 	 "r": ["CCBot"],
 	 "rx": ["CCBot\\/(\\d+\\.\\d+)[\\s\\.;]*"],
 	 "url": "https://commoncrawl.org/bot.html"
 	},
 	{"id": "mjbot",
-	 "n": "Majestic Crawler (UK)",
+	 "n": "Majestic Crawler (UK)", "geo": "GB",
 	 "r": ["MJ12bot"],
 	 "rx": ["MJ12bot\\/v?(\\d+\\.\\d+)[\\s\\.;]"],
 	 "url": "http://www.majestic12.co.uk/bot.php"
 	},
 	{"id": "petal",
-	 "n": "PetalSearch Bot (CN)",
+	 "n": "PetalSearch Bot (CN)", "geo": "CN",
 	 "r": ["PetalBot", "AspiegelBot"],
 	 "rx": ["[\\s;]PetalBot[\\s\\/;]", "AspiegelBot[\\)$]"],
 	 "url": "https://webmaster.petalsearch.com/site/petalbot"
 	},
 	{"id": "barkrowler",
-	 "n": "Barkrowler (Babbar Bot)",
+	 "n": "Barkrowler (Babbar)",
 	 "r": ["Barkrowler"],
 	 "rx": ["[\\s;^]Barkrowler\\/(\\d+\\.\\d+)?"],
 	 "url": "https://babbar.tech/crawler"
@@ -119,7 +119,7 @@
 	 "url": "http://www.semrush.com/bot.html"
 	},
 	{"id": "bytespider",
-	 "n": "Bytespider (ByteDance, TikTok)",
+	 "n": "Bytespider (ByteDance, TikTok)", "geo": "CN",
 	 "r": ["Bytespider"],
 	 "rx": ["Bytespider[;$]"],
 	 "url": "https://darkvisitors.com/agents/bytespider"
@@ -143,7 +143,7 @@
 	 "url": "https://serpstatbot.com/"
 	},
 	{"id": "netestate",
-	 "n": "netEstate NE Crawler (DE)",
+	 "n": "netEstate NE Crawler", "geo": "DE",
 	 "r": ["netEstate NE Crawler"],
 	 "rx": ["netEstate NE Crawler\\s"],
 	 "url": "http://www.website-datenbank.de/"
@@ -167,7 +167,7 @@
 	 "url": "https://darkvisitors.com/agents/mauibot"
 	},
 	{"id": "plagaware",
-	 "n": "PlagAwareBot (DE)",
+	 "n": "PlagAwareBot (DE)", "geo": "DE",
 	 "r": ["PlagAwareBot"],
 	 "rx": ["PlagAwareBot\\/(\\d\\.\\d)"],
 	 "url": "https://www.plagaware.com/bot"
@@ -213,5 +213,11 @@
 	 "r": ["TerraCotta"],
 	 "rx": ["TerraCotta"],
 	 "url": "https://github.com/CeramicTeam/CeramicTerracotta"
+	},
+	{"id": "tiktok",
+	 "n": "TikTok Spider", "geo": "CN",
+	 "r": ["TikTokSpider"],
+	 "rx": ["TikTokSpider"],
+	 "url": "https://darkvisitors.com/agents/tiktokspider"
 	}
 ]

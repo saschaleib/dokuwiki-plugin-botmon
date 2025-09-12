@@ -23,6 +23,10 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertHeader');
 	}
 
+	/* session information */
+	private $sessionId = null;
+	private $sessionType = '';
+
 	/**
 	 * Inserts tracking code to the page header
 	 *
@@ -33,12 +37,15 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		global $INFO;
 
+		// populate the session id and type:
+		$this->getSessionInfo();
+
 		// is there a user logged in?
 		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name'])
 					?  $INFO['userinfo']['name'] : '');
 
 		// build the tracker code:
-		$code = NL . DOKU_TAB . "document._botmon = {'t0': Date.now()};" . NL;
+		$code = NL . DOKU_TAB . "document._botmon = {'t0': Date.now(), 'session': '" . json_encode($this->sessionId) . "'};" . NL;
 		if ($username) {
 			$code .= DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
 		}
@@ -68,22 +75,11 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		global $conf;
 		global $INFO;
 
-		// what is the session identifier?
-		$sessionId = $_COOKIE['DokuWiki']  ?? '';
-		$sessionType = 'dw';
-		if ($sessionId == '') {
-			$sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
-			if ($sessionId == '127.0.0.1' || $sessionId == '::1') {
-				$sessionId = 'localhost';
-			}
-			$sessionType = 'ip';
-		}
-
 		// clean the page ID
 		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
 
 		// collect GeoIP information (if available):
-		$geoIp = 'XX'; /* User-defined code for unknown country */
+		$geoIp = ( $this->sessionId == 'localhost' ? 'local' : 'ZZ' ); /* User-defined code for unknown country */
 		try {
 			if (extension_loaded('geoip') && geoip_db_avail(GEOIP_COUNTRY_EDITION)) {
 				$geoIp = geoip_country_code_by_name($_SERVER['REMOTE_ADDR']);
@@ -98,8 +94,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$logArr = Array(
 			$_SERVER['REMOTE_ADDR'] ?? '', /* remote IP */
 			$pageId, /* page ID */
-			$sessionId, /* Session ID */
-			$sessionType, /* session ID type */
+			$this->sessionId, /* Session ID */
+			$this->sessionType, /* session ID type */
 			$username,
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
@@ -125,5 +121,32 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		/* Done */
 		fclose($logfile);
+	}
+
+	private function getSessionInfo() {
+
+		// what is the session identifier?
+		if (isset($_SESSION)) {
+			$sesKeys = array_keys($_SESSION); /* DokuWiki Session ID preferred */
+			foreach ($sesKeys as $key) {
+				if (substr($key, 0, 2) == 'DW') {
+					$this->sessionId = $key;
+					$this->sessionType = 'dw';
+					return;
+				}
+			}
+		}
+		if (!$this->sessionId) { /* no DokuWiki Session ID, try PHP session ID */
+			$this->sessionId = session_id();
+			$this->sessionType = 'php';
+		}
+		if (!$this->sessionId) { /* no PHP session ID, try IP address */
+			$this->sessionId = $_SERVER['REMOTE_ADDR'] ?? '';
+			$this->sessionType = 'ip';
+		}
+		if (!$this->sessionId) { /* if everything else fails, just us a random ID */
+			$this->sessionId = rand(1000000, 9999999);
+			$this->sessionType = 'rand';
+		}
 	}
 }

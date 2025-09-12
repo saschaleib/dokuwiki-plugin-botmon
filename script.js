@@ -1,6 +1,6 @@
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
-/* 06.09.2025 - 0.2.0 - beta */
+/* 12.09.2025 - 0.3.0 - beta */
 /* Author: Sascha Leib <ad@hominem.info> */
 
 // enumeration of user types:
@@ -21,6 +21,7 @@ const BotMon = {
 		// find the plugin basedir:
 		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
 			+ '/plugins/botmon/';
+		this._DWBaseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/lib/')) + '/';
 
 		// read the page language from the DOM:
 		this._lang = document.getRootNode().documentElement.lang || this._lang;
@@ -33,6 +34,7 @@ const BotMon = {
 	},
 
 	_baseDir: null,
+	_DWBaseDir: null,
 	_lang: 'en',
 	_today: (new Date()).toISOString().slice(0, 10),
 	_timeDiff: '',
@@ -242,20 +244,20 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				const timeout = 60 * 60 * 1000; /* session timeout: One hour */
+				const timeout = 60 * 60 * 1000; // session timeout: One hour
 
 				// loop over all visitors already registered:
 				for (let i=0; i<model._visitors.length; i++) {
 					const v = model._visitors[i];
 
-					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { /* known bots */
+					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
 						// bots match when their ID matches:
 						if (v._bot && v._bot.id == visitor._bot.id) {
 							return v;
 						}
 
-					} else if (visitor._type == BM_USERTYPE.KNOWN_USER) { /* registered users */
+					} else { /*if (visitor._type == BM_USERTYPE.KNOWN_USER) { // registered users
 
 						// visitors match when their names match:
 						if ( v.usr == visitor.usr
@@ -263,19 +265,13 @@ BotMon.live = {
 						&& v.agent == visitor.agent) {
 							return v;
 						}
-					} else { /* any other visitor */
+					} else { // any other visitor
 
-						if (Math.abs(v._lastSeen - visitor.ts) < timeout) { /* ignore timed out visits */
-							if ( v.id == visitor.id) { /* match the pre-defined IDs */
-								return v;
-							} else if (v.ip == visitor.ip && v.agent == visitor.agent) {
-								if (v.typ !== 'ip') {
-									console.warn(`Visitor ID “${v.id}” not found, using matchin IP + User-Agent instead.`);
-								}
+						if (Math.abs(v._lastSeen - visitor.ts) < timeout) { // ignore timed out visits */
+							if ( v.id == visitor.id) { // match the DW/PHP IDs
 								return v;
 							}
-						}
-
+						/*}*/
 					}
 				}
 				return null; // nothing found
@@ -308,17 +304,23 @@ BotMon.live = {
 
 				// enrich new visitor with relevant data:
 				if (!nv._bot) nv._bot = bot ?? null; // bot info
-				nv._type = ( bot ? BM_USERTYPE.KNOWN_BOT : ( nv.usr && nv.usr !== '' ? BM_USERTYPE.KNOWN_USER : BM_USERTYPE.UNKNOWN ) );
-				if (!nv._firstSeen) nv._firstSeen = nv.ts;
-				nv._lastSeen = nv.ts;
-				if (!nv.geo ||nv.geo === '') nv.geo = 'ZZ';
+				nv._type = ( bot ? BM_USERTYPE.KNOWN_BOT : ( nv.usr && nv.usr !== '' ? BM_USERTYPE.KNOWN_USER : BM_USERTYPE.UNKNOWN ) ); // user type
+				if (bot && bot.geo) {
+					if (!nv.geo || nv.geo == '' || nv.geo == 'ZZ') nv.geo = bot.geo;
+				} else if (!nv.geo ||nv.geo == '') {
+					nv.geo = 'ZZ';
+				}
+
+				// update first and last seen:
+				if (!nv._firstSeen) nv._firstSeen = nv.ts; // first-seen
+				nv._lastSeen = nv.ts; // last-seen
 
 				// country name:
 				try {
-					nv._country = "Undefined";
-					if (nv.geo && nv.geo !== '') {
+					nv._country = ( nv.geo == 'local' ? "localhost" : "Unknown" );
+					if (nv.geo && nv.geo !== '' && nv.geo !== 'ZZ' && nv.geo !== 'local') {
 						const countryName = new Intl.DisplayNames(['en', BotMon._lang], {type: 'region'});
-						nv._country = countryName.of(nv.geo) ?? "Unknown";
+						nv._country = countryName.of(nv.geo) ?? nv.geo;
 					}
 				} catch (err) {
 					console.error(err);
@@ -883,7 +885,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known bots …");
-				const url = BotMon._baseDir + 'config/known-bots.json';
+				const url = BotMon._baseDir + 'conf/known-bots.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -921,6 +923,7 @@ BotMon.live = {
 							botInfo = {
 								n : bot.n,
 								id: bot.id,
+								geo: (bot.geo ? bot.geo : null),
 								url: bot.url,
 								v: (rxr.length > 1 ? rxr[1] : -1)
 							};
@@ -958,7 +961,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known clients");
-				const url = BotMon._baseDir + 'config/known-clients.json';
+				const url = BotMon._baseDir + 'conf/known-clients.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1024,7 +1027,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known platforms");
-				const url = BotMon._baseDir + 'config/known-platforms.json';
+				const url = BotMon._baseDir + 'conf/known-platforms.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1090,7 +1093,26 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
-				const url = BotMon._baseDir + 'config/botmon-config.json';
+
+				// relative file path to the rules file:
+				const filePath = 'conf/botmon-config.json';
+
+				// check if the user has a configuration file in their DokuWiki installation,
+				// then load the appropriate file:
+				this._checkForUserConfig( filePath, (hasUserConfig) => {
+					this._loadrulesFile(( hasUserConfig ? BotMon._DWBaseDir : BotMon._baseDir ) + filePath);
+				});				
+			},
+
+			/**
+			 * Loads the list of rules and settings from a JSON file.
+			 * @param {String} url - the URL from which to load the rules file.
+			 */
+			
+			_loadrulesFile: async function(url) {
+				//console.info('BotMon.live.data.rules._loadrulesFile(',url,')');}
+
+				const me = BotMon.live.data.rules;
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1100,12 +1122,11 @@ BotMon.live = {
 					const json = await response.json();
 
 					if (json.rules) {
-						this._rulesList = json.rules;
+						me._rulesList = json.rules;
 					}
 
-					if (json.threshold) {
-						this._threshold = json.threshold;
-					}
+					// override the threshold?
+					if (json.threshold) me._threshold = json.threshold;
 
 					if (json.ipRanges) {
 						// clean up the IPs first:
@@ -1119,16 +1140,38 @@ BotMon.live = {
 							list.push(item);
 						});
 
-						this._botIPs = list;
+						me._botIPs = list;
 					}
 
-					this._ready = true;
+					me._ready = true;
 
 				} catch (error) {
 					BotMon.live.gui.status.setError("Error while loading the ‘rules’ file: " + error.message);
 				} finally {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('rules')
+				}
+			},
+
+			/**
+			 * Checks if the user has a configuration file in their DokuWiki installation.
+			 * @param {function} whenDone - an optional callback function to call when the check is finished.
+			 */
+			_checkForUserConfig: async function(filePath, whenDone = undefined) {
+				//console.info('BotMon.live.data.rules._checkForUserConfig()');
+				
+				let hasUserConfig = false;
+				try {
+					const response = await fetch(BotMon._DWBaseDir + '/' + filePath, {
+						method: 'HEAD'
+					});
+					hasUserConfig = response.ok;
+				} catch (err) {
+					console.info("An error occured while trying to check for a user configuration file:", err);
+				} finally {
+					if (whenDone) {
+						whenDone(hasUserConfig);
+					}
 				}
 			},
 
@@ -1306,7 +1349,7 @@ BotMon.live = {
 				matchesCountry: function(visitor, ...countries) {
 
 					// ingore if geoloc is not set or unknown:
-					if (visitor.geo && visitor.geo !== 'ZZ') {
+					if (visitor.geo) {
 						return (countries.indexOf(visitor.geo) >= 0);
 					}
 					return false;
@@ -1349,11 +1392,11 @@ BotMon.live = {
 
 		},
 
-	/**
-	 * Loads a log file (server, page load, or ticker) and parses it.
-	 * @param {String} type - the type of the log file to load (srv, log, or tck)
-	 * @param {Function} [onLoaded] - an optional callback function to call after loading is finished.
-	 */
+		/**
+		 * Loads a log file (server, page load, or ticker) and parses it.
+		 * @param {String} type - the type of the log file to load (srv, log, or tck)
+		 * @param {Function} [onLoaded] - an optional callback function to call after loading is finished.
+		 */
 		loadLogFile: async function(type, onLoaded = undefined) {
 			//console.info('BotMon.live.data.loadLogFile(',type,')');
 
@@ -1389,50 +1432,56 @@ BotMon.live = {
 			try {
 				const response = await fetch(url);
 				if (!response.ok) {
+
 					throw new Error(`${response.status} ${response.statusText}`);
-				}
 
-				const logtxt = await response.text();
-
-				logtxt.split('\n').forEach((line) => {
-					if (line.trim() === '') return; // skip empty lines
-					const cols = line.split('\t');
-
-					// assign the columns to an object:
-					const data = {};
-					cols.forEach( (colVal,i) => {
-						colName = columns[i] || `col${i}`;
-						const colValue = (colName == 'ts' ? new Date(colVal) : colVal.trim());
-						data[colName] = colValue;
-					});
-	
-					// register the visit in the model:
-					switch(type) {
-						case 'srv':
-							BotMon.live.data.model.registerVisit(data, type);
-							break;
-						case 'log':
-							data.typ = 'js';
-							BotMon.live.data.model.updateVisit(data);
-							break;
-						case 'tck':
-							data.typ = 'js';
-							BotMon.live.data.model.updateTicks(data);
-							break;
-						default:
-							console.warn(`Unknown log type ${type}.`);
-							return;
+				} else {
+					
+					// parse the data:
+					const logtxt = await response.text();
+					if (logtxt.length <= 0) {
+						throw new Error(`Empty log file ${url}.`);
 					}
-				});
 
-				if (onLoaded) {
-					onLoaded(); // callback after loading is finished.
+					logtxt.split('\n').forEach((line) => {
+						if (line.trim() === '') return; // skip empty lines
+						const cols = line.split('\t');
+
+						// assign the columns to an object:
+						const data = {};
+						cols.forEach( (colVal,i) => {
+							colName = columns[i] || `col${i}`;
+							const colValue = (colName == 'ts' ? new Date(colVal) : colVal.trim());
+							data[colName] = colValue;
+						});
+		
+						// register the visit in the model:
+						switch(type) {
+							case 'srv':
+								BotMon.live.data.model.registerVisit(data, type);
+								break;
+							case 'log':
+								data.typ = 'js';
+								BotMon.live.data.model.updateVisit(data);
+								break;
+							case 'tck':
+								data.typ = 'js';
+								BotMon.live.data.model.updateTicks(data);
+								break;
+							default:
+								console.warn(`Unknown log type ${type}.`);
+								return;
+						}
+					});
 				}
 
 			} catch (error) {
 				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
 			} finally {
 				BotMon.live.gui.status.hideBusy("Status: Done.");
+				if (onLoaded) {
+					onLoaded(); // callback after loading is finished.
+				}
 			}
 		}
 	},
@@ -1443,7 +1492,14 @@ BotMon.live = {
 			this.lists.init();
 		},
 
+		/* The Overview / web metrics section of the live tab */
 		overview: {
+			/**
+			 * Populates the overview part of the today tab with the analytics data.
+			 *
+			 * @method make
+			 * @memberof BotMon.live.gui.overview
+			 */
 			make: function() {
 
 				const data = BotMon.live.data.analytics.data;
@@ -1486,29 +1542,29 @@ BotMon.live = {
 				}
 
 				// update known bots list:
-				const botlist = document.getElementById('botmon__botslist');
-				botlist.innerHTML = "<dt>Known bots (top 4)</dt>";
+				const botlist = document.getElementById('botmon__botslist'); /* Known bots */
+				botlist.innerHTML = "<dt>Known bots (top 5)</dt>";
 
 				let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
 					return b._pageViews.length - a._pageViews.length;
 				});
 
-				for (let i=0; i < Math.min(bots.length, 4); i++) {
+				for (let i=0; i < Math.min(bots.length, 5); i++) {
 					const dd = makeElement('dd');
-					dd.appendChild(makeElement('span', {'class': 'bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
-					dd.appendChild(makeElement('strong', undefined, bots[i]._pageViews.length));
+					dd.appendChild(makeElement('span', {'class': 'has_icon bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
+					dd.appendChild(makeElement('span', undefined, bots[i]._pageViews.length));
 					botlist.appendChild(dd);
 				}
 
 				// update the suspected bot IP ranges list:
 				const botIps = document.getElementById('botmon__today__botips');
 				if (botIps) {
-					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 4)"));
+					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 5)"));
 
-					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(4);
+					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(5);
 					ipList.forEach( (ipInfo) => {
 						const li = makeElement('dd');
-						li.appendChild(makeElement('span', {'class': 'ip ip' + ipInfo.typ }, ipInfo.ip));
+						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + ipInfo.typ }, ipInfo.ip));
 						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
 						botIps.append(li)
 					});
@@ -1517,11 +1573,11 @@ BotMon.live = {
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__today__countries');
 				if (botCountries) {
-					botCountries.appendChild(makeElement('dt', {}, "Bot Countries (top 4)"));
-					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 4);
+					botCountries.appendChild(makeElement('dt', {}, "Bot Countries (top 5)"));
+					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 5);
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
-						cLi.appendChild(makeElement('span', {'class': 'country ctry_' + cInfo.iso }, cInfo.name));
+						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.iso.toLowerCase() }, cInfo.name));
 						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
 						botCountries.appendChild(cLi);
 					});
@@ -1563,13 +1619,13 @@ BotMon.live = {
 				const wmclients = document.getElementById('botmon__today__wm_clients');
 				if (wmclients) {
 
-					wmclients.appendChild(makeElement('dt', {}, "Browsers (humans only)"));
+					wmclients.appendChild(makeElement('dt', {}, "Top browsers (humans only)"));
 
 					const clientList = BotMon.live.data.analytics.getTopBrowsers(5);
 					if (clientList) {
 						clientList.forEach( (cInfo) => {
 							const cDd = makeElement('dd');
-							cDd.appendChild(makeElement('span', {'class': 'has_icon client_' + cInfo.id }, ( cInfo.name ? cInfo.name : cInfo.id)));
+							cDd.appendChild(makeElement('span', {'class': 'has_icon client cl_' + cInfo.id }, ( cInfo.name ? cInfo.name : cInfo.id)));
 							cDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': cInfo.count + " page views"
@@ -1583,13 +1639,13 @@ BotMon.live = {
 				const wmplatforms = document.getElementById('botmon__today__wm_platforms');
 				if (wmplatforms) {
 
-					wmplatforms.appendChild(makeElement('dt', {}, "Platforms (humans only)"));
+					wmplatforms.appendChild(makeElement('dt', {}, "Top platforms (humans only)"));
 
 					const pfList = BotMon.live.data.analytics.getTopPlatforms(5);
 					if (pfList) {
 						pfList.forEach( (pInfo) => {
 							const pDd = makeElement('dd');
-							pDd.appendChild(makeElement('span', {'class': 'has_icon client_' + pInfo.id }, ( pInfo.name ? pInfo.name : pInfo.id)));
+							pDd.appendChild(makeElement('span', {'class': 'has_icon platform pf_' + pInfo.id }, ( pInfo.name ? pInfo.name : pInfo.id)));
 							pDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': pInfo.count + " page views"
@@ -1622,7 +1678,7 @@ BotMon.live = {
 				BotMon.live.gui.status._errorCount += 1;
 				const el = document.getElementById('botmon__today__status');
 				if (el) {
-					el.innerText = "An error occured. See the browser log for details!";
+					el.innerText = "An error occurred. Data may be incomplete! See browser console for details";
 					el.classList.add('error');
 				}
 			},
@@ -1688,8 +1744,8 @@ BotMon.live = {
 							'data-loaded': false
 						});
 						const title = details.appendChild(makeElement('summary'));
-						title.appendChild(makeElement('span', {'class':'title'}, listTitle));
-						title.appendChild(makeElement('span', {'class':'counter'}, '–'));
+						title.appendChild(makeElement('span', {'class': 'title'}, listTitle));
+						title.appendChild(makeElement('span', {'class': 'counter'}));
 						details.addEventListener("toggle", this._onDetailsToggle);
 
 						parent.appendChild(details);
@@ -1731,6 +1787,8 @@ BotMon.live = {
 				const make = BotMon.t._makeElement;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
+				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
+
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
 
@@ -1742,12 +1800,22 @@ BotMon.live = {
 				const span1 = make('span'); /* left-hand group */
 
 				// country flag:
-				if (data.geo && data.geo !=='') {
-					span1.appendChild(make('span', {
-						'class': 'icon country ctry_' + data.geo.toLowerCase(),
-						'data-ctry': data.geo,
-						'title': "Country: " + data._country
-					}, data._country));
+				span1.appendChild(make('span', {
+					'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+					'data-ctry': (data.geo | 'ZZ'),
+					'title': "Country: " + ( data._country || "Unknown")
+				}, ( data._country || "Unknown") ));
+
+				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* No platform/client for bots */
+					span1.appendChild(make('span', { /* Platform */
+						'class': 'icon_only platform pf_' + (data._platform ? data._platform.id : 'unknown'),
+						'title': "Platform: " + platformName
+					}, platformName));
+
+					span1.appendChild(make('span', { /* Client */
+						'class': 'icon_only client client cl_' + (data._client ? data._client.id : 'unknown'),
+						'title': "Client: " + clientName
+					}, clientName));
 				}
 
 				// identifier:
@@ -1755,43 +1823,37 @@ BotMon.live = {
 
 					const botName = ( data._bot && data._bot.n ? data._bot.n : "Unknown");
 					span1.appendChild(make('span', { /* Bot */
-						'class': 'bot bot_' + (data._bot ? data._bot.id : 'unknown'),
+						'class': 'has_icon bot bot_' + (data._bot ? data._bot.id : 'unknown'),
 						'title': "Bot: " + botName
 					}, botName));
 
 				} else if (data._type == BM_USERTYPE.KNOWN_USER) { /* User only */
 
 					span1.appendChild(make('span', { /* User */
-						'class': 'user_known',
+						'class': 'has_icon user_known',
 						'title': "User: " + data.usr
 					}, data.usr));
 
 				} else { /* others */
 
-					if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
-					span1.appendChild(make('span', { /* IP-Address */
-						'class': 'ipaddr ip' + ipType,
+					
+					/*span1.appendChild(make('span', { // IP-Address
+						'class': 'has_icon ipaddr ip' + ipType,
 						'title': "IP-Address: " + data.ip
-					}, data.ip));
-				}
+					}, data.ip));*/
 
-				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* Not for bots */
-					span1.appendChild(make('span', { /* Platform */
-						'class': 'icon platform platform_' + (data._platform ? data._platform.id : 'unknown'),
-						'title': "Platform: " + platformName
-					}, platformName));
-
-					span1.appendChild(make('span', { /* Client */
-						'class': 'icon client client_' + (data._client ? data._client.id : 'unknown'),
-						'title': "Client: " + clientName
-					}, clientName));
+					span1.appendChild(make('span', { /* Internal ID */
+						'class': 'has_icon session typ_' + data.typ,
+						'title': "ID: " + data.id
+					}, data.id));
 				}
 
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
 				span2.appendChild(make('span', { /* page views */
-					'class': 'pageviews'
+					'class': 'has_icon pageviews',
+					'title': data._pageViews.length + " page view(s)"
 				}, data._pageViews.length));
 
 				summary.appendChild(span2);
@@ -1818,7 +1880,7 @@ BotMon.live = {
 				if (data._type == BM_USERTYPE.KNOWN_BOT) {
 
 					dl.appendChild(make('dt', {}, "Bot name:")); /* bot info */
-					dl.appendChild(make('dd', {'class': 'has_icon bot bot_' + (data._bot ? data._bot.id : 'unknown')},
+					dl.appendChild(make('dd', {'class': 'icon_only bot bot_' + (data._bot ? data._bot.id : 'unknown')},
 						(data._bot ? data._bot.n : 'Unknown')));
 
 					if (data._bot && data._bot.url) {
@@ -1834,15 +1896,15 @@ BotMon.live = {
 				} else { /* not for bots */
 
 					dl.appendChild(make('dt', {}, "Client:")); /* client */
-					dl.appendChild(make('dd', {'class': 'has_icon client_' + (data._client ? data._client.id : 'unknown')},
+					dl.appendChild(make('dd', {'class': 'has_icon client cl_' + (data._client ? data._client.id : 'unknown')},
 						clientName + ( data._client.v > 0 ? ' (' + data._client.v + ')' : '' ) ));
 
 					dl.appendChild(make('dt', {}, "Platform:")); /* platform */
-					dl.appendChild(make('dd', {'class': 'has_icon platform_' + (data._platform ? data._platform.id : 'unknown')},
+					dl.appendChild(make('dd', {'class': 'has_icon platform pf_' + (data._platform ? data._platform.id : 'unknown')},
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
 					dl.appendChild(make('dt', {}, "IP-Address:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ip' + ipType}, data.ip));
+					dl.appendChild(make('dd', {'class': 'has_icon ipaddr ip' + ipType}, data.ip));
 
 					/*dl.appendChild(make('dt', {}, "ID:"));
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
@@ -1867,7 +1929,7 @@ BotMon.live = {
 				if (data.geo && data.geo !=='') {
 					dl.appendChild(make('dt', {}, "Location:"));
 					dl.appendChild(make('dd', {
-						'class': 'country ctry_' + data.geo.toLowerCase(),
+						'class': 'has_icon country ctry_' + data.geo.toLowerCase(),
 						'data-ctry': data.geo,
 						'title': "Country: " + data._country
 					}, data._country + ' (' + data.geo + ')'));
@@ -1875,6 +1937,9 @@ BotMon.live = {
 
 				/*dl.appendChild(make('dt', {}, "Visitor Type:"));
 				dl.appendChild(make('dd', undefined, data._type ));*/
+
+				dl.appendChild(make('dt', {}, "Session ID:"));
+				dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
 
 				dl.appendChild(make('dt', {}, "Seen by:"));
 				dl.appendChild(make('dd', undefined, data._seenBy.join(', ') ));

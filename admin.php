@@ -32,6 +32,9 @@ class admin_plugin_botmon extends AdminPlugin {
 
 		global $conf;
 
+		// spinner animation as SVG image:
+		$svg = '<svg width="12" height="12" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" id="botmon__today__busy"><defs><linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#666"></stop><stop offset="100%" stop-color="#666"></stop></linearGradient></defs><circle cx="25" cy="25" r="20" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-dasharray="31.4 31.4"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"></animateTransform></circle></svg>';
+
 		$pluginPath = $conf['basedir'] . 'lib/plugins/' . $this->getPluginName();
 
 		/* Plugin Headline */
@@ -44,7 +47,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	</nav>';
 
 	if ($this->hasOldLogFiles()) {
-		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="/' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
+		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
 	}
 
 	echo '<article role="tabpanel" id="botmon__today"">
@@ -75,7 +78,7 @@ class admin_plugin_botmon extends AdminPlugin {
 			</details>
 		</div>
 		<footer aria-live="polite">
-			<img src="/' . $pluginPath . '/img/spinner.svg" id="botmon__today__busy" width="12" height="12" alt="busy indicator">
+			<span>' . $svg . '</span>
 			<span id="botmon__today__status">Initialising&nbsp;&hellip;</span>
 		</footer>
 	</article>
