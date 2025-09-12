@@ -1852,7 +1852,8 @@ BotMon.live = {
 				const span2 = make('span'); /* right-hand group */
 
 				span2.appendChild(make('span', { /* page views */
-					'class': 'pageviews'
+					'class': 'has_icon pageviews',
+					'title': data._pageViews.length + " page view(s)"
 				}, data._pageViews.length));
 
 				summary.appendChild(span2);

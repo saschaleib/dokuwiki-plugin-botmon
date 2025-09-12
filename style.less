@@ -354,7 +354,7 @@
 		header {
 			background-color: #F0F0F0;
 			color: #333;
-			border: #CCC solid 1px;
+			border: #666 solid 1px;
 			border-radius: .5rem .5rem 0 0;
 			margin: .5rem 0 1pt 0;
 			padding: .25rem .5rem;
@@ -454,6 +454,9 @@
 
 		/* visitor lists: */
 		#botmon__today__visitorlists {
+			& > details summary {
+				border-radius: .5em;
+			}
 			details ul {
 				margin: 0;
 				padding: 0;
@@ -498,6 +501,7 @@
 					display: grid;
 					grid-template-columns: min-content auto;
 					border-left: transparent none 0;
+					margin: 0 .5rem .25rem 0;
 				}
 				dt {
 					grid-column: 1;
@@ -563,7 +567,8 @@
 				border: #999 solid 1px;
 				padding: 0 2px;
 				font-size: smaller;
-				border-radius: .25em;
+				border-radius: .5em;
+				margin-right: .25em;
 			}
 			span.pageviews::before {
 				content : '';
@@ -572,7 +577,6 @@
 				background: transparent url('img/page.svg') center no-repeat;
 				background-size: 1.25em;
 			}
-
 		}
 
 		/* item footer */
@@ -583,7 +587,7 @@
 				column-gap: .25rem;
 				background-color: #F0F0F0;
 				color: #333;
-				border: #CCC solid 1px;
+				border: #666 solid 1px;
 				border-radius: 0 0 .5rem .5rem;
 				margin: 1pt 0 0 0;
 				padding: .25rem .5rem;
@@ -627,7 +631,7 @@
 					color: #adadb3;
 				}
 				dd:nth-child(even) {
-					background-color: #333337;
+					background-color: #333;
 				}
 			}
 
@@ -650,24 +654,36 @@
 			/* visitor lists: */
 			#botmon__today__visitorlists {
 				details ul > li {
-					color: #aeaeae;
+					& {
+						color: #aeaeae;
+					}
+					& > details {
+						border-color: #666;
+					}
+					& > details summary {
+						background-color: #171717;
+					}
 				}
-			}
 
-			ul.eval {
-				li:nth-child(odd) {
-					background-color: #333337;
+				ul.eval {
+					li:nth-child(odd) {
+						background-color: #333;
+					}
+					li.total {
+						border-top-color: #CCC;
+					}
 				}
-				li.total {
-					border-top-color: #CCC;
+				span.pageviews {
+					border-color: #555;
 				}
+
 			}
 
 			footer {
 				& {
 					background-color: #0c0c0d;
 					color: #adadb3;
-					border-color: #CCC;
+					border-color: #666;
 				}
 				& > svg {
 					fill: #777;
