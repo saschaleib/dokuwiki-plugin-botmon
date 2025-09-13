@@ -1,35 +1,35 @@
 [	{"id": "bingbot",
-	 "n": "BingBot",
+	 "n": "BingBot", "geo": "US",
 	 "r": ["bingbot"],
 	 "rx": ["\\sbingbot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.bing.com/bingbot.htm"
 	},
 	{"id": "googlebot",
-	 "n": "GoogleBot",
+	 "n": "GoogleBot", "geo": "US",
 	 "r": ["Googlebot"],
 	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)"],
 	 "url": "http://www.google.com/bot.html"
 	},
 	{"id": "googleads",
-	 "n": "Google Ads",
+	 "n": "Google Ads", "geo": "US",
 	 "r": ["AdsBot-Google", "AdsBot-Google-Mobile", "Mediapartners-Google"],
 	 "rx": ["AdsBot-Google;","AdsBot-Google-Mobile;", "Mediapartners-Google\\/(\\d+\\.\\d+);"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
 	{"id": "googleapi",
-	 "n": "Google API Crawler",
+	 "n": "Google API Crawler", "geo": "US",
 	 "r": ["APIs-Google"],
 	 "rx": ["APIs-Google"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
 	{"id": "applebot",
-	 "n": "Applebot",
+	 "n": "Applebot", "geo": "US",
 	 "r": ["Applebot"],
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
 	{"id": "slurp",
-	 "n": "Slurp (Yahoo!)",
+	 "n": "Slurp (Yahoo!)", "geo": "US",
 	 "r": ["Slurp"],
 	 "rx": ["Slurp[\\s;\\)]"],
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
@@ -41,25 +41,25 @@
 	 "url": "https://duckduckgo.com/duckduckbot.html"
 	},
 	{"id": "openai",
-	 "n": "OpenAI/ChatGPT",
+	 "n": "OpenAI/ChatGPT", "geo": "US",
 	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
 	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "claude",
-	 "n": "Anthropic Claude",
+	 "n": "Anthropic Claude", "geo": "US",
 	 "r": ["ClaudeBot", "Claude-User", "Claude-SearchBot"],
 	 "rx": ["ClaudeBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://darkvisitors.com/agents/claudebot"
 	},
 	{"id": "perplexity",
-	 "n": "Perplexity",
+	 "n": "Perplexity", "geo": "US",
 	 "r": ["PerplexityBot", "Perplexity‑User"],
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
 	{"id": "metabots",
-	 "n": "Meta/Facebook",
+	 "n": "Meta/Facebook", "geo": "US",
 	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
 	 "rx": ["facebook\\w+\\/(\\d+\\.\\d+)", "meta-\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
@@ -89,7 +89,7 @@
 	 "url": "https://ahrefs.com/robot/"
 	},
 	{"id": "ccbot",
-	 "n": "CommonCrawl Bot",
+	 "n": "CommonCrawl Bot", "geo": "US",
 	 "r": ["CCBot"],
 	 "rx": ["CCBot\\/(\\d+\\.\\d+)[\\s\\.;]*"],
 	 "url": "https://commoncrawl.org/bot.html"
@@ -185,7 +185,7 @@
 	 "url": "http://www.sogou.com/docs/help/webmasters.htm#07"
 	},
 	{"id": "amazon",
-	 "n": "Amazonbot",
+	 "n": "Amazonbot", "geo": "US",
 	 "r": ["Amazonbot"],
 	 "rx": ["Amazonbot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
 	 "url": "https://developer.amazon.com/amazonbot"

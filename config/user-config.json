@@ -65,6 +65,10 @@
 		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
 		 "bot": 50
 		},
+		{"func": "notFromCountry", "params": ["DE", "AT", "CH", "LI", "LU", "BE"],
+		 "id": "notFromHere", "desc": "Location is not among the site’s main target countries.",
+		 "bot": 20
+		},
 		{"func": "matchesCountry", "params": ["ZZ"],
 		 "id": "zzCtry", "desc": "Location could not be determined",
 		 "bot": 20

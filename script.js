@@ -21,7 +21,6 @@ const BotMon = {
 		// find the plugin basedir:
 		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
 			+ '/plugins/botmon/';
-		this._DWBaseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/lib/')) + '/';
 
 		// read the page language from the DOM:
 		this._lang = document.getRootNode().documentElement.lang || this._lang;
@@ -34,7 +33,6 @@ const BotMon = {
 	},
 
 	_baseDir: null,
-	_DWBaseDir: null,
 	_lang: 'en',
 	_today: (new Date()).toISOString().slice(0, 10),
 	_timeDiff: '',
@@ -320,7 +318,7 @@ BotMon.live = {
 					nv._country = ( nv.geo == 'local' ? "localhost" : "Unknown" );
 					if (nv.geo && nv.geo !== '' && nv.geo !== 'ZZ' && nv.geo !== 'local') {
 						const countryName = new Intl.DisplayNames(['en', BotMon._lang], {type: 'region'});
-						nv._country = countryName.of(nv.geo) ?? nv.geo;
+						nv._country = countryName.of(nv.geo.substring(0,2)) ?? nv.geo;
 					}
 				} catch (err) {
 					console.error(err);
@@ -553,9 +551,9 @@ BotMon.live = {
 					if (v._type == BM_USERTYPE.KNOWN_BOT || v._type == BM_USERTYPE.LIKELY_BOT) { /* bots only */
 						
 						// add bot views to IP range information:
-						v._pageViews.forEach( pv => {
+						/*v._pageViews.forEach( pv => {
 							me.addToIPRanges(pv.ip);
-						});
+						});*/
 
 						// add to the country lists:
 						me.addToCountries(v.geo, v._country, v._type);
@@ -572,10 +570,10 @@ BotMon.live = {
 			},
 
 			// visits from IP ranges:
-			_ipRange: {
+			/*_ipRange: {
 				ip4: [],
 				ip6: []
-			},
+			},*/
 			/**
 			 * Adds a visit to the IP range statistics.
 			 * 
@@ -583,7 +581,7 @@ BotMon.live = {
 			 * 
 			 * @param {string} ip The IP address to add.
 			 */
-			addToIPRanges: function(ip) {
+			/*addToIPRanges: function(ip) {
 
 				// #TODO: handle nestled ranges!
 				const me = BotMon.live.data.analytics;
@@ -615,8 +613,8 @@ BotMon.live = {
 					it.count += 1;
 				}
 			
-			},
-			getTopBotIPRanges: function(max) {
+			},*/
+			/*getTopBotIPRanges: function(max) {
 
 				const me = BotMon.live.data.analytics;
 
@@ -649,7 +647,7 @@ BotMon.live = {
 				}
 				
 				return rList;
-			},
+			},*/
 
 			/* countries of visits */
 			_countries: {
@@ -885,7 +883,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known bots …");
-				const url = BotMon._baseDir + 'conf/known-bots.json';
+				const url = BotMon._baseDir + 'config/known-bots.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -896,7 +894,7 @@ BotMon.live = {
 					this._ready = true;
 
 				} catch (error) {
-					BotMon.live.gui.status.setError("Error while loading the ‘known bots’ file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the known bots file:", error.message);
 				} finally {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('bots')
@@ -961,7 +959,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known clients");
-				const url = BotMon._baseDir + 'conf/known-clients.json';
+				const url = BotMon._baseDir + 'config/known-clients.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1009,7 +1007,7 @@ BotMon.live = {
 			// return the browser name for a browser ID:
 			getName: function(id) {
 				const it = BotMon.live.data.clients._list.find(client => client.id == id);
-				return it.n;
+				return ( it && it.n ? it.n : "Unknown"); //it.n;
 			},
 
 			// indicates if the list is loaded and ready to use:
@@ -1027,7 +1025,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known platforms");
-				const url = BotMon._baseDir + 'conf/known-platforms.json';
+				const url = BotMon._baseDir + 'config/known-platforms.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1095,13 +1093,10 @@ BotMon.live = {
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
 
 				// relative file path to the rules file:
-				const filePath = 'conf/botmon-config.json';
+				const filePath = 'config/default-config.json';
 
-				// check if the user has a configuration file in their DokuWiki installation,
-				// then load the appropriate file:
-				this._checkForUserConfig( filePath, (hasUserConfig) => {
-					this._loadrulesFile(( hasUserConfig ? BotMon._DWBaseDir : BotMon._baseDir ) + filePath);
-				});				
+				// load the rules file:
+				this._loadrulesFile(BotMon._baseDir + filePath);			
 			},
 
 			/**
@@ -1146,32 +1141,10 @@ BotMon.live = {
 					me._ready = true;
 
 				} catch (error) {
-					BotMon.live.gui.status.setError("Error while loading the ‘rules’ file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the config file: " + error.message);
 				} finally {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('rules')
-				}
-			},
-
-			/**
-			 * Checks if the user has a configuration file in their DokuWiki installation.
-			 * @param {function} whenDone - an optional callback function to call when the check is finished.
-			 */
-			_checkForUserConfig: async function(filePath, whenDone = undefined) {
-				//console.info('BotMon.live.data.rules._checkForUserConfig()');
-				
-				let hasUserConfig = false;
-				try {
-					const response = await fetch(BotMon._DWBaseDir + '/' + filePath, {
-						method: 'HEAD'
-					});
-					hasUserConfig = response.ok;
-				} catch (err) {
-					console.info("An error occured while trying to check for a user configuration file:", err);
-				} finally {
-					if (whenDone) {
-						whenDone(hasUserConfig);
-					}
 				}
 			},
 
@@ -1476,7 +1449,7 @@ BotMon.live = {
 				}
 
 			} catch (error) {
-				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
+				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message} – data may be incomplete.`);
 			} finally {
 				BotMon.live.gui.status.hideBusy("Status: Done.");
 				if (onLoaded) {
@@ -1557,7 +1530,7 @@ BotMon.live = {
 				}
 
 				// update the suspected bot IP ranges list:
-				const botIps = document.getElementById('botmon__today__botips');
+				/*const botIps = document.getElementById('botmon__today__botips');
 				if (botIps) {
 					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 5)"));
 
@@ -1568,7 +1541,7 @@ BotMon.live = {
 						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
 						botIps.append(li)
 					});
-				}
+				}*/
 
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__today__countries');
@@ -1678,7 +1651,7 @@ BotMon.live = {
 				BotMon.live.gui.status._errorCount += 1;
 				const el = document.getElementById('botmon__today__status');
 				if (el) {
-					el.innerText = "An error occurred. Data may be incomplete! See browser console for details";
+					el.innerText = "Data may be incomplete.";
 					el.classList.add('error');
 				}
 			},
@@ -1792,19 +1765,16 @@ BotMon.live = {
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
 
+				const sumClass = ( data._seenBy.indexOf('srv') < 0 ? 'noServer' : 'hasServer');
+
 				const li = make('li'); // root list item
 				const details = make('details');
-				const summary = make('summary');
+				const summary = make('summary', {
+					'class': sumClass
+				});
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
-
-				// country flag:
-				span1.appendChild(make('span', {
-					'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
-					'data-ctry': (data.geo | 'ZZ'),
-					'title': "Country: " + ( data._country || "Unknown")
-				}, ( data._country || "Unknown") ));
 
 				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* No platform/client for bots */
 					span1.appendChild(make('span', { /* Platform */
@@ -1846,6 +1816,15 @@ BotMon.live = {
 						'class': 'has_icon session typ_' + data.typ,
 						'title': "ID: " + data.id
 					}, data.id));
+				}
+
+				// country flag:
+				if (data.geo && data.geo !== 'ZZ') {
+					span1.appendChild(make('span', {
+						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + ( data._country || "Unknown")
+					}, ( data._country || "Unknown") ));
 				}
 
 				summary.appendChild(span1);

@@ -59,7 +59,6 @@ class admin_plugin_botmon extends AdminPlugin {
 				<div class="botmon_overview_grid">
 					<dl id="botmon__today__botsvshumans"></dl>
 					<dl id="botmon__botslist"></dl>
-					<dl id="botmon__today__botips"></dl>
 					<dl id="botmon__today__countries"></dl>
 				</div>
 			</details>
@@ -69,7 +68,6 @@ class admin_plugin_botmon extends AdminPlugin {
 					<dl id="botmon__today__wm_overview"></dl>
 					<dl id="botmon__today__wm_clients"></dl>
 					<dl id="botmon__today__wm_platforms"></dl>
-					<dl></dl>
 				</div>
 			</details>
 			<details id="botmon__today__visitors">
