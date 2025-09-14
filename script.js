@@ -95,7 +95,9 @@ const BotMon = {
 
 		/* helper to convert an ip address string to a normalised format: */
 		_ip2Num: function(ip) {
-			if (ip.indexOf(':') > 0) { /* IP6 */
+			if (!ip) {
+				return 'null';
+			} else if (ip.indexOf(':') > 0) { /* IP6 */
 				return (ip.split(':').map(d => ('0000'+d).slice(-4) ).join(''));
 			} else { /* IP4 */
 				return Number(ip.split('.').map(d => ('000'+d).slice(-3) ).join(''));
