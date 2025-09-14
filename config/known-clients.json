@@ -23,6 +23,14 @@
 	 "id": "huawei",
 	 "rx": [ "\\sHuaweiBrowser\\/(\\d+\\.\\d+)[\\s\\.]", "\\/harmony360Browser\\/(\\d+\\.\\d+)[\\s\\.]"]
 	},
+	{"n": "Ecosia Browser",
+	 "id": "ecosia",
+	 "rx": [ "\\(Ecosia ios@(\\d+)\\." ]
+	},
+	{"n": "Silk",
+	 "id": "silk",
+	 "rx": [ "\\Silk\\/(\\d+)\\." ]
+	},
 	{"n": "DuckDuckGo",
 	 "id": "ddg",
 	 "rx": [ "\\sDdg\\/(\\S+)" ]
@@ -59,8 +67,12 @@
 	 "id": "safari",
 	 "rx": [ "\\sSafari\\/(\\d+)" ]
 	},
+	{"n": "Firefox Old",
+	 "id": "ffold",
+	 "rx": [ "\\sFirefox\\/(\\d\\d)\\.", "\\sFirefox\\s" ]
+	},
 	{"n": "Firefox",
 	 "id": "firefox",
-	 "rx": [ "\\sFirefox\\/(\\S+)" ]
+	 "rx": [ "\\sFirefox\\/(\\d\\d\\d)\\." ]
 	}
 ]

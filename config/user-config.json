@@ -9,12 +9,16 @@
 		 "id": "oldClient", "desc": "Obsolete browser version",
 		 "bot": 40
 		},
-		{"func": "matchesPlatform", "params": ["winold", "macosold"],
+		{"func": "matchesPlatform", "params": ["winold", "macosold", "androidold"],
 		 "id": "oldOS", "desc": "Obsolete platform version",
 		 "bot": 40
 		},
 		{"func": "matchesPlatform", "params": ["winsrvr", "bsd"],
 		 "id": "serverOS", "desc": "Server OS",
+		 "bot": 40
+		},
+		{"func": "matchesPlatform", "params": ["null"],
+		 "id": "noOS", "desc": "Unknown or missing OS information",
 		 "bot": 40
 		},
 		{"func": "smallPageCount", "params": [1],
@@ -65,6 +69,10 @@
 		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
 		 "bot": 50
 		},
+		{"func": "notFromCountry", "params": ["DE", "AT", "CH", "LI", "LU", "BE"],
+		 "id": "notFromHere", "desc": "Location is not among the site’s main target countries.",
+		 "bot": 20
+		},
 		{"func": "matchesCountry", "params": ["ZZ"],
 		 "id": "zzCtry", "desc": "Location could not be determined",
 		 "bot": 20
@@ -73,12 +81,13 @@
 	"ipRanges": [
 		{"from": "3.0.0.0", "to": "3.255.255.254", "label": "Amazon Data Services [US]"},
 		{"from": "8.127.0.0", "to": "8.223.255.254", "label": "Alibaba [CN]"},
-		{"from": "24.240.0.0", "to": "24.243.255.254", "label": "Charter [US]"},
+		{"from": "24.240.0.0", "to": "24.247.255.255", "m": 13, "label": "Charter [US]"},
 		{"from": "27.106.0.0", "to": "27.106.127.254", "label": "Huawei [US]"},
 		{"from": "34.0.0.0", "to": "34.191.255.254", "label": "Google LLC"},
 		{"from": "45.0.0.0", "to": "45.255.255.254", "label": "Various small ISPs, mostly BR"},
 		{"from": "46.250.160.0", "to": "46.250.191.254", "label": "Huawei [MX]"},
 		{"from": "49.0.200.0", "to": "49.0.255.254", "label": "Huawei [SG]"},
+		{"from": "66.249.64.0", "to": "66.249.95.255", "m": 19, "label": "Google LLC [US]"},
 		{"from": "84.37.35.0", "to": "84.37.255.254", "label": "GTT.net [US]"},
 		{"from": "94.74.64.0", "to": "94.74.127.254", "label": "Huawei [HK]"},
 		{"from": "101.0.0.0", "to": "101.255.255.254", "label": "ChinaNet [CN]"},
@@ -102,12 +111,14 @@
 		{"from": "188.0.0.0", "to": "188.255.255.254", "label": "South-American ISPs (188.x)"},
 		{"from": "189.0.0.0", "to": "189.255.255.254", "label": "South-American ISPs (189.x)"},
 		{"from": "190.0.0.0", "to": "190.255.255.254", "label": "South-American ISPs (190.x)"},
-		{"from": "192.124.170.0", "to": "192.124.182.254", "label": "Relcom  [CZ]"},
+		{"from": "192.124.170.0", "to": "192.124.182.254", "label": "Relcom [CZ]"},
 		{"from": "195.37.0.0", "to": "195.37.255.255", "label": "DFN [DE]"},
-		{"from": "2001:4800::::::", "to": "2001:4fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Rackspace/Google [US]"},
-		{"from": "2001:0ee0::::::", "to": "2001:ee3:ffff:ffff:ffff:ffff:ffff:ffff", "mask": 30, "label": "VNPT [VN]"},
-		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "label": "Amazon Cloud [US]"},
-		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Inspire [BR]"},
+		{"from": "2001:4860::::::", "to": "2001:4860:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Google LLC [US]"},
+		{"from": "2001:0ee0::::::", "to": "2001:ee3:ffff:ffff:ffff:ffff:ffff:ffff", "m": 30, "label": "VNPT [VN]"},
+		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "m": "Amazon Cloud [US]"},
+		{"from": "2603:6010::::::", "to": "2603:6010:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Charter [US]"},
+		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "label": "Charter [US]"},
+		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "label": "Inspire [BR]"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Netcup [DE]"}
 	]
 }

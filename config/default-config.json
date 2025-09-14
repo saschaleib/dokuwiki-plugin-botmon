@@ -1,0 +1,118 @@
+{
+	"threshold": 100,
+	"rules": [
+		{"func": "fromKnownBotIP",
+		 "id": "botIpRange", "desc": "Common Bot IP range",
+		 "bot": 50
+		},
+		{"func": "matchesClient", "params": ["aol", "msie", "chromeold","oldedge"],
+		 "id": "oldClient", "desc": "Obsolete browser version",
+		 "bot": 40
+		},
+		{"func": "matchesPlatform", "params": ["winold", "macosold", "androidold"],
+		 "id": "oldOS", "desc": "Obsolete platform version",
+		 "bot": 40
+		},
+		{"func": "matchesPlatform", "params": ["winsrvr", "bsd"],
+		 "id": "serverOS", "desc": "Server OS",
+		 "bot": 40
+		},
+		{"func": "matchesPlatform", "params": ["null"],
+		 "id": "noOS", "desc": "Unknown or missing OS information",
+		 "bot": 40
+		},
+		{"func": "smallPageCount", "params": [1],
+		 "id": "onePage", "desc": "Visiter viewed only a single page",
+		 "bot": 30
+		},
+		{"func": "noRecord", "params": ["log"],
+		 "id": "noClient", "desc": "No client-side JS log was recorded",
+		 "bot": 40
+		},
+		{"func": "noRecord", "params": ["tck"],
+		 "id": "noTicks", "desc": "No client ticks were recorded",
+		 "bot": 10
+		},
+		{"func": "noReferrer",
+		 "id": "noRefs", "desc": "No referer field",
+		 "bot": 30
+		},
+		{"func": "matchLang", "params": [],
+		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
+		 "bot": 30
+		},
+		{"func": "matchesClient", "params": ["brave"],
+		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
+		 "bot": 10
+		},
+		{"func": "combinationTest", "params": [["macos","chromeold"],["macos","msie"],["winold","edge"],["winold","brave"]],
+		 "id": "suspPC", "desc": "Suspicious combination of platform and client",
+		 "bot": 30
+		},
+		{"func": "combinationTest", "params": [["macos","msie"],["win10","safari"],["macosold","brave"]],
+		 "id": "impPC", "desc": "Impossible combination of platform and client",
+		 "bot": 70
+		},
+		{"func": "loadSpeed", "params": [3, 20],
+		 "id": "speedRun", "desc": "Average time between page loads is less than 20 seconds",
+		 "bot": 80
+		},
+		{"func": "noAcceptLang",
+		 "id": "noAcc", "desc": "No “Accept-Language” header",
+		 "bot": 40
+		},
+		{"func": "clientAccepts", "params": ["zh"],
+		 "id": "zhLang", "desc": "Client accepts Chinese language",
+		 "bot": 60
+		},
+		{"func": "matchesCountry", "params": ["BR", "CN", "RU", "US", "MX", "SG", "IN", "UY"],
+		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
+		 "bot": 50
+		}
+	],
+	"ipRanges": [
+		{"from": "3.0.0.0", "to": "3.255.255.254", "label": "Amazon Data Services [US]"},
+		{"from": "8.127.0.0", "to": "8.223.255.254", "label": "Alibaba [CN]"},
+		{"from": "24.240.0.0", "to": "24.247.255.255", "m": 13, "label": "Charter [US]"},
+		{"from": "27.106.0.0", "to": "27.106.127.254", "label": "Huawei [US]"},
+		{"from": "34.0.0.0", "to": "34.191.255.254", "label": "Google LLC"},
+		{"from": "45.0.0.0", "to": "45.255.255.254", "label": "Various small ISPs, mostly BR"},
+		{"from": "46.250.160.0", "to": "46.250.191.254", "label": "Huawei [MX]"},
+		{"from": "47.200.0.0", "to": "47.203.255.255", "m": 14, "label": "Frontier Communications [US]"},
+		{"from": "49.0.200.0", "to": "49.0.255.254", "label": "Huawei [SG]"},
+		{"from": "66.249.64.0", "to": "66.249.95.255", "m": 19, "label": "Google LLC [US]"},
+		{"from": "84.37.35.0", "to": "84.37.255.254", "label": "GTT.net [US]"},
+		{"from": "94.74.64.0", "to": "94.74.127.254", "label": "Huawei [HK]"},
+		{"from": "101.0.0.0", "to": "101.255.255.254", "label": "ChinaNet [CN]"},
+		{"from": "110.238.80.0", "to": "110.238.127.254", "label": "Huawei [SG]"},
+		{"from": "111.119.192.0", "to": "111.119.255.254", "label": "Huawei [SG]"},
+		{"from": "119.0.0.0", "to": "119.207.255.254", "label": "Unicom [CN]"},
+		{"from": "121.91.168.", "to": "121.91.175.254", "label": "Huawei [HK]"},
+		{"from": "122.8.0.0", "to": "122.8.255.254", "label": "CN-ISP [CN]"},
+		{"from": "122.9.0.0", "to": "122.9.255.254", "label": "Huawei [CN]"},
+		{"from": "124.243.128.0", "to": "124.243.191.254", "label": "Huawei [SG]"},
+		{"from": "142.147.128.0", "to": "1142.147.255.254", "label": "Web2Objects LLC [US]"},
+		{"from": "150.40.128.0", "to": "150.40.255.254", "label": "Huawei [HK]"},
+		{"from": "159.138.0.0", "to": "159.138.225.254", "label": "Huawei [TH]"},
+		{"from": "162.128.0.0", "to": "162.128.255.254", "label": "Zenlayer [SG]"},
+		{"from": "166.108.192.0", "to": "166.108.255.254", "label": "Huawei [SG]"},
+		{"from": "177.0.0.0", "to": "177.255.255.254", "label": "BrasilNET [BR]"},
+		{"from": "179.0.0.0", "to": "179.255.255.254", "label": "BrasilNET [BR]"},
+		{"from": "183.87.32.0", "to": "183.87.159.254", "label": "Huawei [HK]"},
+		{"from": "186.0.0.0", "to": "186.255.255.254", "label": "South-American ISPs (186.x)"},
+		{"from": "187.0.0.0", "to": "187.255.255.254", "label": "South-American ISPs (187.x)"},
+		{"from": "188.0.0.0", "to": "188.255.255.254", "label": "South-American ISPs (188.x)"},
+		{"from": "189.0.0.0", "to": "189.255.255.254", "label": "South-American ISPs (189.x)"},
+		{"from": "190.0.0.0", "to": "190.255.255.254", "label": "South-American ISPs (190.x)"},
+		{"from": "192.124.170.0", "to": "192.124.182.254", "label": "Relcom [CZ]"},
+		{"from": "195.37.0.0", "to": "195.37.255.255", "label": "DFN [DE]"},
+		{"from": "2001:4860::::::", "to": "2001:4860:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Google LLC [US]"},
+		{"from": "2001:0ee0::::::", "to": "2001:ee3:ffff:ffff:ffff:ffff:ffff:ffff", "m": 30, "label": "VNPT [VN]"},
+		{"from": "2408:8210::::::", "to": "2408:8210:ffff:ffff:ffff:ffff:ffff:ffff", "m": 30, "label": "China Unicom [CN]"},
+		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "m": "Amazon Cloud [US]"},
+		{"from": "2603:6010::::::", "to": "2603:6010:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Charter [US]"},
+		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "label": "Charter [US]"},
+		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "label": "Inspire [BR]"},
+		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Netcup [DE]"}
+	]
+}

@@ -40,7 +40,7 @@
 
 		/* Bot icons */
 		&.bot::before { background-image: url('img/bots.png') }
-		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before { background-position-y: -20px }
+		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before, &.bot_googleother::before { background-position-y: -20px }
 		&.bot_bingbot::before { background-position-y: -40px }
 		&.bot_applebot::before { background-position-y: -60px }
 		&.bot_openai::before { background-position-y: -80px }
@@ -49,8 +49,7 @@
 		&.bot_seznambot::before { background-position-y: -140px }
 		&.bot_claude::before { background-position-y: -160px }
 
-		/* platform icons */
-			
+		/* platform icons */	
 		&.platform::before { background-image: url('img/platforms.png') }
 		&.pf_win10::before { background-position-y: -20px }
 		&.pf_winold::before, dd.platform_winold::before,
@@ -59,18 +58,19 @@
 		&.pf_macosold::before { background-position-y: -80px }
 		&.pf_ios::before { background-position-y: -100px }
 		&.pf_android::before { background-position-y: -120px }
+		&.pf_androidold::before { background-position-y: -140px }
 		&.pf_linux::before { background-position-y: -160px }
 		&.pf_bsd::before { background-position-y: -180px }
 		&.pf_chromium::before { background-position-y: -200px }
 		&.pf_hmos::before { background-position-y: -220px }
 		&.pf_tizen::before { background-position-y: -240px }
+		&.pf_fire::before { background-position-y: -260px }
 
 		/* browser icons */
 		&.client::before { background-image: url('img/clients.png') }
 		&.cl_firefox::before { background-position-y: -20px }
 		&.cl_safari::before { background-position-y: -40px }
 		&.cl_chrome::before { background-position-y: -60px }
-		&.cl_chromeold::before { background-position-y: -60px; opacity: 75%; filter: ~"saturate(25%)"; }
 		&.cl_msedge::before { background-position-y: -80px }
 		&.cl_msie::before { background-position-y: -100px }
 		&.cl_opera::before { background-position-y: -120px }
@@ -81,6 +81,10 @@
 		&.cl_vivaldi::before { background-position-y: -220px }
 		&.cl_aol::before { background-position-y: -240px }
 		&.cl_ya::before { background-position-y: -260px }
+		&.cl_silk::before { background-position-y: -280px }
+		&.cl_ffold::before { background-position-y: -300px }
+		&.cl_chromeold::before { background-position-y: -320px }
+		&.cl_ecosia::before { background-position-y: -340px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
@@ -329,13 +333,18 @@
 		&.typ_php::before { background-position-y: -40px }
 		&.typ_ip::before { background-position-y: -60px }
 		&.typ_usr::before { background-position-y: -80px }
+
+		/* External link icons */
+		&.extlink::before { background-image: url('img/links.png') }
+		&.extlink.dnscheck::before { background-position-y: -20px }
+		&.extlink.ipinfo::before { background-position-y: -40px }
 	}
 
 	/* grid layout for the overview: */
 	.botmon_overview_grid {
 		& {
 			display: grid;
-			grid-template-columns: 1fr 1fr 1fr 1fr;
+			grid-template-columns: 1fr 1fr 1fr;
 			grid-gap: 0 .33em;
 		}
 		dl {
@@ -354,7 +363,7 @@
 		header {
 			background-color: #F0F0F0;
 			color: #333;
-			border: #666 solid 1px;
+			border: #999 solid 1px;
 			border-radius: .5rem .5rem 0 0;
 			margin: .5rem 0 1pt 0;
 			padding: .25rem .5rem;
@@ -432,7 +441,7 @@
 				}
 				& > div {
 					padding: .5rem;
-					border: #CCC solid 1px;
+					border: #999 solid 1px;
 					border-top-width: 0;
 					border-radius: 0 0 .25rem .25rem;
 				}
@@ -448,7 +457,7 @@
 			}
 			& > details > summary {
 				background-color: #F0F0F0;
-				border: #CCC solid 1px;
+				border: #999 solid 1px;
 			}
 		}
 
@@ -483,7 +492,9 @@
 				border-bottom: #CCC solid 1px;
 				border-radius: .7em;
 			}
-
+			details ul > li > details > summary.noServer {
+				opacity: 67%;
+			}
 			details ul > li > details > summary > span {
 				display: flex;
 				align-items: center;
@@ -519,25 +530,48 @@
 							& {
 								display: flex;
 								justify-content: space-between;
-								align-items: center;
+								align-items: baseline;
+								white-space: nowrap;
+								line-height: 1.2rem;
+								margin: 0;
+								padding: 0 .25em;
+							}
+							&:nth-child(odd) {
+								background-color: #DFDFDF;
 							}
 							span {
-								&.visit-length {
-									min-width: min-content;
-								}
-								&.bounce {
-									width: 1.25em; height: 1.25em;
-									overflow: hidden;
-								}
-								&.bounce::before {
-									display: inline-block;
-									content: '';
-									width: 1.25em; height: 1.25em;
-									background: transparent url('img/bounce.svg') center no-repeat;
-									background-size: 1.25em;
-								}
+								display: inline-block;
 							}
 						}
+					}
+					span[data-lang] {
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+					span[data-lang]::after {
+						content: attr(data-lang);
+						font-size: smaller;
+						color: #555;
+						border: #555 solid 1px;
+						line-height: 1.25;
+						border-radius: 2pt;
+						padding: 0 1pt;
+						margin-left: .2em;
+					}
+					span.first-seen {
+						min-width: 4.2em;
+						text-align: right;;
+					}
+					span.bounce {
+						width: 1.25em; height: 1.25em;
+						overflow: hidden;
+					}
+					span.bounce::before {
+						display: inline-block;
+						content: '';
+						width: 1.25em; height: 1.25em;
+						background: transparent url('img/bounce.svg') center no-repeat;
+						background-size: 1.25em;
 					}
 				}
 			}
@@ -549,7 +583,7 @@
 					align-items: center;
 				}
 				li:nth-child(odd) {
-					background-color: #EEE;
+					background-color: #DFDFDF;
 				}
 				li.total {
 					border-top: #333 solid 1px;
@@ -587,7 +621,7 @@
 				column-gap: .25rem;
 				background-color: #F0F0F0;
 				color: #333;
-				border: #666 solid 1px;
+				border: #999 solid 1px;
 				border-radius: 0 0 .5rem .5rem;
 				margin: 1pt 0 0 0;
 				padding: .25rem .5rem;

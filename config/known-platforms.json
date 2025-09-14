@@ -15,13 +15,21 @@
 	 "id": "ios",
 	 "rx": [ "\\sFxiOS\\/(\\d+\\.\\d+)\\s", "\\siPhone\\sOS\\s([\\d\\._]+)\\s", "\\siPadOS\\s([\\d\\._]+)\\s", "iPad; CPU OS (\\d+)[_\\.\\s]", "\\sCriOS\\/(\\d+\\.\\d+)\\." ]
 	},
+	{"n": "FireOS",
+	 "id": "fire",
+	 "rx": [ "\\sKFFOWI[\\)\\s]]", "\\sKFTHWI[\\)\\s]]" , "\\sSilk\\/"]
+	},
+	{"n": "Old Android",
+	 "id": "androidold",
+	 "rx": [ "Android[\\s;\\/](\\d)\\." ]
+	},
 	{"n": "Android",
 	 "id": "android",
-	 "rx": [ "[\\(\\s]Android\\s([^;]+);" ]
+	 "rx": [ "Android[\\s;\\/](\\d\\d)[\\.;\\s]" ]
 	},
 	{"n": "Old MacOS",
 	 "id": "macosold",
-	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[123])[\\._]" ]
+	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[123])[\\.;_\\s]" ]
 	},
 	{"n": "MacOS",
 	 "id": "macos",

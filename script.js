@@ -21,7 +21,6 @@ const BotMon = {
 		// find the plugin basedir:
 		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
 			+ '/plugins/botmon/';
-		this._DWBaseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/lib/')) + '/';
 
 		// read the page language from the DOM:
 		this._lang = document.getRootNode().documentElement.lang || this._lang;
@@ -34,7 +33,6 @@ const BotMon = {
 	},
 
 	_baseDir: null,
-	_DWBaseDir: null,
 	_lang: 'en',
 	_today: (new Date()).toISOString().slice(0, 10),
 	_timeDiff: '',
@@ -109,7 +107,7 @@ const BotMon = {
 		_formatTime: function(date) {
 
 			if (date) {
-				return ('0'+date.getHours()).slice(-2) + ':' + ('0'+date.getMinutes()).slice(-2) + ':' + ('0'+date.getSeconds()).slice(-2);
+				return date.getHours() + ':' + ('0'+date.getMinutes()).slice(-2) + ':' + ('0'+date.getSeconds()).slice(-2);
 			} else {
 				return null;
 			}
@@ -320,7 +318,7 @@ BotMon.live = {
 					nv._country = ( nv.geo == 'local' ? "localhost" : "Unknown" );
 					if (nv.geo && nv.geo !== '' && nv.geo !== 'ZZ' && nv.geo !== 'local') {
 						const countryName = new Intl.DisplayNames(['en', BotMon._lang], {type: 'region'});
-						nv._country = countryName.of(nv.geo) ?? nv.geo;
+						nv._country = countryName.of(nv.geo.substring(0,2)) ?? nv.geo;
 					}
 				} catch (err) {
 					console.error(err);
@@ -435,7 +433,7 @@ BotMon.live = {
 					// get the page view info:
 					let pv = model._getPageView(visitor, dat);
 					if (!pv) {
-						console.warn(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
+						console.info(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
 						pv = model._makePageView(dat, type);
 						visitor._pageViews.push(pv);
 					}
@@ -450,19 +448,21 @@ BotMon.live = {
 
 			// helper function to create a new "page view" item:
 			_makePageView: function(data, type) {
+				// console.info('_makePageView', data);
 
 				// try to parse the referrer:
 				let rUrl = null;
 				try {
 					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
 				} catch (e) {
-					console.info(`Invalid referer: “${data.ref}”.`);
+					console.warn(`Invalid referer: “${data.ref}”.`);
 				}
 
 				return {
 					_by: type,
 					ip: data.ip,
 					pg: data.pg,
+					lang: data.lang || '??',
 					_ref: rUrl,
 					_firstSeen: data.ts,
 					_lastSeen: data.ts,
@@ -553,9 +553,9 @@ BotMon.live = {
 					if (v._type == BM_USERTYPE.KNOWN_BOT || v._type == BM_USERTYPE.LIKELY_BOT) { /* bots only */
 						
 						// add bot views to IP range information:
-						v._pageViews.forEach( pv => {
+						/*v._pageViews.forEach( pv => {
 							me.addToIPRanges(pv.ip);
-						});
+						});*/
 
 						// add to the country lists:
 						me.addToCountries(v.geo, v._country, v._type);
@@ -572,10 +572,10 @@ BotMon.live = {
 			},
 
 			// visits from IP ranges:
-			_ipRange: {
+			/*_ipRange: {
 				ip4: [],
 				ip6: []
-			},
+			},*/
 			/**
 			 * Adds a visit to the IP range statistics.
 			 * 
@@ -583,7 +583,7 @@ BotMon.live = {
 			 * 
 			 * @param {string} ip The IP address to add.
 			 */
-			addToIPRanges: function(ip) {
+			/*addToIPRanges: function(ip) {
 
 				// #TODO: handle nestled ranges!
 				const me = BotMon.live.data.analytics;
@@ -615,8 +615,8 @@ BotMon.live = {
 					it.count += 1;
 				}
 			
-			},
-			getTopBotIPRanges: function(max) {
+			},*/
+			/*getTopBotIPRanges: function(max) {
 
 				const me = BotMon.live.data.analytics;
 
@@ -649,7 +649,7 @@ BotMon.live = {
 				}
 				
 				return rList;
-			},
+			},*/
 
 			/* countries of visits */
 			_countries: {
@@ -885,7 +885,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known bots …");
-				const url = BotMon._baseDir + 'conf/known-bots.json';
+				const url = BotMon._baseDir + 'config/known-bots.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -896,7 +896,7 @@ BotMon.live = {
 					this._ready = true;
 
 				} catch (error) {
-					BotMon.live.gui.status.setError("Error while loading the ‘known bots’ file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the known bots file:", error.message);
 				} finally {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('bots')
@@ -961,7 +961,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known clients");
-				const url = BotMon._baseDir + 'conf/known-clients.json';
+				const url = BotMon._baseDir + 'config/known-clients.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -983,7 +983,7 @@ BotMon.live = {
 			match: function(agent) {
 				//console.info('BotMon.live.data.clients.match(',agent,')');
 
-				let match = {"n": "Unknown", "v": -1, "id": null};
+				let match = {"n": "Unknown", "v": -1, "id": 'null'};
 
 				if (agent) {
 					BotMon.live.data.clients._list.find(client => {
@@ -1009,7 +1009,7 @@ BotMon.live = {
 			// return the browser name for a browser ID:
 			getName: function(id) {
 				const it = BotMon.live.data.clients._list.find(client => client.id == id);
-				return it.n;
+				return ( it && it.n ? it.n : "Unknown"); //it.n;
 			},
 
 			// indicates if the list is loaded and ready to use:
@@ -1027,7 +1027,7 @@ BotMon.live = {
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading known platforms");
-				const url = BotMon._baseDir + 'conf/known-platforms.json';
+				const url = BotMon._baseDir + 'config/known-platforms.json';
 				try {
 					const response = await fetch(url);
 					if (!response.ok) {
@@ -1049,7 +1049,7 @@ BotMon.live = {
 			match: function(cid) {
 				//console.info('BotMon.live.data.platforms.match(',cid,')');
 
-				let match = {"n": "Unknown", "id": null};
+				let match = {"n": "Unknown", "id": 'null'};
 
 				if (cid) {
 					BotMon.live.data.platforms._list.find(platform => {
@@ -1095,13 +1095,10 @@ BotMon.live = {
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
 
 				// relative file path to the rules file:
-				const filePath = 'conf/botmon-config.json';
+				const filePath = 'config/default-config.json';
 
-				// check if the user has a configuration file in their DokuWiki installation,
-				// then load the appropriate file:
-				this._checkForUserConfig( filePath, (hasUserConfig) => {
-					this._loadrulesFile(( hasUserConfig ? BotMon._DWBaseDir : BotMon._baseDir ) + filePath);
-				});				
+				// load the rules file:
+				this._loadrulesFile(BotMon._baseDir + filePath);			
 			},
 
 			/**
@@ -1146,32 +1143,10 @@ BotMon.live = {
 					me._ready = true;
 
 				} catch (error) {
-					BotMon.live.gui.status.setError("Error while loading the ‘rules’ file: " + error.message);
+					BotMon.live.gui.status.setError("Error while loading the config file: " + error.message);
 				} finally {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('rules')
-				}
-			},
-
-			/**
-			 * Checks if the user has a configuration file in their DokuWiki installation.
-			 * @param {function} whenDone - an optional callback function to call when the check is finished.
-			 */
-			_checkForUserConfig: async function(filePath, whenDone = undefined) {
-				//console.info('BotMon.live.data.rules._checkForUserConfig()');
-				
-				let hasUserConfig = false;
-				try {
-					const response = await fetch(BotMon._DWBaseDir + '/' + filePath, {
-						method: 'HEAD'
-					});
-					hasUserConfig = response.ok;
-				} catch (err) {
-					console.info("An error occured while trying to check for a user configuration file:", err);
-				} finally {
-					if (whenDone) {
-						whenDone(hasUserConfig);
-					}
 				}
 			},
 
@@ -1243,6 +1218,9 @@ BotMon.live = {
 				matchesPlatform: function(visitor, ...platforms) {
 
 					const pId = ( visitor._platform ? visitor._platform.id : '');
+
+					if (visitor._platform.id == null) console.log(visitor._platform);
+
 					return platforms.includes(pId);
 				},
 
@@ -1313,6 +1291,16 @@ BotMon.live = {
 
 					if (visitor.lang && visitor.accept && exceptions.indexOf(visitor.lang) < 0) {
 						return (visitor.accept.split(',').indexOf(visitor.lang) < 0);
+					}
+					return false;
+				},
+
+				// the "Accept language" header contains certain entries:
+				clientAccepts: function(visitor, ...languages) {
+					//console.info('clientAccepts', visitor.accept, languages);
+
+					if (visitor.accept && languages) {;
+						return ( visitor.accept.split(',').filter(lang => languages.includes(lang)).length > 0 );
 					}
 					return false;
 				},
@@ -1476,7 +1464,7 @@ BotMon.live = {
 				}
 
 			} catch (error) {
-				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message}.`);
+				BotMon.live.gui.status.setError(`Error while loading the ${typeName} log file: ${error.message} – data may be incomplete.`);
 			} finally {
 				BotMon.live.gui.status.hideBusy("Status: Done.");
 				if (onLoaded) {
@@ -1557,7 +1545,7 @@ BotMon.live = {
 				}
 
 				// update the suspected bot IP ranges list:
-				const botIps = document.getElementById('botmon__today__botips');
+				/*const botIps = document.getElementById('botmon__today__botips');
 				if (botIps) {
 					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 5)"));
 
@@ -1568,7 +1556,7 @@ BotMon.live = {
 						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
 						botIps.append(li)
 					});
-				}
+				}*/
 
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__today__countries');
@@ -1678,7 +1666,7 @@ BotMon.live = {
 				BotMon.live.gui.status._errorCount += 1;
 				const el = document.getElementById('botmon__today__status');
 				if (el) {
-					el.innerText = "An error occurred. Data may be incomplete! See browser console for details";
+					el.innerText = "Data may be incomplete.";
 					el.classList.add('error');
 				}
 			},
@@ -1792,19 +1780,16 @@ BotMon.live = {
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
 
+				const sumClass = ( data._seenBy.indexOf('srv') < 0 ? 'noServer' : 'hasServer');
+
 				const li = make('li'); // root list item
 				const details = make('details');
-				const summary = make('summary');
+				const summary = make('summary', {
+					'class': sumClass
+				});
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
-
-				// country flag:
-				span1.appendChild(make('span', {
-					'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
-					'data-ctry': (data.geo | 'ZZ'),
-					'title': "Country: " + ( data._country || "Unknown")
-				}, ( data._country || "Unknown") ));
 
 				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* No platform/client for bots */
 					span1.appendChild(make('span', { /* Platform */
@@ -1846,6 +1831,15 @@ BotMon.live = {
 						'class': 'has_icon session typ_' + data.typ,
 						'title': "ID: " + data.id
 					}, data.id));
+				}
+
+				// country flag:
+				if (data.geo && data.geo !== 'ZZ') {
+					span1.appendChild(make('span', {
+						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + ( data._country || "Unknown")
+					}, ( data._country || "Unknown") ));
 				}
 
 				summary.appendChild(span1);
@@ -1904,7 +1898,21 @@ BotMon.live = {
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
 					dl.appendChild(make('dt', {}, "IP-Address:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ipaddr ip' + ipType}, data.ip));
+					const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
+						ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink dnscheck',
+							'href': `https://dnschecker.org/ip-location.php?ip=${encodeURIComponent(data.ip)}`,
+							'target': 'dnscheck',
+							'title': "View this address on DNSChecker.org"
+						} , "Check Address"));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink ipinfo',
+							'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
+							'target': 'ipinfo',
+							'title': "View this address on IPInfo.io"
+						} , "DNS Info"));
+					dl.appendChild(ipItem);
 
 					/*dl.appendChild(make('dt', {}, "ID:"));
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
@@ -1924,7 +1932,7 @@ BotMon.live = {
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
 				dl.appendChild(make('dt', {}, "Languages:"));
-				dl.appendChild(make('dd', {'class': 'langs'}, "Client accepts: [" + data.accept + "]; Page: [" + data.lang + ']'));
+				dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
 
 				if (data.geo && data.geo !=='') {
 					dl.appendChild(make('dt', {}, "Location:"));
@@ -1949,37 +1957,56 @@ BotMon.live = {
 				const pageList = make('ul');
 
 				/* list all page views */
+				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
+					//console.log("page:",page);
+
 					const pgLi = make('li');
 
-					let visitTimeStr = "Bounce";
-					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
-					if (visitDuration > 0) {
-						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
-					}
+					const lGroup = make('span'); // left group:
 
-					pgLi.appendChild(make('span', {}, page.pg)); /* DW Page ID */
-					if (page._ref) {
-						pgLi.appendChild(make('span', {
-							'data-ref': page._ref.host,
-							'title': "Referrer: " + page._ref.full
-						}, page._ref.site));
-					} else {
-						pgLi.appendChild(make('span', {
-						}, "No referer"));
-					}
-					pgLi.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
-					pgLi.appendChild(make('span', {}, BotMon.t._formatTime(page._firstSeen)));
+						lGroup.appendChild(make('span', {
+							'data-lang': page.lang,
+							'title': "PageID: " + page.pg
+						}, page.pg)); /* DW Page ID */
 
-					// get the time difference:
-					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
-					if (tDiff) {
-						pgLi.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
-					} else {
-						pgLi.appendChild(make('span', {
-							'class': 'bounce',
-							'title': "Visitor bounced"}, "Bounce"));
-					}
+					pgLi.appendChild(lGroup); // end of left group
+
+					const rGroup = make('span'); // right group:
+
+						let visitTimeStr = "Bounce";
+						const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+						if (visitDuration > 0) {
+							visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+						}
+
+						/*if (page._ref) {
+							rGroup.appendChild(make('span', {
+								'data-ref': page._ref.host,
+								'title': "Referrer: " + page._ref.full
+							}, page._ref.site));
+						} else {
+							rGroup.appendChild(make('span', {
+							}, "No referer"));
+						}*/
+						//rGroup.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
+
+						// get the time difference:
+						const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+						if (tDiff) {
+							rGroup.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
+						} else {
+							rGroup.appendChild(make('span', {
+								'class': 'bounce',
+								'title': "Visitor bounced"}, "Bounce"));
+						}
+						rGroup.appendChild(make('span', {
+							'class': 'first-seen',
+							'title': "First visited: " + page._firstSeen.toLocaleString()
+						}, BotMon.t._formatTime(page._firstSeen)));
+					
+					pgLi.appendChild(rGroup); // end of right group
+
 
 					pageList.appendChild(pgLi);
 				});

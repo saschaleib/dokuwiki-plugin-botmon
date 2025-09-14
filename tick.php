@@ -2,6 +2,12 @@
 
 	// Note: this script is normally called in HEAD mode, therefore it can not return any payload.
 
+	// quit out if it is called without athe right parameters:
+	if (!isset($_GET['id']) || !isset($_GET['p'])) {
+		http_response_code(400);
+		die("Parameter error.");
+	}
+
 	// what is the session identifier?
 	$sessionId = preg_replace('/[\x00-\x1F{};\"\']/', "\u{FFFD}", $_GET['id']) /* clean json parameter */
 		?? session_id()
