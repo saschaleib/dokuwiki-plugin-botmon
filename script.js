@@ -981,7 +981,7 @@ BotMon.live = {
 			match: function(agent) {
 				//console.info('BotMon.live.data.clients.match(',agent,')');
 
-				let match = {"n": "Unknown", "v": -1, "id": null};
+				let match = {"n": "Unknown", "v": -1, "id": 'null'};
 
 				if (agent) {
 					BotMon.live.data.clients._list.find(client => {
@@ -1047,7 +1047,7 @@ BotMon.live = {
 			match: function(cid) {
 				//console.info('BotMon.live.data.platforms.match(',cid,')');
 
-				let match = {"n": "Unknown", "id": null};
+				let match = {"n": "Unknown", "id": 'null'};
 
 				if (cid) {
 					BotMon.live.data.platforms._list.find(platform => {
@@ -1216,6 +1216,9 @@ BotMon.live = {
 				matchesPlatform: function(visitor, ...platforms) {
 
 					const pId = ( visitor._platform ? visitor._platform.id : '');
+
+					if (visitor._platform.id == null) console.log(visitor._platform);
+
 					return platforms.includes(pId);
 				},
 
