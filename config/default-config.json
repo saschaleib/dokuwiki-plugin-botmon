@@ -80,6 +80,7 @@
 		{"from": "46.250.160.0", "to": "46.250.191.254", "label": "Huawei [MX]"},
 		{"from": "47.200.0.0", "to": "47.203.255.255", "m": 14, "label": "Frontier Communications [US]"},
 		{"from": "49.0.200.0", "to": "49.0.255.254", "label": "Huawei [SG]"},
+		{"from": "52.220.0.0", "to": "52.222.255.254", "label": "Amazon Data Services"},
 		{"from": "66.249.64.0", "to": "66.249.95.255", "m": 19, "label": "Google LLC [US]"},
 		{"from": "84.37.35.0", "to": "84.37.255.254", "label": "GTT.net [US]"},
 		{"from": "94.74.64.0", "to": "94.74.127.254", "label": "Huawei [HK]"},
@@ -112,6 +113,7 @@
 		{"from": "2600:1f00::::::", "to": "2600:1fff:ffff:ffff:ffff:ffff:ffff:ffff", "m": "Amazon Cloud [US]"},
 		{"from": "2603:6010::::::", "to": "2603:6010:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Charter [US]"},
 		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "label": "Charter [US]"},
+		{"from": "2607:a400::::::", "to": "2607:a400:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Zenlayer Inc. [US]"},
 		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "label": "Inspire [BR]"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Netcup [DE]"}
 	]

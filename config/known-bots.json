@@ -41,7 +41,7 @@
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
 	},
 	{"id": "ddg",
-	 "n": "DuckDuckGo",
+	 "n": "DuckDuck Bot",
 	 "r": ["DuckDuckBot","DuckAssistBot","DuckDuckGo-Favicons-Bot"],
 	 "rx": ["DuckDuckBot\\/(\\d+\\.\\d+);", "DuckAssistBot\\/(\\d+\\.\\d+);", "DuckDuckGo-Favicons-Bot\\/(\\d+\\.\\d+);"],
 	 "url": "https://duckduckgo.com/duckduckbot.html"
@@ -224,6 +224,12 @@
 	 "n": "TikTok Spider", "geo": "CN",
 	 "r": ["TikTokSpider"],
 	 "rx": ["TikTokSpider"],
+	 "url": "https://darkvisitors.com/agents/tiktokspider"
+	},
+	{"id": "HaloBot",
+	 "n": "HaloBot", "geo": "FR",
+	 "r": ["HaloBot"],
+	 "rx": [" HaloBot\\/(\\d+)\\."],
 	 "url": "https://darkvisitors.com/agents/tiktokspider"
 	}
 ]
