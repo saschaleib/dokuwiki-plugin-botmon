@@ -25,11 +25,11 @@
 	},
 	{"n": "Android",
 	 "id": "android",
-	 "rx": [ " Android[\\s;\\/](\\d\\d)\\.;\\s" ]
+	 "rx": [ "Android[\\s;\\/](\\d\\d)[\\.;\\s]" ]
 	},
 	{"n": "Old MacOS",
 	 "id": "macosold",
-	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[123])[\\._]" ]
+	 "rx": [ "\\sMac OS X 10[\\._](\\d|1[0-3])[\\._;\\s\\)]", "\\sMac OS X (1[123])[\\.;_\\s]" ]
 	},
 	{"n": "MacOS",
 	 "id": "macos",

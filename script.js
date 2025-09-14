@@ -107,7 +107,7 @@ const BotMon = {
 		_formatTime: function(date) {
 
 			if (date) {
-				return ('0'+date.getHours()).slice(-2) + ':' + ('0'+date.getMinutes()).slice(-2) + ':' + ('0'+date.getSeconds()).slice(-2);
+				return date.getHours() + ':' + ('0'+date.getMinutes()).slice(-2) + ':' + ('0'+date.getSeconds()).slice(-2);
 			} else {
 				return null;
 			}
@@ -433,7 +433,7 @@ BotMon.live = {
 					// get the page view info:
 					let pv = model._getPageView(visitor, dat);
 					if (!pv) {
-						console.warn(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
+						console.info(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
 						pv = model._makePageView(dat, type);
 						visitor._pageViews.push(pv);
 					}
@@ -448,19 +448,21 @@ BotMon.live = {
 
 			// helper function to create a new "page view" item:
 			_makePageView: function(data, type) {
+				// console.info('_makePageView', data);
 
 				// try to parse the referrer:
 				let rUrl = null;
 				try {
 					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
 				} catch (e) {
-					console.info(`Invalid referer: “${data.ref}”.`);
+					console.warn(`Invalid referer: “${data.ref}”.`);
 				}
 
 				return {
 					_by: type,
 					ip: data.ip,
 					pg: data.pg,
+					lang: data.lang || '??',
 					_ref: rUrl,
 					_firstSeen: data.ts,
 					_lastSeen: data.ts,
@@ -1293,6 +1295,16 @@ BotMon.live = {
 					return false;
 				},
 
+				// the "Accept language" header contains certain entries:
+				clientAccepts: function(visitor, ...languages) {
+					//console.info('clientAccepts', visitor.accept, languages);
+
+					if (visitor.accept && languages) {;
+						return ( visitor.accept.split(',').filter(lang => languages.includes(lang)).length > 0 );
+					}
+					return false;
+				},
+
 				// Is there an accept-language field defined at all?
 				noAcceptLang: function(visitor) {
 
@@ -1886,7 +1898,21 @@ BotMon.live = {
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
 					dl.appendChild(make('dt', {}, "IP-Address:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ipaddr ip' + ipType}, data.ip));
+					const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
+						ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink dnscheck',
+							'href': `https://dnschecker.org/ip-location.php?ip=${encodeURIComponent(data.ip)}`,
+							'target': 'dnscheck',
+							'title': "View this address on DNSChecker.org"
+						} , "Check Address"));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink ipinfo',
+							'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
+							'target': 'ipinfo',
+							'title': "View this address on IPInfo.io"
+						} , "DNS Info"));
+					dl.appendChild(ipItem);
 
 					/*dl.appendChild(make('dt', {}, "ID:"));
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
@@ -1906,7 +1932,7 @@ BotMon.live = {
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
 				dl.appendChild(make('dt', {}, "Languages:"));
-				dl.appendChild(make('dd', {'class': 'langs'}, "Client accepts: [" + data.accept + "]; Page: [" + data.lang + ']'));
+				dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
 
 				if (data.geo && data.geo !=='') {
 					dl.appendChild(make('dt', {}, "Location:"));
@@ -1931,37 +1957,56 @@ BotMon.live = {
 				const pageList = make('ul');
 
 				/* list all page views */
+				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
+					//console.log("page:",page);
+
 					const pgLi = make('li');
 
-					let visitTimeStr = "Bounce";
-					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
-					if (visitDuration > 0) {
-						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
-					}
+					const lGroup = make('span'); // left group:
 
-					pgLi.appendChild(make('span', {}, page.pg)); /* DW Page ID */
-					if (page._ref) {
-						pgLi.appendChild(make('span', {
-							'data-ref': page._ref.host,
-							'title': "Referrer: " + page._ref.full
-						}, page._ref.site));
-					} else {
-						pgLi.appendChild(make('span', {
-						}, "No referer"));
-					}
-					pgLi.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
-					pgLi.appendChild(make('span', {}, BotMon.t._formatTime(page._firstSeen)));
+						lGroup.appendChild(make('span', {
+							'data-lang': page.lang,
+							'title': "PageID: " + page.pg
+						}, page.pg)); /* DW Page ID */
 
-					// get the time difference:
-					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
-					if (tDiff) {
-						pgLi.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
-					} else {
-						pgLi.appendChild(make('span', {
-							'class': 'bounce',
-							'title': "Visitor bounced"}, "Bounce"));
-					}
+					pgLi.appendChild(lGroup); // end of left group
+
+					const rGroup = make('span'); // right group:
+
+						let visitTimeStr = "Bounce";
+						const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+						if (visitDuration > 0) {
+							visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+						}
+
+						/*if (page._ref) {
+							rGroup.appendChild(make('span', {
+								'data-ref': page._ref.host,
+								'title': "Referrer: " + page._ref.full
+							}, page._ref.site));
+						} else {
+							rGroup.appendChild(make('span', {
+							}, "No referer"));
+						}*/
+						//rGroup.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
+
+						// get the time difference:
+						const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+						if (tDiff) {
+							rGroup.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
+						} else {
+							rGroup.appendChild(make('span', {
+								'class': 'bounce',
+								'title': "Visitor bounced"}, "Bounce"));
+						}
+						rGroup.appendChild(make('span', {
+							'class': 'first-seen',
+							'title': "First visited: " + page._firstSeen.toLocaleString()
+						}, BotMon.t._formatTime(page._firstSeen)));
+					
+					pgLi.appendChild(rGroup); // end of right group
+
 
 					pageList.appendChild(pgLi);
 				});

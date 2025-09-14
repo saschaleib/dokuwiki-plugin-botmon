@@ -22,6 +22,12 @@
 	 "rx": ["APIs-Google"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
+	{"id": "googleother",
+	 "n": "GoogleOther", "geo": "US",
+	 "r": ["GoogleOther"],
+	 "rx": ["\\sGoogleOther(\\-\\w+)?[\\)\\/]"],
+	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers#googleother"
+	},
 	{"id": "applebot",
 	 "n": "Applebot", "geo": "US",
 	 "r": ["Applebot"],

@@ -23,6 +23,10 @@
 	 "id": "huawei",
 	 "rx": [ "\\sHuaweiBrowser\\/(\\d+\\.\\d+)[\\s\\.]", "\\/harmony360Browser\\/(\\d+\\.\\d+)[\\s\\.]"]
 	},
+	{"n": "Ecosia Browser",
+	 "id": "ecosia",
+	 "rx": [ "\\(Ecosia ios@(\\d+)\\." ]
+	},
 	{"n": "Silk",
 	 "id": "silk",
 	 "rx": [ "\\Silk\\/(\\d+)\\." ]

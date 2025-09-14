@@ -40,7 +40,7 @@
 
 		/* Bot icons */
 		&.bot::before { background-image: url('img/bots.png') }
-		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before { background-position-y: -20px }
+		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before, &.bot_googleother::before { background-position-y: -20px }
 		&.bot_bingbot::before { background-position-y: -40px }
 		&.bot_applebot::before { background-position-y: -60px }
 		&.bot_openai::before { background-position-y: -80px }
@@ -84,6 +84,7 @@
 		&.cl_silk::before { background-position-y: -280px }
 		&.cl_ffold::before { background-position-y: -300px }
 		&.cl_chromeold::before { background-position-y: -320px }
+		&.cl_ecosia::before { background-position-y: -340px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
@@ -332,6 +333,11 @@
 		&.typ_php::before { background-position-y: -40px }
 		&.typ_ip::before { background-position-y: -60px }
 		&.typ_usr::before { background-position-y: -80px }
+
+		/* External link icons */
+		&.extlink::before { background-image: url('img/links.png') }
+		&.extlink.dnscheck::before { background-position-y: -20px }
+		&.extlink.ipinfo::before { background-position-y: -40px }
 	}
 
 	/* grid layout for the overview: */
@@ -524,25 +530,48 @@
 							& {
 								display: flex;
 								justify-content: space-between;
-								align-items: center;
+								align-items: baseline;
+								white-space: nowrap;
+								line-height: 1.2rem;
+								margin: 0;
+								padding: 0 .25em;
+							}
+							&:nth-child(odd) {
+								background-color: #DFDFDF;
 							}
 							span {
-								&.visit-length {
-									min-width: min-content;
-								}
-								&.bounce {
-									width: 1.25em; height: 1.25em;
-									overflow: hidden;
-								}
-								&.bounce::before {
-									display: inline-block;
-									content: '';
-									width: 1.25em; height: 1.25em;
-									background: transparent url('img/bounce.svg') center no-repeat;
-									background-size: 1.25em;
-								}
+								display: inline-block;
 							}
 						}
+					}
+					span[data-lang] {
+						overflow: hidden;
+						text-overflow: ellipsis;
+					}
+					span[data-lang]::after {
+						content: attr(data-lang);
+						font-size: smaller;
+						color: #555;
+						border: #555 solid 1px;
+						line-height: 1.25;
+						border-radius: 2pt;
+						padding: 0 1pt;
+						margin-left: .2em;
+					}
+					span.first-seen {
+						min-width: 4.2em;
+						text-align: right;;
+					}
+					span.bounce {
+						width: 1.25em; height: 1.25em;
+						overflow: hidden;
+					}
+					span.bounce::before {
+						display: inline-block;
+						content: '';
+						width: 1.25em; height: 1.25em;
+						background: transparent url('img/bounce.svg') center no-repeat;
+						background-size: 1.25em;
 					}
 				}
 			}
@@ -554,7 +583,7 @@
 					align-items: center;
 				}
 				li:nth-child(odd) {
-					background-color: #EEE;
+					background-color: #DFDFDF;
 				}
 				li.total {
 					border-top: #333 solid 1px;
