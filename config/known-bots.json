@@ -64,6 +64,12 @@
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
+	{"id": "applemsgs",
+	 "n": "Apple Messages",
+	 "r": [],
+	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"],
+	 "url": "https://developer.apple.com/documentation/technotes/tn3156-create-rich-previews-for-messages"
+	},
 	{"id": "metabots",
 	 "n": "Meta/Facebook", "geo": "US",
 	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
