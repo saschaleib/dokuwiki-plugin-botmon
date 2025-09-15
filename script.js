@@ -642,7 +642,7 @@ BotMon.live = {
 						id: it.id,
 						count: it.count,
 						pct: (it.count / me._refererListCount * 100).toFixed(0)
-					}
+					};
 					rList.push(rIt);
 				}
 				
