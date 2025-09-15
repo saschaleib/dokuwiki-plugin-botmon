@@ -2023,7 +2023,7 @@ BotMon.live = {
 
 			// make a page view item:
 			_makePageViewItem: function(page) {
-				console.log("makePageViewItem:",page);
+				//console.log("makePageViewItem:",page);
 
 				// shortcut for neater code:
 				const make = BotMon.t._makeElement;
