@@ -3,6 +3,10 @@
 	 "id": "opera",
 	 "rx": [ "\\sOpera\\/.*?Version\\/(\\S+)", "Opera\\/(\\S+)" ]
 	},
+	{"n": "Firefox on iOS",
+	 "id": "firefox",
+	 "rx": [ "\\sFxiOS\\/(\\d+)\\." ]
+	},
 	{"n": "AOL Explorer",
 	 "id": "aol",
 	 "rx": [ "\\sAOL\\s(\\d+\\.\\d+)\\)", "\\sAOLBUILD\\/(\\S+)", "\\sBukaolshop\\s", "\\.aolapp\\/(\\d+\\.\\d+)\\." ]
@@ -74,5 +78,9 @@
 	{"n": "Firefox",
 	 "id": "firefox",
 	 "rx": [ "\\sFirefox\\/(\\d\\d\\d)\\." ]
+	},
+	{"n": "AppleWebKit",
+	 "id": "webkit",
+	 "rx": [ "\\sAppleWebKit\\/(\\d\\d\\d)\\." ]
 	}
 ]

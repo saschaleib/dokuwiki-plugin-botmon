@@ -1847,10 +1847,15 @@ BotMon.live = {
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
-				span2.appendChild(make('span', { /* page views */
-					'class': 'has_icon pageviews',
-					'title': data._pageViews.length + " page view(s)"
-				}, data._pageViews.length));
+					span2.appendChild(make('span', { /* first-seen */
+						'class': 'has_iconfirst-seen',
+						'title': "First seen: " + data._firstSeen.toLocaleString() + " UTC"
+					}, BotMon.t._formatTime(data._firstSeen)));
+
+					span2.appendChild(make('span', { /* page views */
+						'class': 'has_icon pageviews',
+						'title': data._pageViews.length + " page view(s)"
+					}, data._pageViews.length));
 
 				summary.appendChild(span2);
 
@@ -1961,56 +1966,7 @@ BotMon.live = {
 				/* list all page views */
 				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
-					//console.log("page:",page);
-
-					const pgLi = make('li');
-
-					const lGroup = make('span'); // left group:
-
-						lGroup.appendChild(make('span', {
-							'data-lang': page.lang,
-							'title': "PageID: " + page.pg
-						}, page.pg)); /* DW Page ID */
-
-					pgLi.appendChild(lGroup); // end of left group
-
-					const rGroup = make('span'); // right group:
-
-						let visitTimeStr = "Bounce";
-						const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
-						if (visitDuration > 0) {
-							visitTimeStr = Math.floor(visitDuration / 1000) + "s";
-						}
-
-						/*if (page._ref) {
-							rGroup.appendChild(make('span', {
-								'data-ref': page._ref.host,
-								'title': "Referrer: " + page._ref.full
-							}, page._ref.site));
-						} else {
-							rGroup.appendChild(make('span', {
-							}, "No referer"));
-						}*/
-						//rGroup.appendChild(make('span', {}, ( page._seenBy ? page._seenBy.join(', ') : '—') + '; ' + page._tickCount));
-
-						// get the time difference:
-						const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
-						if (tDiff) {
-							rGroup.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
-						} else {
-							rGroup.appendChild(make('span', {
-								'class': 'bounce',
-								'title': "Visitor bounced"}, "Bounce"));
-						}
-						rGroup.appendChild(make('span', {
-							'class': 'first-seen',
-							'title': "First visited: " + page._firstSeen.toLocaleString()
-						}, BotMon.t._formatTime(page._firstSeen)));
-					
-					pgLi.appendChild(rGroup); // end of right group
-
-
-					pageList.appendChild(pgLi);
+					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page));
 				});
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
@@ -2063,8 +2019,68 @@ BotMon.live = {
 				}
 				// return the element to add to the UI:
 				return dl;
-			}
+			},
 
+			// make a page view item:
+			_makePageViewItem: function(page) {
+				console.log("makePageViewItem:",page);
+
+				// shortcut for neater code:
+				const make = BotMon.t._makeElement;
+
+				// the actual list item:
+				const pgLi = make('li');
+
+				const row1 = make('div', {'class': 'row'});
+
+					row1.appendChild(make('span', { // page id is the left group
+						'data-lang': page.lang,
+						'title': "PageID: " + page.pg
+					}, page.pg)); /* DW Page ID */
+
+					// get the time difference:
+					row1.appendChild(make('span', {
+						'class': 'first-seen',
+						'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
+					}, BotMon.t._formatTime(page._firstSeen)));
+					
+				pgLi.appendChild(row1);
+
+				/* LINE 2 */
+
+				const row2 = make('div', {'class': 'row'});
+
+					// page referrer:
+					if (page._ref) {
+						row2.appendChild(make('span', {
+							'class': 'referer',
+							'title': "Referrer: " + page._ref.href
+						}, page._ref.hostname));
+					} else {
+						row2.appendChild(make('span', {
+							'class': 'referer'
+						}, "No referer"));
+					}
+
+					// visit duration:
+					let visitTimeStr = "Bounce";
+					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+					if (visitDuration > 0) {
+						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+					}
+					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+					if (tDiff) {
+						row2.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
+					} else {
+						row2.appendChild(make('span', {
+							'class': 'bounce',
+							'title': "Visitor bounced"}, "Bounce"));
+					}
+
+				pgLi.appendChild(row2);
+
+				return pgLi;
+			}
 		}
 	}
 };

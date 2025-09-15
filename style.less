@@ -40,7 +40,7 @@
 
 		/* Bot icons */
 		&.bot::before { background-image: url('img/bots.png') }
-		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before, &.bot_googleother::before { background-position-y: -20px }
+		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before, &.bot_googleother::before, &.bot_googinspct::before { background-position-y: -20px }
 		&.bot_bingbot::before { background-position-y: -40px }
 		&.bot_applebot::before { background-position-y: -60px }
 		&.bot_openai::before { background-position-y: -80px }
@@ -49,6 +49,7 @@
 		&.bot_seznambot::before { background-position-y: -140px }
 		&.bot_claude::before { background-position-y: -160px }
 		&.bot_applemsgs::before { background-position-y: -180px }
+		&.bot_reddit::before { background-position-y: -200px }
 
 		/* platform icons */	
 		&.platform::before { background-image: url('img/platforms.png') }
@@ -86,6 +87,7 @@
 		&.cl_ffold::before { background-position-y: -300px }
 		&.cl_chromeold::before { background-position-y: -320px }
 		&.cl_ecosia::before { background-position-y: -340px }
+		&.cl_webkit::before { background-position-y: -360px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
@@ -530,15 +532,21 @@
 						li {
 							& {
 								display: flex;
-								justify-content: space-between;
-								align-items: baseline;
-								white-space: nowrap;
+								flex-direction: column;
 								line-height: 1.2rem;
 								margin: 0;
 								padding: 0 .25em;
 							}
 							&:nth-child(odd) {
 								background-color: #DFDFDF;
+							}
+							div.row {
+								display: flex;
+								flex-direction: row;
+								justify-content: space-between;
+								align-items: baseline;
+								white-space: nowrap;
+								line-height: 1.35em;
 							}
 							span {
 								display: inline-block;
@@ -548,6 +556,8 @@
 					span[data-lang] {
 						overflow: hidden;
 						text-overflow: ellipsis;
+						padding: 2pt 0 0 2pt;
+
 					}
 					span[data-lang]::after {
 						content: attr(data-lang);
@@ -561,7 +571,10 @@
 					}
 					span.first-seen {
 						min-width: 4.2em;
-						text-align: right;;
+						text-align: right;
+					}
+					span.visit-length {
+						font-size: smaller;
 					}
 					span.bounce {
 						width: 1.25em; height: 1.25em;
@@ -570,9 +583,13 @@
 					span.bounce::before {
 						display: inline-block;
 						content: '';
-						width: 1.25em; height: 1.25em;
+						width: 1.25em; height: 1em;
 						background: transparent url('img/bounce.svg') center no-repeat;
-						background-size: 1.25em;
+						background-size: .95em;
+					}
+					span.referer {
+						font-size: smaller;
+						margin-left: .67rem;
 					}
 				}
 			}

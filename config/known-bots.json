@@ -28,11 +28,23 @@
 	 "rx": ["\\sGoogleOther(\\-\\w+)?[\\)\\/]"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers#googleother"
 	},
+	{"id": "googinspct",
+	 "n": "Google-InspectionTool", "geo": "US",
+	 "r": ["Google-InspectionTool"],
+	 "rx": ["\\sGoogle-InspectionTool(\\-\\w+)?[\\)\\/]"],
+	 "url": "https://support.google.com/webmasters/answer/9012289"
+	},
 	{"id": "applebot",
 	 "n": "Applebot", "geo": "US",
 	 "r": ["Applebot"],
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
+	},
+	{"id": "reddit",
+	 "n": "RedditBot",
+	 "r": ["Applebot"],
+	 "rx": [" redditbot\\/(\\d+\\.\\d+);"],
+	 "url": "http://www.reddit.com/feedback"
 	},
 	{"id": "slurp",
 	 "n": "Slurp (Yahoo!)", "geo": "US",
