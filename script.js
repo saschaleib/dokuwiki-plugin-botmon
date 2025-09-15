@@ -566,6 +566,11 @@ BotMon.live = {
 
 						// add browser and platform statistics:
 						me.addBrowserPlatform(v);
+
+						// add 
+						v._pageViews.forEach( pv => {
+							me.addToRefererList(pv._ref);
+						});
 					}
 	
 				});
@@ -573,85 +578,76 @@ BotMon.live = {
 				BotMon.live.gui.status.hideBusy('Done.');
 			},
 
-			// visits from IP ranges:
-			/*_ipRange: {
-				ip4: [],
-				ip6: []
-			},*/
-			/**
-			 * Adds a visit to the IP range statistics.
-			 * 
-			 * This helps to identify IP ranges that are used by bots.
-			 * 
-			 * @param {string} ip The IP address to add.
-			 */
-			/*addToIPRanges: function(ip) {
+			// Referer List:
+			_refererList:  [],
+			_refererListCount: 0,
 
-				// #TODO: handle nestled ranges!
+			addToRefererList: function(ref) {
+				//console.log('BotMon.live.data.analytics.addToRefererList',ref);
+
 				const me = BotMon.live.data.analytics;
-				const ipv = (ip.indexOf(':') > 0 ? 6 : 4);
+
+				// ignore internal references:
+				if (ref && ref.host == 'denkfehler.online') {
+					return;
+				}
+
+				// find the referer ID:
+				let refId = 'null';
+				if (ref && ref.host) {
+					const hArr = ref.host.split('.');
+					const tld = hArr[hArr.length-1];
+					refId = ( tld == 'localhost' ? tld : hArr[hArr.length-2] + ( tld.length > 3 ? '.' + tld : '' ) );
+				}
 				
-				const ipArr = ip.split( ipv == 6 ? ':' : '.');
-				const maxSegments = (ipv == 6 ? 4 : 3);
-
-				let arr = (ipv == 6 ? me._ipRange.ip6 : me._ipRange.ip4);
-
-				// find any existing segment entry:
-				it = null;
-				for (let i=0; i < arr.length; i++) {
-					const sig = arr[i];
-					if (sig.seg == ipArr[0]) {
-						it = sig;
+				// already exists?
+				let refObj = null;
+				for (let i = 0; i < me._refererList.length; i++) {
+					if (me._refererList[i].id == refId) {
+						refObj = me._refererList[i];
 						break;
 					}
 				}
-				
-				// create if not found:
-				if (!it) {
-					it = {seg: ipArr[0], count: 1};
-					//if (i<maxSegments) it.sub = [];
-					arr.push(it);
 
-				} else { // increase count:
-
-					it.count += 1;
+				// if not exists, create it:
+				if (!refObj) {
+					refObj = {
+						id: refId,
+						count: 0
+					};
+					me._refererList.push(refObj);
+				} else {
+					refObj.count += 1;
 				}
-			
-			},*/
-			/*getTopBotIPRanges: function(max) {
+				// add to total count:
+				me._refererListCount += 1;
+			},
+
+			getTopReferers: function(max) {
+				//console.info(('BotMon.live.data.analytics.getTopReferers(' + max + ')'));
 
 				const me = BotMon.live.data.analytics;
 
-				const kMinHits = 2;
+				const rList = []; // return array
 
-				// combine the ip lists, removing all lower volume branches:
-				let ipTypes = [4,6];
-				const tmpList = [];
-				for (let i=0; i<ipTypes.length; i++) {
-					const ipType = ipTypes[i];
-					(ipType == 6 ? me._ipRange.ip6 : me._ipRange.ip4).forEach( it => {
-						if (it.count > kMinHits) {
-							it.type = ipType;
-							tmpList.push(it);
-						}
-						});
-					tmpList.sort( (a,b) => b.count - a.count);
-				}
+				// sort the list:
+				me._refererList.sort( (a,b) => {
+					return b.count - a.count;
+				});
 
-				// reduce to only the top (max) items and create the target format:
-				// #TODO: handle nestled ranges!
-				let rList = [];
-				for (let j=0; Math.min(max, tmpList.length) > j; j++) {
-					const rangeInfo = tmpList[j];
-					rList.push({
-						'ip': rangeInfo.seg + ( rangeInfo.type == 4 ? '.x.x.x' : '::x'),
-						'typ': rangeInfo.type,
-						'num': rangeInfo.count
-					});
+				// get the top:
+				for (let i = 0; i < max; i++) {
+					const it = me._refererList[i];
+					const rIt = {
+						id: it.id,
+						count: it.count,
+						pct: (it.count / me._refererListCount * 100).toFixed(0)
+					}
+					rList.push(rIt);
 				}
 				
 				return rList;
-			},*/
+			},
 
 			/* countries of visits */
 			_countries: {
@@ -1609,7 +1605,7 @@ BotMon.live = {
 				const wmclients = document.getElementById('botmon__today__wm_clients');
 				if (wmclients) {
 
-					wmclients.appendChild(makeElement('dt', {}, "Top browsers (humans only)"));
+					wmclients.appendChild(makeElement('dt', {}, "Top browsers"));
 
 					const clientList = BotMon.live.data.analytics.getTopBrowsers(5);
 					if (clientList) {
@@ -1629,7 +1625,7 @@ BotMon.live = {
 				const wmplatforms = document.getElementById('botmon__today__wm_platforms');
 				if (wmplatforms) {
 
-					wmplatforms.appendChild(makeElement('dt', {}, "Top platforms (humans only)"));
+					wmplatforms.appendChild(makeElement('dt', {}, "Top platforms"));
 
 					const pfList = BotMon.live.data.analytics.getTopPlatforms(5);
 					if (pfList) {
@@ -1645,6 +1641,25 @@ BotMon.live = {
 					}
 				}
 
+				// update the top referrers;
+				const wmreferers = document.getElementById('botmon__today__wm_referers');
+				if (wmreferers) {
+
+					wmreferers.appendChild(makeElement('dt', {}, "Top Referers"));
+
+					const refList = BotMon.live.data.analytics.getTopReferers(5);
+					if (refList) {
+						refList.forEach( (rInfo) => {
+							const rDd = makeElement('dd');
+							rDd.appendChild(makeElement('span', {'class': 'has_icon referer ref_' + rInfo.id }, rInfo.id));
+							rDd.appendChild(makeElement('span', {
+								'class': 'count',
+								'title': rInfo.count + " references"
+							}, Math.round(rInfo.pct) + '%'));
+							wmreferers.appendChild(rDd);
+						});
+					}
+				}
 			}
 		},
 
@@ -1978,7 +1993,7 @@ BotMon.live = {
 
 					/* add bot evaluation details: */
 					if (data._eval) {
-						dl.appendChild(make('dt', {}, "Bot evaluation details:"));
+						dl.appendChild(make('dt', {}, "Bot evaluation:"));
 						const evalDd = make('dd');
 						const testList = make('ul',{
 							'class': 'eval'

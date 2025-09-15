@@ -40,7 +40,8 @@
 
 		/* Bot icons */
 		&.bot::before { background-image: url('img/bots.png') }
-		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before, &.bot_googleother::before, &.bot_googinspct::before { background-position-y: -20px }
+		&.bot_googlebot::before, &.bot_googleads::before, &.bot_googleapi::before,
+			&.bot_googleother::before, &.bot_googinspct::before { background-position-y: -20px }
 		&.bot_bingbot::before { background-position-y: -40px }
 		&.bot_applebot::before { background-position-y: -60px }
 		&.bot_openai::before { background-position-y: -80px }
@@ -341,13 +342,23 @@
 		&.extlink::before { background-image: url('img/links.png') }
 		&.extlink.dnscheck::before { background-position-y: -20px }
 		&.extlink.ipinfo::before { background-position-y: -40px }
+	
+		/* Common referers icons */
+		&.referer::before { background-image: url('img/referers.png') }
+		&.ref_null::before { background-position-y: -20px }
+		&.ref_google::before { background-position-y: -40px }
+		&.ref_bing::before { background-position-y: -60px }
+		&.ref_yahoo::before { background-position-y: -80px }
+		&.ref_dokuwiki::before { background-position-y: -100px }
+		&.ref_duckduckgo::before { background-position-y: -120px }
+		&.ref_ecosia::before { background-position-y: -140px }
+		&.ref_yandex::before { background-position-y: -160px }
 	}
 
 	/* grid layout for the overview: */
-	.botmon_overview_grid {
+	.botmon_bots_grid, .botmon_webmetrics_grid {
 		& {
 			display: grid;
-			grid-template-columns: 1fr 1fr 1fr;
 			grid-gap: 0 .33em;
 		}
 		dl {
@@ -357,6 +368,12 @@
 				align-items: baseline;
 			}
 		}
+	}
+	.botmon_bots_grid {
+		grid-template-columns: 1fr 1fr 1fr;
+	}
+	.botmon_webmetrics_grid {
+		grid-template-columns: 1fr 1fr 1fr 1fr;
 	}
 
 	/* the "today" tab: */
@@ -750,7 +767,7 @@
 /* layout overrides for narrow screens: */
 @media (max-width: 670px) {
 	#botmon__admin {
-		.botmon_overview_grid {
+		.botmon_bots_grid, .botmon_webmetrics_grid {
 			grid-template-columns: 100%;
 		}
 	}

@@ -121,7 +121,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	private function getCountryCode() {
 
-		$country = ( $this->ipAddress == 'localhost' ? 'AA' : 'ZZ' ); // default if no geoip is available!
+		$country = ( $this->ipAddress == 'localhost' ? 'local' : 'ZZ' ); // default if no geoip is available!
 
 		$lib = $this->getConf('geoiplib'); /* which library to use? (can only be phpgeoip or disabled) */
 
