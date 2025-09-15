@@ -588,7 +588,7 @@ BotMon.live = {
 				const me = BotMon.live.data.analytics;
 
 				// ignore internal references:
-				if (ref && ref.host == 'denkfehler.online') {
+				if (ref && ref.host == window.location.host) {
 					return;
 				}
 
