@@ -578,9 +578,55 @@ BotMon.live = {
 				BotMon.live.gui.status.hideBusy('Done.');
 			},
 
+			// get a list of known bots:
+			getTopBots: function(max) {
+				//console.info('BotMon.live.data.analytics.getTopBots('+max+')');
+
+				//console.log(BotMon.live.data.analytics.groups.knownBots);
+
+				let botsList = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
+					return b._pageViews.length - a._pageViews.length;
+				});
+
+				const other = {
+					'id': 'other',
+					'name': "Others",
+					'count': 0
+				};
+
+				const rList = [];
+				const max2 = ( botsList.length > max ? max-1 : botsList.length );
+				let total = 0; // adding up the items
+				for (let i=0; i<botsList.length; i++) {
+					const it = botsList[i];
+					if (it && it._bot) {
+						if (i < max2) {
+							rList.push({
+								id: it._bot.id,
+								name: (it._bot.n ? it._bot.n : it._bot.id),
+								count: it._pageViews.length
+							});
+						} else {
+							other.count += it._pageViews.length;
+						};
+						total += it._pageViews.length;
+					}
+				};
+
+				// add the "other" item, if needed:
+				if (botsList.length > max2) {
+					rList.push(other);
+				};
+
+				rList.forEach( it => {
+					it.pct = (it.count * 100 / total);
+				});
+
+				return rList;
+			},
+
 			// Referer List:
-			_refererList:  [],
-			_refererListCount: 0,
+			_refererList: [],
 
 			addToRefererList: function(ref) {
 				//console.log('BotMon.live.data.analytics.addToRefererList',ref);
@@ -592,18 +638,12 @@ BotMon.live = {
 					return;
 				}
 
-				// find the referer ID:
-				let refId = 'null';
-				if (ref && ref.host) {
-					const hArr = ref.host.split('.');
-					const tld = hArr[hArr.length-1];
-					refId = ( tld == 'localhost' ? tld : hArr[hArr.length-2] + ( tld.length > 3 ? '.' + tld : '' ) );
-				}
+				const refInfo = me.getRefererInfo(ref);
 				
 				// already exists?
 				let refObj = null;
 				for (let i = 0; i < me._refererList.length; i++) {
-					if (me._refererList[i].id == refId) {
+					if (me._refererList[i].id == refInfo.id) {
 						refObj = me._refererList[i];
 						break;
 					}
@@ -611,16 +651,31 @@ BotMon.live = {
 
 				// if not exists, create it:
 				if (!refObj) {
-					refObj = {
-						id: refId,
-						count: 0
-					};
+					refObj = refInfo;
+					refObj.count = 1;
 					me._refererList.push(refObj);
 				} else {
 					refObj.count += 1;
 				}
-				// add to total count:
-				me._refererListCount += 1;
+			},
+
+			getRefererInfo: function(url) {
+				//console.log('BotMon.live.data.analytics.getRefererInfo',url);
+
+				// find the referer ID:
+				let refId = 'null';
+				let refName = 'No Referer';
+				if (url && url.host) {
+					const hArr = url.host.split('.');
+					const tld = hArr[hArr.length-1];
+					refId = ( tld == 'localhost' ? tld : hArr[hArr.length-2] + ( tld.length > 3 ? '.' + tld : '' ) );
+					refName = hArr[hArr.length-2] + '.' + tld;
+				}
+
+				return {
+					'id': refId,
+					'n': refName
+				};
 			},
 
 			getTopReferers: function(max) {
@@ -628,24 +683,53 @@ BotMon.live = {
 
 				const me = BotMon.live.data.analytics;
 
-				const rList = []; // return array
+				return me._makeTopList(me._refererList, max);
+			},
+
+			_makeTopList: function(arr, max) {
+				//console.info(('BotMon.live.data.analytics._makeTopList(arr,' + max + ')'));
+
+				const me = BotMon.live.data.analytics;
 
 				// sort the list:
-				me._refererList.sort( (a,b) => {
+				arr.sort( (a,b) => {
 					return b.count - a.count;
 				});
 
-				// get the top:
-				for (let i = 0; i < max; i++) {
-					const it = me._refererList[i];
-					const rIt = {
-						id: it.id,
-						count: it.count,
-						pct: (it.count / me._refererListCount * 100).toFixed(0)
-					};
-					rList.push(rIt);
+				const rList = []; // return array
+				const max2 = ( arr.length >= max ? max-1 : arr.length );
+				const other = {
+					'id': 'other',
+					'name': "Others",
+					'count': 0
+				};
+				let total = 0; // adding up the items
+				for (let i=0; Math.min(max, arr.length) > i; i++) {
+					const it = arr[i];
+					if (it) {
+						if (i < max2) {
+							const rIt = {
+								id: it.id,
+								name: (it.n ? it.n : it.id),
+								count: it.count
+							};
+							rList.push(rIt);
+						} else {
+							other.count += it.count;
+						}
+						total += it.count;
+					}
 				}
-				
+
+				// add the "other" item, if needed:
+				if (arr.length > max2) {
+					rList.push(other);
+				};
+
+				rList.forEach( it => {
+					it.pct = (it.count * 100 / total);
+				});
+
 				return rList;
 			},
 
@@ -687,11 +771,11 @@ BotMon.live = {
 				}
 
 				if (arr) {
-					let cRec = arr.find( it => it.iso == iso);
+					let cRec = arr.find( it => it.id == iso);
 					if (!cRec) {
 						cRec = {
-							'iso': iso,
-							'name': name,
+							'id': iso,
+							'n': name,
 							'count': 1
 						};
 						arr.push(cRec);
@@ -730,25 +814,10 @@ BotMon.live = {
 						break;
 					default:
 						console.warn(`Unknown user type ${type} in function getCountryList.`);
+						return;
 				}
 				
-				if (arr) {
-					// sort by visit count:
-					arr.sort( (a,b) => b.count - a.count);
-
-					// reduce to only the top (max) items and create the target format:
-					let rList = [];
-					for (let i=0; Math.min(max, arr.length) > i; i++) {
-						const cRec = arr[i];
-						rList.push({
-							'iso': cRec.iso,
-							'name': cRec.name,
-							'count': cRec.count
-						});
-					}
-					return rList;
-				}
-				return [];
+				return me._makeTopList(arr, max);
 			},
 
 			/* browser and platform of human visitors */
@@ -766,8 +835,9 @@ BotMon.live = {
 					let bRec = me._browsers.find( it => it.id == browserRec.id);
 					if (!bRec) {
 						bRec = {
-							'id': browserRec.id,
-							'count': 1
+							id: browserRec.id,
+							n: browserRec.n,
+							count: 1
 						};
 						me._browsers.push(bRec);
 					} else {
@@ -781,8 +851,9 @@ BotMon.live = {
 					let pRec = me._platforms.find( it => it.id == platformRec.id);
 					if (!pRec) {
 						pRec = {
-							'id': platformRec.id,
-							'count': 1
+							id: platformRec.id,
+							n: platformRec.n,
+							count: 1
 						};
 						me._platforms.push(pRec);
 					} else {
@@ -795,84 +866,15 @@ BotMon.live = {
 			getTopBrowsers: function(max) {
 			
 				const me = BotMon.live.data.analytics;
-				
-				me._browsers.sort( (a,b) => b.count - a.count);
 
-				// how many browsers to show:
-				const max2 = ( me._browsers.length >= max ? max-1 : max );
-
-				const rArr = []; // return array
-				let total = 0;
-				const others = {
-					'id': 'other',
-					'name': "Others",
-					'count': 0
-				};
-				for (let i=0; i < me._browsers.length; i++) {
-					if (i < max2) {
-						rArr.push({
-							'id': me._browsers[i].id,
-							'name': BotMon.live.data.clients.getName(me._browsers[i].id),
-							'count': me._browsers[i].count
-						});
-						total += me._browsers[i].count;
-					} else {
-						others.count += me._browsers[i].count;
-						total += me._browsers[i].count;
-					}
-				};
-
-				if (me._browsers.length > (max-1)) {
-					rArr.push(others);
-				};
-
-				// update percentages:
-				rArr.forEach( it => {
-					it.pct = Math.round(it.count * 100 / total);
-				});
-
-				return rArr;
+				return me._makeTopList(me._browsers, max);
 			},
 
 			getTopPlatforms: function(max) {
 
 				const me = BotMon.live.data.analytics;
-				
-				me._platforms.sort( (a,b) => b.count - a.count);
-				// how many browsers to show:
-				const max2 = ( me._platforms.length >= max ? max-1 : max );
 
-				const rArr = []; // return array
-				let total = 0;
-				const others = {
-					'id': 'other',
-					'name': "Others",
-					'count': 0
-				};
-				for (let i=0; i < me._platforms.length; i++) {
-					if (i < max2) {
-						rArr.push({
-							'id': me._platforms[i].id,
-							'name': BotMon.live.data.platforms.getName(me._platforms[i].id),
-							'count': me._platforms[i].count
-						});
-						total += me._platforms[i].count;
-					} else {
-						others.count += me._platforms[i].count;
-						total += me._platforms[i].count;
-					}
-				};
-
-				if (me._platforms.length > (max-1)) {
-					rArr.push(others);
-				};
-
-				// update percentages:				
-				rArr.forEach( it => {
-					it.pct = Math.round(it.count * 100 / total);
-				});
-
-				return rArr;
+				return me._makeTopList(me._platforms, max);
 			}
 		},
 
@@ -1490,14 +1492,16 @@ BotMon.live = {
 
 				const data = BotMon.live.data.analytics.data;
 
+				const maxItemsPerList = 5; // how many list items to show?
+
 				// shortcut for neater code:
 				const makeElement = BotMon.t._makeElement;
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Bots vs. Humans"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Page views by category:"));
 
-					for (let i = 3; i >= 0; i--) {
+					for (let i = 0; i <= 4; i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
@@ -1518,6 +1522,10 @@ BotMon.live = {
 								title = "Known bots:";
 								value = data.bots.known;
 								break;
+							case 4:
+								title = "Total:";
+								value = data.totalPageViews;
+								break;
 							default:
 								console.warn(`Unknown list type ${i}.`);
 						}
@@ -1528,19 +1536,19 @@ BotMon.live = {
 				}
 
 				// update known bots list:
-				const botlist = document.getElementById('botmon__botslist'); /* Known bots */
-				botlist.innerHTML = "<dt>Known bots (top 5)</dt>";
+				const botElement = document.getElementById('botmon__botslist'); /* Known bots */
+				if (botElement) {
+					botElement.innerHTML = `<dt>Known bots (top ${maxItemsPerList})</dt>`;
 
-				let bots = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
-					return b._pageViews.length - a._pageViews.length;
-				});
-
-				for (let i=0; i < Math.min(bots.length, 5); i++) {
-					const dd = makeElement('dd');
-					dd.appendChild(makeElement('span', {'class': 'has_icon bot bot_' + bots[i]._bot.id }, bots[i]._bot.n));
-					dd.appendChild(makeElement('span', undefined, bots[i]._pageViews.length));
-					botlist.appendChild(dd);
+					let botList = BotMon.live.data.analytics.getTopBots(maxItemsPerList);
+					botList.forEach( (botInfo) => {
+						const bli = makeElement('dd');
+						bli.appendChild(makeElement('span', {'class': 'has_icon bot bot_' + botInfo.id }, botInfo.name));
+						bli.appendChild(makeElement('span', {'class': 'count' }, botInfo.count));
+						botElement.append(bli)
+					});
 				}
+
 
 				// update the suspected bot IP ranges list:
 				/*const botIps = document.getElementById('botmon__today__botips');
@@ -1559,11 +1567,11 @@ BotMon.live = {
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__today__countries');
 				if (botCountries) {
-					botCountries.appendChild(makeElement('dt', {}, "Bot Countries (top 5)"));
+					botCountries.appendChild(makeElement('dt', {}, `Bot Countries (top ${maxItemsPerList})`));
 					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 5);
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
-						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.iso.toLowerCase() }, cInfo.name));
+						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
 						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
 						botCountries.appendChild(cLi);
 					});
@@ -1605,9 +1613,9 @@ BotMon.live = {
 				const wmclients = document.getElementById('botmon__today__wm_clients');
 				if (wmclients) {
 
-					wmclients.appendChild(makeElement('dt', {}, "Top browsers"));
+					wmclients.appendChild(makeElement('dt', {}, "Browsers"));
 
-					const clientList = BotMon.live.data.analytics.getTopBrowsers(5);
+					const clientList = BotMon.live.data.analytics.getTopBrowsers(maxItemsPerList);
 					if (clientList) {
 						clientList.forEach( (cInfo) => {
 							const cDd = makeElement('dd');
@@ -1615,7 +1623,7 @@ BotMon.live = {
 							cDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': cInfo.count + " page views"
-							}, Math.round(cInfo.pct) + '%'));
+							}, cInfo.pct.toFixed(1) + '%'));
 							wmclients.appendChild(cDd);
 						});
 					}
@@ -1625,9 +1633,9 @@ BotMon.live = {
 				const wmplatforms = document.getElementById('botmon__today__wm_platforms');
 				if (wmplatforms) {
 
-					wmplatforms.appendChild(makeElement('dt', {}, "Top platforms"));
+					wmplatforms.appendChild(makeElement('dt', {}, "Platforms"));
 
-					const pfList = BotMon.live.data.analytics.getTopPlatforms(5);
+					const pfList = BotMon.live.data.analytics.getTopPlatforms(maxItemsPerList);
 					if (pfList) {
 						pfList.forEach( (pInfo) => {
 							const pDd = makeElement('dd');
@@ -1635,7 +1643,7 @@ BotMon.live = {
 							pDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': pInfo.count + " page views"
-							}, Math.round(pInfo.pct) + '%'));
+							}, pInfo.pct.toFixed(1) + '%'));
 							wmplatforms.appendChild(pDd);
 						});
 					}
@@ -1645,17 +1653,17 @@ BotMon.live = {
 				const wmreferers = document.getElementById('botmon__today__wm_referers');
 				if (wmreferers) {
 
-					wmreferers.appendChild(makeElement('dt', {}, "Top Referers"));
+					wmreferers.appendChild(makeElement('dt', {}, "Referers"));
 
-					const refList = BotMon.live.data.analytics.getTopReferers(5);
+					const refList = BotMon.live.data.analytics.getTopReferers(maxItemsPerList);
 					if (refList) {
 						refList.forEach( (rInfo) => {
 							const rDd = makeElement('dd');
-							rDd.appendChild(makeElement('span', {'class': 'has_icon referer ref_' + rInfo.id }, rInfo.id));
+							rDd.appendChild(makeElement('span', {'class': 'has_icon referer ref_' + rInfo.id }, rInfo.name));
 							rDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': rInfo.count + " references"
-							}, Math.round(rInfo.pct) + '%'));
+							}, rInfo.pct.toFixed(1) + '%'));
 							wmreferers.appendChild(rDd);
 						});
 					}
@@ -1859,6 +1867,15 @@ BotMon.live = {
 					}, ( data._country || "Unknown") ));
 				}
 
+				// referer icons:
+				if ((data._type == BM_USERTYPE.HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
+					const refInfo = BotMon.live.data.analytics.getRefererInfo(new URL(data.ref));
+					span1.appendChild(make('span', {
+						'class': 'icon_only referer ref_' + refInfo.id,
+						'title': "Referer: " + data.ref
+					}, refInfo.n));
+				}
+
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
@@ -1964,9 +1981,6 @@ BotMon.live = {
 						'title': "Country: " + data._country
 					}, data._country + ' (' + data.geo + ')'));
 				}
-
-				/*dl.appendChild(make('dt', {}, "Visitor Type:"));
-				dl.appendChild(make('dd', undefined, data._type ));*/
 
 				dl.appendChild(make('dt', {}, "Session ID:"));
 				dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
