@@ -34,7 +34,7 @@ const BotMon = {
 
 	_baseDir: null,
 	_lang: 'en',
-	_today: (new Date()).toISOString().slice(0, 10),
+	_datestr: (new Date()).toISOString().slice(0, 10),
 	_timeDiff: '',
 
 	/* internal tools */
@@ -147,7 +147,7 @@ BotMon.live = {
 
 		// set the title:
 		const tDiff = '(<abbr title="Coordinated Universal Time">UTC</abbr>' + (BotMon._timeDiff != '' ? `, ${BotMon._timeDiff}` : '' ) + ')';
-		BotMon.live.gui.status.setTitle(`Data for <time datetime=${BotMon._today}>${BotMon._today}</time> ${tDiff}`);
+		BotMon.live.gui.status.setTitle(`Data for <time datetime="${BotMon._datestr}">${BotMon._datestr}</time> ${tDiff}`);
 
 		// init sub-objects:
 		BotMon.t._callInit(this);
@@ -1413,7 +1413,7 @@ BotMon.live = {
 			BotMon.live.gui.status.showBusy(`Loading ${typeName} log file …`);
 
 			// compose the URL from which to load:
-			const url = BotMon._baseDir + `logs/${BotMon._today}.${type}.txt`;
+			const url = BotMon._baseDir + `logs/${BotMon._datestr}.${type}.txt`;
 			//console.log("Loading:",url);
 
 			// fetch the data:
