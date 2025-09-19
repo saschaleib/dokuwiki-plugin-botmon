@@ -11,8 +11,8 @@ foreach($dir as $file) {
 	$fName = pathinfo($file, PATHINFO_BASENAME);
 	$bName = strtok($fName, '.');
 
-	if ($bName == '' || $bName == 'logfiles') {
-		//echo "File “{$fName}” ignored.";
+	if ($bName == '' || $bName == 'logfiles' || $bName == 'empty' || $fName == '.htaccess') {
+		// echo "File “{$fName}” ignored.\n";
 	} else if ($bName == $today || $bName == $yesterday) {
 		echo "File “{$fName}” skipped.\n";
 	} else {
