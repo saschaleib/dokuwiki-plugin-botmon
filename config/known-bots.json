@@ -244,10 +244,22 @@
 	 "rx": ["TikTokSpider"],
 	 "url": "https://darkvisitors.com/agents/tiktokspider"
 	},
-	{"id": "HaloBot",
+	{"id": "halobot",
 	 "n": "HaloBot", "geo": "FR",
 	 "r": ["HaloBot"],
 	 "rx": [" HaloBot\\/(\\d+)\\."],
 	 "url": "https://darkvisitors.com/agents/tiktokspider"
+	},
+	{"id": "wayback",
+	 "n": "Internet Archive",
+	 "r": ["archive.org_bot"],
+	 "rx": [" archive.org_bot "],
+	 "url": "https://archive.org/details/archive.org_bot"
+	},
+	{"id": "alibaba",
+	 "n": "Alibaba AliyunSec Bot",
+	 "r": ["AliyunSecBot"],
+	 "rx": ["AliyunSecBot/Aliyun"],
+	 "url": "https://www.aqtronix.com/useragents/?Action=ShowAgentDetails&Name=AliyunSecBot"
 	}
 ]

@@ -1,4 +1,4 @@
-botmon_client = {
+({
 	init: function() {
 
 		/* send the page view request: */
@@ -27,8 +27,8 @@ botmon_client = {
 				'lg': navigator.language.substring(0,2),
 				'lt': ( document._botmon ? Date.now() - document._botmon.t0 : null),
 				'id': (document._botmon.session || 'null').replaceAll('\"', ''),
-				'r': document.referrer /*,
-				'tz': new Date().getTimezoneOffset(),
+				'r': document.referrer,
+				'tz': new Date().getTimezoneOffset() /*,
 				'url': window.location.href,
 				'scr': screen.width+':'+screen.height,
 				'l': navigator.languages */
@@ -64,7 +64,7 @@ botmon_client = {
 					+ ( sessionId ? '&id=' + encodeURIComponent(sessionId) : '')
 					+ ( uid ? '&u=' + encodeURIComponent(uid) : '');
 			const response = await fetch(url + req, {
-				/*method: 'HEAD'*/
+				method: 'HEAD'
 			});
 			if (!response.ok) {
 				throw new Error(response.status + ' ' + response.statusText + ' - ' + url);
@@ -76,7 +76,4 @@ botmon_client = {
 		//	setTimeout(this._onHeartbeat.bind(this, this._src.replace( this._scriptName, '/tick.php')),this._heartbeat * 1000);
 		}
 	}
-}
-
-// init the script:
-botmon_client.init();
+}).init();

@@ -7,9 +7,16 @@
 const BM_USERTYPE = Object.freeze({
 	'UNKNOWN': 'unknown',
 	'KNOWN_USER': 'user',
-	'HUMAN': 'human',
+	'PROBABLY_HUMAN': 'human',
 	'LIKELY_BOT': 'likely_bot',
 	'KNOWN_BOT': 'known_bot'
+});
+
+// enumeration of log types:
+const BM_LOGTYPE = Object.freeze({
+	'SERVER': 'srv',
+	'CLIENT': 'log',
+	'TICKER': 'tck'
 });
 
 /* BotMon root object */
@@ -189,7 +196,7 @@ BotMon.live = {
 			// are all the flags set?
 			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded && data._dispatchRulesLoaded) {
 				// chain the log files loading:
-				BotMon.live.data.loadLogFile('srv', BotMon.live.data._onServerLogLoaded);
+				BotMon.live.data.loadLogFile(BM_LOGTYPE.SERVER, BotMon.live.data._onServerLogLoaded);
 			}
 		},
 		// flags to track which data files have been loaded:
@@ -203,7 +210,7 @@ BotMon.live = {
 			//console.info('BotMon.live.data._onServerLogLoaded()');
 
 			// chain the client log file to load:
-			BotMon.live.data.loadLogFile('log', BotMon.live.data._onClientLogLoaded);
+			BotMon.live.data.loadLogFile(BM_LOGTYPE.CLIENT, BotMon.live.data._onClientLogLoaded);
 		},
 
 		// event callback, after the client log has been loaded:
@@ -211,7 +218,7 @@ BotMon.live = {
 			//console.info('BotMon.live.data._onClientLogLoaded()');
 			
 			// chain the ticks file to load:
-			BotMon.live.data.loadLogFile('tck', BotMon.live.data._onTicksLogLoaded);
+			BotMon.live.data.loadLogFile(BM_LOGTYPE.TICKER, BotMon.live.data._onTicksLogLoaded);
 
 		},
 
@@ -237,8 +244,8 @@ BotMon.live = {
 			_visitors: [],
 
 			// find an already existing visitor record:
-			findVisitor: function(visitor) {
-				//console.info('BotMon.live.data.model.findVisitor()');
+			findVisitor: function(visitor, type) {
+				//console.info('BotMon.live.data.model.findVisitor()', type);
 				//console.log(visitor);
 
 				// shortcut to make code more readable:
@@ -246,34 +253,36 @@ BotMon.live = {
 
 				const timeout = 60 * 60 * 1000; // session timeout: One hour
 
-				// loop over all visitors already registered:
-				for (let i=0; i<model._visitors.length; i++) {
-					const v = model._visitors[i];
+				if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots match by their bot ID:
 
-					if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots
+					for (let i=0; i<model._visitors.length; i++) {
+						const v = model._visitors[i];
 
 						// bots match when their ID matches:
 						if (v._bot && v._bot.id == visitor._bot.id) {
 							return v;
 						}
+					}
+				} else { // other types match by their DW/PHPIDs:
 
-					} else { /*if (visitor._type == BM_USERTYPE.KNOWN_USER) { // registered users
+					// loop over all visitors already registered and check for ID matches:
+					for (let i=0; i<model._visitors.length; i++) {
+						const v = model._visitors[i];
 
-						// visitors match when their names match:
-						if ( v.usr == visitor.usr
-						&& v.ip == visitor.ip
-						&& v.agent == visitor.agent) {
+						if ( v.id == visitor.id) { // match the DW/PHP IDs
 							return v;
 						}
-					} else { // any other visitor
+					}
 
-						if (Math.abs(v._lastSeen - visitor.ts) < timeout) { // ignore timed out visits */
-							if ( v.id == visitor.id) { // match the DW/PHP IDs
-								return v;
-							}
-						/*}*/
+					// if not found, try to match IP address and user agent:
+					for (let i=0; i<model._visitors.length; i++) {
+						const v = model._visitors[i];
+						if (  v.ip == visitor.ip && v.agent == visitor.agent) {
+							return v;
+						}
 					}
 				}
+
 				return null; // nothing found
 			},
 
@@ -328,7 +337,7 @@ BotMon.live = {
 				}
 
 				// check if it already exists:
-				let visitor = model.findVisitor(nv);
+				let visitor = model.findVisitor(nv, type);
 				if (!visitor) {
 					visitor = nv;
 					visitor._seenBy = [type];
@@ -380,9 +389,9 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				const type = 'log';
+				const type = BM_LOGTYPE.CLIENT;
 
-				let visitor = BotMon.live.data.model.findVisitor(dat);
+				let visitor = BotMon.live.data.model.findVisitor(dat, type);
 				if (!visitor) {
 					visitor = model.registerVisit(dat, type);
 				}
@@ -419,10 +428,10 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				const type = 'tck';
+				const type = BM_LOGTYPE.TICKER;
 
 				// find the visit info:
-				let visitor = model.findVisitor(dat);
+				let visitor = model.findVisitor(dat, type);
 				if (!visitor) {
 					console.info(`No visitor with ID “${dat.id}” found, registering as a new one.`);
 					visitor = model.registerVisit(dat, type);
@@ -458,6 +467,7 @@ BotMon.live = {
 					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
 				} catch (e) {
 					console.warn(`Invalid referer: “${data.ref}”.`);
+					console.info(data);
 				}
 
 				return {
@@ -469,7 +479,7 @@ BotMon.live = {
 					_firstSeen: data.ts,
 					_lastSeen: data.ts,
 					_seenBy: [type],
-					_jsClient: ( type !== 'srv'),
+					_jsClient: ( type !== BM_LOGTYPE.SERVER),
 					_viewCount: 1,
 					_tickCount: 0
 				};
@@ -545,7 +555,7 @@ BotMon.live = {
 							this.data.bots.suspected += v._pageViews.length;
 							this.groups.suspectedBots.push(v);
 						} else { // probably humans
-							v._type = BM_USERTYPE.HUMAN;
+							v._type = BM_USERTYPE.PROBABLY_HUMAN;
 							this.data.bots.human += v._pageViews.length;
 							this.groups.humans.push(v);
 						}						
@@ -661,6 +671,14 @@ BotMon.live = {
 
 			getRefererInfo: function(url) {
 				//console.log('BotMon.live.data.analytics.getRefererInfo',url);
+				try {
+					url = new URL(url);
+				} catch (e) {
+					return {
+						'id': 'null',
+						'n': 'Invalid Referer'
+					};
+				}
 
 				// find the referer ID:
 				let refId = 'null';
@@ -668,7 +686,7 @@ BotMon.live = {
 				if (url && url.host) {
 					const hArr = url.host.split('.');
 					const tld = hArr[hArr.length-1];
-					refId = ( tld == 'localhost' ? tld : hArr[hArr.length-2] + ( tld.length > 3 ? '.' + tld : '' ) );
+					refId = ( tld == 'localhost' ? tld : hArr[hArr.length-2]);
 					refName = hArr[hArr.length-2] + '.' + tld;
 				}
 
@@ -757,7 +775,7 @@ BotMon.live = {
 					case BM_USERTYPE.KNOWN_USER:
 						arr = me._countries.user;
 						break;
-					case BM_USERTYPE.HUMAN:
+					case BM_USERTYPE.PROBABLY_HUMAN:
 						arr = me._countries.human;
 						break;
 					case BM_USERTYPE.LIKELY_BOT:
@@ -803,7 +821,7 @@ BotMon.live = {
 					case BM_USERTYPE.KNOWN_USER:
 						arr = me._countries.user;
 						break;
-					case BM_USERTYPE.HUMAN:
+					case BM_USERTYPE.PROBABLY_HUMAN:
 						arr = me._countries.human;
 						break;
 					case BM_USERTYPE.LIKELY_BOT:
@@ -1445,14 +1463,14 @@ BotMon.live = {
 		
 						// register the visit in the model:
 						switch(type) {
-							case 'srv':
+							case BM_LOGTYPE.SERVER:
 								BotMon.live.data.model.registerVisit(data, type);
 								break;
-							case 'log':
+							case BM_LOGTYPE.CLIENT:
 								data.typ = 'js';
 								BotMon.live.data.model.updateVisit(data);
 								break;
-							case 'tck':
+							case BM_LOGTYPE.TICKER:
 								data.typ = 'js';
 								BotMon.live.data.model.updateTicks(data);
 								break;
@@ -1538,7 +1556,7 @@ BotMon.live = {
 				// update known bots list:
 				const botElement = document.getElementById('botmon__botslist'); /* Known bots */
 				if (botElement) {
-					botElement.innerHTML = `<dt>Known bots (top ${maxItemsPerList})</dt>`;
+					botElement.innerHTML = `<dt>Top visiting bots:</dt>`;
 
 					let botList = BotMon.live.data.analytics.getTopBots(maxItemsPerList);
 					botList.forEach( (botInfo) => {
@@ -1567,7 +1585,7 @@ BotMon.live = {
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__today__countries');
 				if (botCountries) {
-					botCountries.appendChild(makeElement('dt', {}, `Bot Countries (top ${maxItemsPerList})`));
+					botCountries.appendChild(makeElement('dt', {}, `Top bot Countries:`));
 					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 5);
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
@@ -1582,7 +1600,7 @@ BotMon.live = {
 				if (wmoverview) {
 					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 100);
 
-					wmoverview.appendChild(makeElement('dt', {}, "Overview"));
+					wmoverview.appendChild(makeElement('dt', {}, "Visitor overview"));
 					for (let i = 0; i < 3; i++) { 
 						const dd = makeElement('dd');
 						let title = '';
@@ -1805,7 +1823,7 @@ BotMon.live = {
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
 
-				const sumClass = ( data._seenBy.indexOf('srv') < 0 ? 'noServer' : 'hasServer');
+				const sumClass = ( data._seenBy.indexOf(BM_LOGTYPE.SERVER) < 0 ? 'noServer' : 'hasServer');
 
 				const li = make('li'); // root list item
 				const details = make('details');
@@ -1868,8 +1886,8 @@ BotMon.live = {
 				}
 
 				// referer icons:
-				if ((data._type == BM_USERTYPE.HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
-					const refInfo = BotMon.live.data.analytics.getRefererInfo(new URL(data.ref));
+				if ((data._type == BM_USERTYPE.PROBABLY_HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
+					const refInfo = BotMon.live.data.analytics.getRefererInfo(data.ref);
 					span1.appendChild(make('span', {
 						'class': 'icon_only referer ref_' + refInfo.id,
 						'title': "Referer: " + data.ref

@@ -55,7 +55,7 @@ class admin_plugin_botmon extends AdminPlugin {
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
 			<details id="botmon__today__overview" open>
-				<summary>Overview</summary>
+				<summary>Bots overview</summary>
 				<div class="botmon_bots_grid">
 					<dl id="botmon__today__botsvshumans"></dl>
 					<dl id="botmon__botslist"></dl>
@@ -63,7 +63,7 @@ class admin_plugin_botmon extends AdminPlugin {
 				</div>
 			</details>
 			<details id="botmon__today__webmetrics">
-				<summary>Web metrics (humans only)</summary>
+				<summary>Humans’ web metrics</summary>
 				<div class="botmon_webmetrics_grid">
 					<dl id="botmon__today__wm_overview"></dl>
 					<dl id="botmon__today__wm_clients"></dl>
