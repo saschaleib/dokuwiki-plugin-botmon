@@ -954,7 +954,7 @@ BotMon.live = {
 
 				// check for unknown bots:
 				if (!botInfo) {
-					const botmatch = agent.match(/([\s\d\w]*bot|[\s\d\w]*crawler|[\s\d\w]*spider)[\/\s;\),\\.$]/i);
+					const botmatch = agent.match(/([\s\d\w\-]*bot|[\s\d\w\-]*crawler|[\s\d\w\-]*spider)[\/\s;\),\\.$]/i);
 					if(botmatch) {
 						botInfo = {'id': ( botmatch[1] || "other_" ), 'n': "Other" + ( botmatch[1] ? " (" + botmatch[1] + ")" : "" ) , "bot": botmatch[1] };
 					}
@@ -1823,7 +1823,7 @@ BotMon.live = {
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
 
-				const sumClass = ( data._seenBy.indexOf(BM_LOGTYPE.SERVER) < 0 ? 'noServer' : 'hasServer');
+				const sumClass = ( !data._seenBy || data._seenBy.indexOf(BM_LOGTYPE.SERVER) < 0 ? 'noServer' : 'hasServer');
 
 				const li = make('li'); // root list item
 				const details = make('details');
