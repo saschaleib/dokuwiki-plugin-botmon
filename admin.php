@@ -101,7 +101,7 @@ class admin_plugin_botmon extends AdminPlugin {
 			$fName = pathinfo($file, PATHINFO_BASENAME);
 			$bName = strtok($fName, '.');
 
-			if ($bName == '' || $bName == 'logfiles') {
+			if ($bName == '' || $bName == 'logfiles' || $bName == 'empty' || $fName == '.htaccess') {
 				// ignore
 			} else if ($bName == $today || $bName == $yesterday) {
 				// skip
