@@ -1104,61 +1104,96 @@ BotMon.live = {
 
 		},
 
+		ipRanges: {
+
+			init: function() {
+				//console.log('BotMon.live.data.ipRanges.init()');
+				// #TODO: Load from separate IP-Ranges file
+			},
+
+			// the actual bot list is stored here:
+			_list: [],
+
+			add: function(data) {
+				//console.log('BotMon.live.data.ipRanges.add(',data,')');
+				
+				const me = BotMon.live.data.ipRanges;
+
+				// convert IP address to easier comparable form:
+				const ip2Num = BotMon.t._ip2Num;
+
+				let item = {
+					'from': ip2Num(data.from),
+					'to': ip2Num(data.to),
+					'label': data.label
+				};
+				me._list.push(item);
+
+			},
+
+			match: function(ip) {
+				//console.log('BotMon.live.data.ipRanges.match(',ip,')');
+
+				const me = BotMon.live.data.ipRanges;
+
+				// convert IP address to easier comparable form:
+				const ipNum = BotMon.t._ip2Num(ip);
+
+				for (let i=0; i < me._list.length; i++) {
+					const ipRange = me._list[i];
+
+					if (ipNum >= ipRange.from && ipNum <= ipRange.to) {
+						return ipRange;
+					}
+
+				};
+				return null;
+			}
+		},
+
 		rules: {
-			// loads the list of rules and settings from a JSON file:
+
+			/**
+			 * Initializes the rules data.
+			 *
+			 * Loads the default config file and the user config file (if present).
+			 * The default config file is used if the user config file does not have a certain setting.
+			 * The user config file can override settings from the default config file.
+			 * 
+			 * The rules are loaded from the `rules` property of the config files.
+			 * The IP ranges are loaded from the `ipRanges` property of the config files.
+			 * 
+			 * If an error occurs while loading the config file, it is displayed in the status bar.
+			 * After the config file is loaded, the status bar is hidden.
+			 */
 			init: async function() {
 				//console.info('BotMon.live.data.rules.init()');
 
 				// Load the list of known bots:
 				BotMon.live.gui.status.showBusy("Loading list of rules …");
 
-				// relative file path to the rules file:
-				const filePath = 'config/default-config.json';
-
 				// load the rules file:
-				this._loadrulesFile(BotMon._baseDir + filePath);			
-			},
+				const me = BotMon.live.data;
 
-			/**
-			 * Loads the list of rules and settings from a JSON file.
-			 * @param {String} url - the URL from which to load the rules file.
-			 */
-			
-			_loadrulesFile: async function(url) {
-				//console.info('BotMon.live.data.rules._loadrulesFile(',url,')');}
-
-				const me = BotMon.live.data.rules;
 				try {
-					const response = await fetch(url);
-					if (!response.ok) {
-						throw new Error(`${response.status} ${response.statusText}`);
-					}
+					BotMon.live.data._loadSettingsFile(['user-config', 'default-config'],
+						(json) => {
 
-					const json = await response.json();
+							// override the threshold?
+							if (json.threshold) me._threshold = json.threshold;
 
-					if (json.rules) {
-						me._rulesList = json.rules;
-					}
+							// set the rules list:
+							if (json.rules) {
+								me.rules._rulesList = json.rules;
+							}
 
-					// override the threshold?
-					if (json.threshold) me._threshold = json.threshold;
-
-					if (json.ipRanges) {
-						// clean up the IPs first:
-						let list = [];
-						json.ipRanges.forEach( it => {
-							let item = {
-								'from': BotMon.t._ip2Num(it.from),
-								'to': BotMon.t._ip2Num(it.to),
-								'label': it.label
+							// load the IP ranges:
+							if (json.ipRanges) {
+								json.ipRanges.forEach( it => me.ipRanges.add(it));
 							};
-							list.push(item);
-						});
 
-						me._botIPs = list;
-					}
-
-					me._ready = true;
+						}
+					);
 
 				} catch (error) {
 					BotMon.live.gui.status.setError("Error while loading the config file: " + error.message);
@@ -1166,6 +1201,7 @@ BotMon.live = {
 					BotMon.live.gui.status.hideBusy("Status: Done.");
 					BotMon.live.data._dispatch('rules')
 				}
+		
 			},
 
 			_rulesList: [], // list of rules to find out if a visitor is a bot
@@ -1396,6 +1432,45 @@ BotMon.live = {
 
 			}
 
+		},
+
+		/**
+		 * Loads a settings file from the specified list of filenames.
+		 * If the file is successfully loaded, it will call the callback function
+		 * with the loaded JSON data.
+		 * If no file can be loaded, it will display an error message.
+		 *
+		 * @param {string[]} fns - list of filenames to load
+		 * @param {function} callback - function to call with the loaded JSON data
+		 */
+		_loadSettingsFile: async function(fns, callback) {
+			//console.info('BotMon.live.data._loadSettingsFile()', fns);
+
+			const kJsonExt = '.json';
+			let loaded = false; // if successfully loaded file
+
+			for (let i=0; i<fns.length; i++) {
+				const filename = fns[i] +kJsonExt;
+				try {
+					const response = await fetch(DOKU_BASE + 'lib/plugins/botmon/config/' + filename);
+					if (!response.ok) {
+						continue;
+					} else {
+						loaded = true;
+					}
+					const json = await response.json();
+					if (callback && typeof callback === 'function') {
+						callback(json);
+					}
+					break;
+				} catch (e) {
+					BotMon.live.gui.status.setError("Error while loading the config file: " + filename);
+				}
+			}
+
+			if (!loaded) {
+				BotMon.live.gui.status.setError("Could not load a config file.");
+			}
 		},
 
 		/**
@@ -2046,7 +2121,7 @@ BotMon.live = {
 
 							// special case for Bot IP range test:
 							if (tObj.func == 'fromKnownBotIP') {
-								const rangeInfo = BotMon.live.data.rules.getBotIPInfo(data.ip);
+								const rangeInfo = BotMon.live.data.ipRanges.match(data.ip);
 								if (rangeInfo) {
 									tDesc += ' (' + (rangeInfo.label ? rangeInfo.label : 'Unknown') + ')';
 								}

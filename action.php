@@ -57,7 +57,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		}
 
 		// add the deferred script loader::
-		$code .= DOKU_TAB . "addEventListener('load', function(){" . NL;
+		$code .= DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "const e=document.createElement('script');" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "e.async=true;e.defer=true;" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;

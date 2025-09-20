@@ -1,7 +1,11 @@
 [
 	{"n": "Opera",
 	 "id": "opera",
-	 "rx": [ "\\sOpera\\/.*?Version\\/(\\S+)", "Opera\\/(\\S+)", "\\sOPR\\/(\\d+)\\." ]
+	 "rx": [ "\\sOpera\\/.*?Version\\/(1\\d\\d)\\.", "Opera\\/(1\\d\\d)\\.", "\\sOPR\\/(1\\d\\d)\\." ]
+	},
+	{"n": "Opera Old",
+	 "id": "operaold",
+	 "rx": [ "\\sOpera\\/.*?Version\\/(\\d\\d)\\.", "Opera\\/(\\d\\d)\\.", "\\sOPR\\/(\\d\\d)\\." ]
 	},
 	{"n": "Firefox on iOS",
 	 "id": "firefox",
