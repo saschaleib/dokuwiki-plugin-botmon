@@ -1780,7 +1780,7 @@ BotMon.live = {
 						title.appendChild(makeElement('span', {'class': 'title'}, listTitle));
 						if (infolink) {
 							title.appendChild(makeElement('a', {
-								'class': 'info', 
+								'class': 'ext_info', 
 								'target': '_blank',
 								'href': infolink,
 								'title': "More information"
