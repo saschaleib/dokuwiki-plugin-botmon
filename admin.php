@@ -63,7 +63,7 @@ class admin_plugin_botmon extends AdminPlugin {
 				</div>
 			</details>
 			<details id="botmon__today__webmetrics">
-				<summary>Humans’ web metrics</summary>
+				<summary>Humans overview</summary>
 				<div class="botmon_webmetrics_grid">
 					<dl id="botmon__today__wm_overview"></dl>
 					<dl id="botmon__today__wm_clients"></dl>

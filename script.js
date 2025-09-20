@@ -1567,7 +1567,6 @@ BotMon.live = {
 					});
 				}
 
-
 				// update the suspected bot IP ranges list:
 				/*const botIps = document.getElementById('botmon__today__botips');
 				if (botIps) {
@@ -1749,6 +1748,7 @@ BotMon.live = {
 						// change the id and title by number:
 						let listTitle = '';
 						let listId = '';
+						let infolink = null;
 						switch (i) {
 							case 0:
 								listTitle = "Registered users";
@@ -1761,10 +1761,12 @@ BotMon.live = {
 							case 2:
 								listTitle = "Suspected bots";
 								listId = 'suspectedBots';
+								infolink = 'https://leib.be/sascha/projects/dokuwiki/botmon/info/suspected_bots';
 								break;
 							case 3:
 								listTitle = "Known bots";
 								listId = 'knownBots';
+								infolink = 'https://leib.be/sascha/projects/dokuwiki/botmon/info/known_bots';
 								break;
 							default:
 								console.warn('Unknown list number.');
@@ -1776,7 +1778,14 @@ BotMon.live = {
 						});
 						const title = details.appendChild(makeElement('summary'));
 						title.appendChild(makeElement('span', {'class': 'title'}, listTitle));
-						title.appendChild(makeElement('span', {'class': 'counter'}));
+						if (infolink) {
+							title.appendChild(makeElement('a', {
+								'class': 'info', 
+								'target': '_blank',
+								'href': infolink,
+								'title': "More information"
+							}, "Info"));
+						}
 						details.addEventListener("toggle", this._onDetailsToggle);
 
 						parent.appendChild(details);

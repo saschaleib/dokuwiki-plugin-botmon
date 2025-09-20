@@ -53,6 +53,7 @@
 		&.bot_reddit::before { background-position-y: -200px }
 		&.bot_wayback::before { background-position-y: -220px }
 		&.bot_alibaba::before { background-position-y: -241px }
+		&.bot_ibou::before { background-position-y: -260px }
 		&.bot_other::before { background-image: url('img/more.svg') }
 
 		/* platform icons */	
@@ -485,6 +486,18 @@
 					span.title {
 						flex-grow: 1;
 					}
+					a.info {
+						display: inline-block;
+						width: 1.25em; height: 1.25em;
+						overflow: hidden;
+						border-radius: 50%;
+					}
+					a.info::before {
+						content: '';
+						display: inline-block;
+						width: 1.25em; height: 1.25em;
+						background: transparent url('img/info.svg') center no-repeat
+					}
 				}
 			}
 			& > details > summary {
@@ -591,8 +604,8 @@
 					span[data-lang]::after {
 						content: attr(data-lang);
 						font-size: smaller;
-						color: #555;
-						border: #555 solid 1px;
+						color: #666;
+						border: #666 solid 1px;
 						line-height: 1.25;
 						border-radius: 2pt;
 						padding: 0 1pt;
@@ -743,6 +756,14 @@
 					}
 					& > details summary {
 						background-color: #171717;
+					}
+				}
+
+				dl.visitor_details {
+					dd.pages {
+						ul li:nth-child(odd) {
+							background-color: #333;
+						}
 					}
 				}
 

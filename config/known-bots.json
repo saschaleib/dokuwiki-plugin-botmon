@@ -230,7 +230,7 @@
 	 "n": "BitSightBot",
 	 "r": ["BitSightBot"],
 	 "rx": ["BitSightBot\\/(\\d+\\.\\d+)"],
-	 "url": "https://darkvisitors.com/agents/bitsightbot"
+	 "url": "https://datadome.co/bots/bitsightbot/"
 	},
 	{"id": "terracotta",
 	 "n": "TerraCotta Bot",
@@ -248,7 +248,7 @@
 	 "n": "HaloBot", "geo": "FR",
 	 "r": ["HaloBot"],
 	 "rx": [" HaloBot\\/(\\d+)\\."],
-	 "url": "https://darkvisitors.com/agents/tiktokspider"
+	 "url": "https://www.haloscan.com/"
 	},
 	{"id": "wayback",
 	 "n": "Internet Archive",
@@ -261,5 +261,11 @@
 	 "r": ["AliyunSecBot"],
 	 "rx": ["AliyunSecBot/Aliyun"],
 	 "url": "https://www.aqtronix.com/useragents/?Action=ShowAgentDetails&Name=AliyunSecBot"
+	},
+	{"id": "ibou",
+	 "n": "Ibou Bot",
+	 "r": ["IbouBot"],
+	 "rx": ["IbouBot\\/(\\d+\\.\\d+)"],
+	 "url": "https://ibou.io/iboubot.html"
 	}
 ]
