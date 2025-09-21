@@ -58,6 +58,12 @@
 	 "rx": ["DuckDuckBot\\/(\\d+\\.\\d+);", "DuckAssistBot\\/(\\d+\\.\\d+);", "DuckDuckGo-Favicons-Bot\\/(\\d+\\.\\d+);"],
 	 "url": "https://duckduckgo.com/duckduckbot.html"
 	},
+	{"id": "marginalia",
+	 "n": "Marginalia.nu",
+	 "r": [],
+	 "rx": ["^search\\.marginalia\\.nu"],
+	 "url": "https://marginalia-search.com/"
+	},
 	{"id": "openai",
 	 "n": "OpenAI/ChatGPT", "geo": "US",
 	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
@@ -281,9 +287,9 @@
 	 "url": "https://ibou.io/iboubot.html"
 	},
 	{"id": "gohttp",
-	 "n": "Go HTTP Client",
+	 "n": "Go HTTP Clients",
 	 "r": [],
-	 "rx": ["Go\\-http\\-client\\/(\\d+\\.\\d+)"],
+	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"],
 	 "url": "https://github.com/golang/goen.wi"
 	}
 ]

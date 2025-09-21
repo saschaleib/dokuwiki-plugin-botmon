@@ -37,7 +37,7 @@
 		 "id": "noRefs", "desc": "No referer field",
 		 "bot": 30
 		},
-		{"func": "matchesClient", "params": ["brave","operaold","msie"],
+		{"func": "matchesClient", "params": ["brave","operaold","msie","webkit"],
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
 		},
@@ -97,6 +97,7 @@
 		{"from": "159.138.0.0", "to": "159.138.225.254", "m": 16, "label": "Huawei [TH]"},
 		{"from": "162.128.0.0", "to": "162.128.255.254", "label": "Zenlayer [SG]"},
 		{"from": "166.108.192.0", "to": "166.108.255.254", "m": 18, "label": "Huawei [SG]"},
+		{"from": "171.224.0.0", "to": "171.239.255.255", "m": 12, "label": "Viettel [VN]"},
 		{"from": "177.0.0.0", "to": "177.255.255.254", "label": "BrasilNET [BR]"},
 		{"from": "179.0.0.0", "to": "179.255.255.254", "label": "BrasilNET [BR]"},
 		{"from": "183.87.32.0", "to": "183.87.63.254", "label": "Huawei [HK]"},
