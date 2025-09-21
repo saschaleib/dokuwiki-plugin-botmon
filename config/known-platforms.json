@@ -25,7 +25,7 @@
 	},
 	{"n": "Android",
 	 "id": "android",
-	 "rx": [ "Android[\\s;\\/](\\d\\d)[\\.;\\s]" ]
+	 "rx": [ "Android (\\d\\d)[\\.;\\s]" ]
 	},
 	{"n": "Old MacOS",
 	 "id": "macosold",

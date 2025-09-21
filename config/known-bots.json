@@ -279,5 +279,11 @@
 	 "r": ["IbouBot"],
 	 "rx": ["IbouBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://ibou.io/iboubot.html"
+	},
+	{"id": "gohttp",
+	 "n": "Go HTTP Client",
+	 "r": [],
+	 "rx": ["Go\\-http\\-client\\/(\\d+\\.\\d+)"],
+	 "url": "https://github.com/golang/goen.wi"
 	}
 ]
