@@ -5,7 +5,7 @@
 	},
 	{"n": "Opera Old",
 	 "id": "operaold",
-	 "rx": [ "\\sOpera\\/.*?Version\\/(\\d\\d)\\.", "Opera\\/(\\d\\d)\\.", "\\sOPR\\/(\\d\\d)\\." ]
+	 "rx": [ "\\sOpera\\/.*?Version\\/(\\d\\d)\\.", "Opera\\/(\\d\\d?)\\.", "\\sOPR\\/(\\d\\d?)\\." ]
 	},
 	{"n": "Firefox on iOS",
 	 "id": "firefox",
@@ -75,16 +75,16 @@
 	 "id": "safari",
 	 "rx": [ "\\sSafari\\/(\\d+)" ]
 	},
+	{"n": "AppleWebKit",
+	 "id": "webkit",
+	 "rx": [ "AppleWebKit\\/(\\d*)\\." ]
+	},
 	{"n": "Firefox Old",
 	 "id": "ffold",
-	 "rx": [ "\\sFirefox\\/(\\d\\d)\\.", "\\sFirefox\\s" ]
+	 "rx": [ "\\sFirefox\\/(\\d\\d?)\\.", "\\sFirefox\\s" ]
 	},
 	{"n": "Firefox",
 	 "id": "firefox",
 	 "rx": [ "\\sFirefox\\/(\\d\\d\\d)\\." ]
-	},
-	{"n": "AppleWebKit",
-	 "id": "webkit",
-	 "rx": [ "\\sAppleWebKit\\/(\\d\\d\\d)\\." ]
 	}
 ]
