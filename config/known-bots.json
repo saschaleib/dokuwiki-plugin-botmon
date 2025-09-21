@@ -193,8 +193,20 @@
 	{"id": "plagaware",
 	 "n": "PlagAwareBot (DE)", "geo": "DE",
 	 "r": ["PlagAwareBot"],
-	 "rx": ["PlagAwareBot\\/(\\d\\.\\d)"],
+	 "rx": ["PlagAwareBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://www.plagaware.com/bot"
+	},
+	{"id": "discord",
+	 "n": "Discord",
+	 "r": ["Discordbot"],
+	 "rx": ["Discordbot\\/(\\d\\.\\d);"],
+	 "url": "https://datadome.co/bots/discordbot/"
+	},
+	{"id": "twitter",
+	 "n": "Twitterbot",
+	 "r": ["Twitterbot"],
+	 "rx": ["Twitterbot\\/(\\d+\\.\\d+)"],
+	 "url": "https://datadome.co/bots/twitterbot/"
 	},
 	{"id": "blexbot",
 	 "n": "BLEXBot",

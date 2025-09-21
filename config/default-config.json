@@ -37,10 +37,6 @@
 		 "id": "noRefs", "desc": "No referer field",
 		 "bot": 30
 		},
-		{"func": "matchLang", "params": [],
-		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
-		 "bot": 30
-		},
 		{"func": "matchesClient", "params": ["brave","operaold","msie"],
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
@@ -61,17 +57,14 @@
 		 "id": "noAcc", "desc": "No “Accept-Language” header",
 		 "bot": 40
 		},
-		{"func": "clientAccepts", "params": ["zh"],
-		 "id": "zhLang", "desc": "Client accepts Chinese language",
-		 "bot": 50
-		},
-		{"func": "matchesCountry", "params": ["BR", "CN", "RU", "US", "MX", "SG", "IN", "UY"],
-		 "id": "isFrom", "desc": "Location is in a known bot-spamming country.",
-		 "bot": 50
+		{"func": "matchLang", "params": [],
+		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
+		 "bot": 30
 		}
 	],
 	"ipRanges": [
 		{"from": "3.0.0.0", "to": "3.255.255.254", "label": "Amazon Data Services [US]"},
+		{"from": "5.161.0.0", "to": "5.161.255.255", "m": 16, "label": "Hetzner [US]"},
 		{"from": "8.127.0.0", "to": "8.223.255.254", "label": "Alibaba [CN]"},
 		{"from": "14.160.0.0", "to": "14.191.255.254", "m": 11, "label": "VNPT [VN]"},
 		{"from": "24.240.0.0", "to": "24.247.255.255", "m": 13, "label": "Charter [US]"},
@@ -98,7 +91,7 @@
 		{"from": "122.9.0.0", "to": "122.9.255.254", "m": 16, "label": "Huawei [CN]"},
 		{"from": "123.16.0.0", "to": "123.31.255.254", "m": 12, "label": "VNPT [VN]"},
 		{"from": "124.243.128.0", "to": "124.243.191.254", "m": 18, "label": "Huawei [SG]"},
-		{"from": "142.147.128.0", "to": "1142.147.255.254", "label": "Web2Objects LLC [US]"},
+		{"from": "142.147.128.0", "to": "1142.147.255.254", "m": 17, "label": "Web2Objects LLC [US]"},
 		{"from": "146.174.128.0", "to": "146.174.191.254", "m": 18, "label": "Huawei [SG]"},
 		{"from": "150.40.128.0", "to": "150.40.255.254", "m": 17, "label": "Huawei [HK]"},
 		{"from": "159.138.0.0", "to": "159.138.225.254", "m": 16, "label": "Huawei [TH]"},
@@ -123,6 +116,7 @@
 		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "label": "Charter [US]"},
 		{"from": "2607:a400::::::", "to": "2607:a400:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "label": "Zenlayer Inc. [US]"},
 		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "label": "Inspire [BR]"},
+		{"from": "2a09:bac2::::::", "to": "2a09:bac2:0:ffff:ffff:ffff:ffff:ffff", "m": 48, "label": "Cloudflare"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "label": "Netcup [DE]"}
 	]
 }
