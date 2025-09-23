@@ -78,7 +78,7 @@
 
 		/* browser icons */
 		&.client::before { background-image: url('img/clients.png') }
-		&.cl_firefox::before { background-position-y: -20px }
+		&.cl_firefox::before, &.cl_ffios::before { background-position-y: -20px }
 		&.cl_safari::before { background-position-y: -40px }
 		&.cl_chrome::before { background-position-y: -60px }
 		&.cl_msedge::before { background-position-y: -80px }
@@ -199,7 +199,7 @@
 		&.ctry_hr::before { background-position-y: -2181px }
 		&.ctry_ht::before { background-position-y: -2201px }
 		&.ctry_hu::before { background-position-y: -2221px }
-		&.ctry_mc::before { background-position-y: -2241px }
+		&.ctry_id::before, &.ctry_mc::before { background-position-y: -2241px }
 		&.ctry_ie::before { background-position-y: -2261px }
 		&.ctry_il::before { background-position-y: -2281px }
 		&.ctry_im::before { background-position-y: -2301px }
@@ -600,14 +600,14 @@
 							}
 						}
 					}
-					span[data-lang] {
+					a[hreflang] {
 						overflow: hidden;
 						text-overflow: ellipsis;
 						padding: 2pt 0 0 2pt;
 
 					}
-					span[data-lang]::after {
-						content: attr(data-lang);
+					a[hreflang]::after {
+						content: attr(hreflang);
 						font-size: smaller;
 						color: #666;
 						border: #666 solid 1px;

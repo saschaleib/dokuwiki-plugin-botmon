@@ -8,8 +8,8 @@
 	 "rx": [ "\\sOpera\\/.*?Version\\/(\\d\\d)\\.", "Opera\\/(\\d\\d?)\\.", "\\sOPR\\/(\\d\\d?)\\." ]
 	},
 	{"n": "Firefox on iOS",
-	 "id": "firefox",
-	 "rx": [ "\\sFxiOS\\/(\\d+)\\." ]
+	 "id": "ffios",
+	 "rx": [ "\\sFxiOS\\/(\\d+)[\\.\\s;]" ]
 	},
 	{"n": "AOL Explorer",
 	 "id": "aol",

@@ -1329,8 +1329,9 @@ BotMon.live = {
 
 				// is the IP address from a known bot network?
 				fromKnownBotIP: function(visitor) {
+					//console.info('fromKnownBotIP()', visitor.ip);
 
-					const ipInfo = BotMon.live.data.rules.getBotIPInfo(visitor.ip);
+					const ipInfo = BotMon.live.data.ipRanges.match(visitor.ip);
 
 					if (ipInfo) {
 						visitor._ipInKnownBotRange = true;
@@ -1406,32 +1407,7 @@ BotMon.live = {
 					}
 					return false;
 				}
-			},
-
-			/* known bot IP ranges: */
-			_botIPs: [],
-
-			// return information on a bot IP range:
-			getBotIPInfo: function(ip) {
-
-				// shortcut to make code more readable:
-				const me = BotMon.live.data.rules;
-
-				// convert IP address to easier comparable form:
-				const ipNum = BotMon.t._ip2Num(ip);
-
-				for (let i=0; i < me._botIPs.length; i++) {
-					const ipRange = me._botIPs[i];
-
-					if (ipNum >= ipRange.from && ipNum <= ipRange.to) {
-						return ipRange;
-					}
-
-				};
-				return null;
-
 			}
-
 		},
 
 		/**
@@ -2164,8 +2140,10 @@ BotMon.live = {
 
 				const row1 = make('div', {'class': 'row'});
 
-					row1.appendChild(make('span', { // page id is the left group
-						'data-lang': page.lang,
+					row1.appendChild(make('a', { // page id is the left group
+						'href': DOKU_BASE + 'doku.php?id=' + encodeURIComponent(page.pg),
+						'target': 'preview',
+						'hreflang': page.lang,
 						'title': "PageID: " + page.pg
 					}, page.pg)); /* DW Page ID */
 
