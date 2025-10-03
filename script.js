@@ -19,6 +19,12 @@ const BM_LOGTYPE = Object.freeze({
 	'TICKER': 'tck'
 });
 
+// enumeration of IP versions:
+const BM_IPVERSION = Object.freeze({
+	'IPv4': 4,
+	'IPv6': 6
+});
+
 /* BotMon root object */
 const BotMon = {
 
@@ -35,13 +41,18 @@ const BotMon = {
 		// get the time offset:
 		this._timeDiff = BotMon.t._getTimeOffset();
 
+		// get yesterday's date:
+		let d = new Date();
+		d.setDate(d.getDate() - 1);
+		this._datestr = d.toISOString().slice(0, 10);
+
 		// init the sub-objects:
 		BotMon.t._callInit(this);
 	},
 
 	_baseDir: null,
 	_lang: 'en',
-	_datestr: (new Date()).toISOString().slice(0, 10),
+	_datestr: '',
 	_timeDiff: '',
 
 	/* internal tools */
@@ -105,9 +116,9 @@ const BotMon = {
 			if (!ip) {
 				return 'null';
 			} else if (ip.indexOf(':') > 0) { /* IP6 */
-				return (ip.split(':').map(d => ('0000'+d).slice(-4) ).join(''));
+				return (ip.split(':').map(d => ('0000'+d).slice(-4) ).join(':'));
 			} else { /* IP4 */
-				return Number(ip.split('.').map(d => ('000'+d).slice(-3) ).join(''));
+				return ip.split('.').map(d => ('000'+d).slice(-3) ).join('.');
 			}
 		},
 
@@ -147,7 +158,7 @@ const BotMon = {
 	}
 };
 
-/* everything specific to the "Today" tab is self-contained in the "live" object: */
+/* everything specific to the "Latest" tab is self-contained in the "live" object: */
 BotMon.live = {
 	init: function() {
 		//console.info('BotMon.live.init()');
@@ -180,6 +191,9 @@ BotMon.live = {
 				case 'rules':
 					data._dispatchRulesLoaded = true;
 					break;
+				case 'ipranges':
+					data._dispatchIPRangesLoaded = true;
+					break;
 				case 'bots':
 					data._dispatchBotsLoaded = true;
 					break;
@@ -194,7 +208,7 @@ BotMon.live = {
 			}
 
 			// are all the flags set?
-			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded && data._dispatchRulesLoaded) {
+			if (data._dispatchBotsLoaded && data._dispatchClientsLoaded && data._dispatchPlatformsLoaded && data._dispatchRulesLoaded && data._dispatchIPRangesLoaded) {
 				// chain the log files loading:
 				BotMon.live.data.loadLogFile(BM_LOGTYPE.SERVER, BotMon.live.data._onServerLogLoaded);
 			}
@@ -203,6 +217,7 @@ BotMon.live = {
 		_dispatchBotsLoaded: false,
 		_dispatchClientsLoaded: false,
 		_dispatchPlatformsLoaded: false,
+		_dispatchIPRangesLoaded: false,
 		_dispatchRulesLoaded: false,
 
 		// event callback, after the server log has been loaded:
@@ -239,6 +254,7 @@ BotMon.live = {
 
 		},
 
+		// the data model:
 		model: {
 			// visitors storage:
 			_visitors: [],
@@ -486,8 +502,12 @@ BotMon.live = {
 			}
 		},
 
+		// functions to analyse the data:
 		analytics: {
 
+			/**
+			 * Initializes the analytics data storage object:
+			 */
 			init: function() {
 				//console.info('BotMon.live.data.analytics.init()');
 			},
@@ -580,12 +600,15 @@ BotMon.live = {
 						// add 
 						v._pageViews.forEach( pv => {
 							me.addToRefererList(pv._ref);
+							me.addToPagesList(pv.pg);
 						});
 					}
 	
 				});
 
 				BotMon.live.gui.status.hideBusy('Done.');
+
+				console.log(me._pagesList);
 			},
 
 			// get a list of known bots:
@@ -633,6 +656,49 @@ BotMon.live = {
 				});
 
 				return rList;
+			},
+
+			// most visited pages list:
+			_pagesList: [],
+
+			/**
+			 * Add a page view to the list of most visited pages.
+			 * @param {string} pageId - The page ID to add to the list.
+			 * @example
+			 * BotMon.live.data.analytics.addToPagesList('1234567890');
+			 */
+			addToPagesList: function(pageId) {
+				//console.log('BotMon.live.data.analytics.addToPagesList', pageId);
+
+				const me = BotMon.live.data.analytics;	
+
+				// already exists?	
+				let pgObj = null;
+				for (let i = 0; i < me._pagesList.length; i++) {
+					if (me._pagesList[i].id == pageId) {
+						pgObj = me._pagesList[i];
+						break;
+					}
+				}
+
+				// if not exists, create it:				
+				if (!pgObj) {
+					pgObj = {
+						id: pageId,
+						count: 1
+					};
+					me._pagesList.push(pgObj);
+				} else {
+					pgObj.count += 1;
+				}
+			},
+
+			getTopPages: function(max) {
+				//console.info('BotMon.live.data.analytics.getTopPages('+max+')');
+				const me = BotMon.live.data.analytics;
+				return me._pagesList.toSorted( (a, b) => {
+					return b.count - a.count;
+				}).slice(0,max);
 			},
 
 			// Referer List:
@@ -696,6 +762,14 @@ BotMon.live = {
 				};
 			},
 
+			/**
+			 * Get a sorted list of the top referers.
+			 * The list is sorted in descending order of count.
+			 * If the array has more items than the given maximum, the rest of the items are added to an "other" item.
+			 * Each item in the list has a "pct" property, which is the percentage of the total count.
+			 * @param {number} max - The maximum number of items to return.
+			 * @return {Array} The sorted list of top referers.
+			 */
 			getTopReferers: function(max) {
 				//console.info(('BotMon.live.data.analytics.getTopReferers(' + max + ')'));
 
@@ -704,6 +778,15 @@ BotMon.live = {
 				return me._makeTopList(me._refererList, max);
 			},
 
+			/**
+			 * Create a sorted list of top items from a given array.
+			 * The list is sorted in descending order of count.
+			 * If the array has more items than the given maximum, the rest of the items are added to an "other" item.
+			 * Each item in the list has a "pct" property, which is the percentage of the total count.
+			 * @param {Array} arr - The array to sort and truncate.
+			 * @param {number} max - The maximum number of items to return.
+			 * @return {Array} The sorted list of top items.
+			 */
 			_makeTopList: function(arr, max) {
 				//console.info(('BotMon.live.data.analytics._makeTopList(arr,' + max + ')'));
 
@@ -896,6 +979,7 @@ BotMon.live = {
 			}
 		},
 
+		// information on "known bots":
 		bots: {
 			// loads the list of known bots from a JSON file:
 			init: async function() {
@@ -972,6 +1056,7 @@ BotMon.live = {
 			_list: []
 		},
 
+		// information on known clients (browsers):
 		clients: {
 			// loads the list of known clients from a JSON file:
 			init: async function() {
@@ -1038,6 +1123,7 @@ BotMon.live = {
 
 		},
 
+		// information on known platforms (operating systems):
 		platforms: {
 			// loads the list of known platforms from a JSON file:
 			init: async function() {
@@ -1104,15 +1190,43 @@ BotMon.live = {
 
 		},
 
+		// storage and functions for the known bot IP-Ranges:
 		ipRanges: {
 
 			init: function() {
 				//console.log('BotMon.live.data.ipRanges.init()');
 				// #TODO: Load from separate IP-Ranges file
+				// load the rules file:
+				const me = BotMon.live.data;
+
+				try {
+					BotMon.live.data._loadSettingsFile(['user-ipranges', 'known-ipranges'],
+						(json) => {
+
+						// groups can be just saved in the data structure:
+						if (json.groups && json.groups.constructor.name == 'Array') {
+							me.ipRanges._groups = json.groups;
+						}
+
+						// groups can be just saved in the data structure:
+						if (json.ranges && json.ranges.constructor.name == 'Array') {
+							json.ranges.forEach(range => {
+								me.ipRanges.add(range);
+							})
+						}
+
+						// finished loading
+						BotMon.live.gui.status.hideBusy("Status: Done.");
+						BotMon.live.data._dispatch('ipranges')
+					});
+				} catch (error) {
+					BotMon.live.gui.status.setError("Error while loading the config file: " + error.message);
+				}
 			},
 
 			// the actual bot list is stored here:
 			_list: [],
+			_groups: [],
 
 			add: function(data) {
 				//console.log('BotMon.live.data.ipRanges.add(',data,')');
@@ -1123,12 +1237,27 @@ BotMon.live = {
 				const ip2Num = BotMon.t._ip2Num;
 
 				let item = {
+					'cidr': data.from.replaceAll(/::+/g, '::') + '/' + ( data.m ? data.m : '??' ),
 					'from': ip2Num(data.from),
 					'to': ip2Num(data.to),
-					'label': data.label
+					'm': data.m,
+					'g': data.g
 				};
 				me._list.push(item);
 
+			},
+
+			getOwner: function(rangeInfo) {
+
+				const me = BotMon.live.data.ipRanges;
+
+				for (let i=0; i < me._groups.length; i++) {
+					const it = me._groups[i];
+					if (it.id == rangeInfo.g) {
+						return it.name;
+					}
+				}
+				return `Unknown (“${rangeInfo.g})`;
 			},
 
 			match: function(ip) {
@@ -1151,6 +1280,7 @@ BotMon.live = {
 			}
 		},
 
+		// storage for the rules and related functions
 		rules: {
 
 			/**
@@ -1183,25 +1313,17 @@ BotMon.live = {
 							if (json.threshold) me._threshold = json.threshold;
 
 							// set the rules list:
-							if (json.rules) {
+							if (json.rules && json.rules.constructor.name == 'Array') {
 								me.rules._rulesList = json.rules;
 							}
 
-							// load the IP ranges:
-							if (json.ipRanges) {
-								json.ipRanges.forEach( it => me.ipRanges.add(it));
-							};
-
+							BotMon.live.gui.status.hideBusy("Status: Done.");
+							BotMon.live.data._dispatch('rules')
 						}
 					);
-
 				} catch (error) {
 					BotMon.live.gui.status.setError("Error while loading the config file: " + error.message);
-				} finally {
-					BotMon.live.gui.status.hideBusy("Status: Done.");
-					BotMon.live.data._dispatch('rules')
 				}
-		
 			},
 
 			_rulesList: [], // list of rules to find out if a visitor is a bot
@@ -1717,6 +1839,31 @@ BotMon.live = {
 					}
 				}
 
+				// update the top pages;
+				const wmpages = document.getElementById('botmon__today__wm_pages');
+				if (wmpages) {
+
+					wmpages.appendChild(makeElement('dt', {}, "Top pages"));
+
+					const pgList = BotMon.live.data.analytics.getTopPages(maxItemsPerList);
+					if (pgList) {
+						pgList.forEach( (pgInfo) => {
+							const pgDd = makeElement('dd');
+							pgDd.appendChild(makeElement('a', {
+								'class': 'page_icon',
+								'href': DOKU_BASE + 'doku.php?id=' + encodeURIComponent(pgInfo.id),
+								'target': 'preview',
+								'title': "PageID: " + pgInfo.id
+							}, pgInfo.id));
+							pgDd.appendChild(makeElement('span', {
+								'class': 'count',
+								'title': pgInfo.count + " page views"
+							}, pgInfo.count));
+							wmpages.appendChild(pgDd);
+						});
+					}
+				}
+
 				// update the top referrers;
 				const wmreferers = document.getElementById('botmon__today__wm_referers');
 				if (wmreferers) {
@@ -2014,26 +2161,26 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'has_icon platform pf_' + (data._platform ? data._platform.id : 'unknown')},
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
-					dl.appendChild(make('dt', {}, "IP-Address:"));
-					const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
-						ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
-						ipItem.appendChild(make('a', {
-							'class': 'icon_only extlink dnscheck',
-							'href': `https://dnschecker.org/ip-location.php?ip=${encodeURIComponent(data.ip)}`,
-							'target': 'dnscheck',
-							'title': "View this address on DNSChecker.org"
-						} , "Check Address"));
-						ipItem.appendChild(make('a', {
-							'class': 'icon_only extlink ipinfo',
-							'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
-							'target': 'ipinfo',
-							'title': "View this address on IPInfo.io"
-						} , "DNS Info"));
-					dl.appendChild(ipItem);
-
 					/*dl.appendChild(make('dt', {}, "ID:"));
 					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
 				}
+
+				dl.appendChild(make('dt', {}, "IP-Address:"));
+				const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
+					ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
+					ipItem.appendChild(make('a', {
+						'class': 'icon_only extlink dnscheck',
+						'href': `https://dnschecker.org/ip-location.php?ip=${encodeURIComponent(data.ip)}`,
+						'target': 'dnscheck',
+						'title': "View this address on DNSChecker.org"
+					} , "Check Address"));
+					ipItem.appendChild(make('a', {
+						'class': 'icon_only extlink ipinfo',
+						'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
+						'target': 'ipinfo',
+						'title': "View this address on IPInfo.io"
+					} , "DNS Info"));
+				dl.appendChild(ipItem);
 
 				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {
 					dl.appendChild(make('dt', {}, "Seen:"));
@@ -2099,7 +2246,8 @@ BotMon.live = {
 							if (tObj.func == 'fromKnownBotIP') {
 								const rangeInfo = BotMon.live.data.ipRanges.match(data.ip);
 								if (rangeInfo) {
-									tDesc += ' (' + (rangeInfo.label ? rangeInfo.label : 'Unknown') + ')';
+									const owner = BotMon.live.data.ipRanges.getOwner(rangeInfo);
+									tDesc += ' (range: “' + rangeInfo.cidr + '”, ' + owner + ')';
 								}
 							}
 

@@ -373,8 +373,23 @@
 		&.ref_other::before { background-image: url('img/more.svg') }
 	}
 
+	.page_icon {
+		display: inline-flex;
+		column-gap: .25em;
+		align-items: center;
+	}
+	.page_icon::before {
+		content: '';
+		display: inline-block;
+		width: 20px; height: 20px;
+		background: transparent url('img/page.svg') center no-repeat;
+		background-position: 0 0;
+		background-size: 20px;
+	}
+
+
 	/* grid layout for the overview: */
-	.botmon_bots_grid, .botmon_webmetrics_grid {
+	.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
 		& {
 			display: grid;
 			grid-gap: 0 .33em;
@@ -391,7 +406,10 @@
 		grid-template-columns: 1fr 1fr 1fr;
 	}
 	.botmon_webmetrics_grid {
-		grid-template-columns: 1fr 1fr 1fr 1fr;
+		grid-template-columns: 1fr 1fr 1fr;
+	}
+	.botmon_traffic_grid {
+		grid-template-columns: 2fr 1fr;
 	}
 
 	/* the "today" tab: */

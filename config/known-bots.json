@@ -297,5 +297,17 @@
 	 "r": [],
 	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"],
 	 "url": "https://github.com/golang/goen.wi"
+	},
+	{"id": "bnl",
+	 "n": "BnL Harvester",
+	 "r": [],
+	 "rx": ["NLUX_IAHarvester\\/(\\d+)"],
+	 "url": "http://crawl.bnl.lu/"
+	},
+	{"id": "turnitin",
+	 "n": "TurnitinBot",
+	 "r": [],
+	 "rx": ["Turnitin\\s"],
+	 "url": "https://www.turnitin.com/robot/crawlerinfo.html"
 	}
 ]
