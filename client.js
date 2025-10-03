@@ -73,7 +73,7 @@
 			console.error(err);
 		} finally {
 			/* send the next heartbeat signal after x seconds: */
-		//	setTimeout(this._onHeartbeat.bind(this, this._src.replace( this._scriptName, '/tick.php')),this._heartbeat * 1000);
+			setTimeout(this._onHeartbeat.bind(this, this._src.replace( this._scriptName, '/tick.php')),this._heartbeat * 1000);
 		}
 	}
 }).init();

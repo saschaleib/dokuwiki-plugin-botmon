@@ -21,7 +21,7 @@
 	},
 	{"n": "Old Android",
 	 "id": "androidold",
-	 "rx": [ "Android[\\s;\\/](\\d)\\." ]
+	 "rx": [ "Android[\\s;\\/](\\d)[\\.;\\)]" ]
 	},
 	{"n": "Android",
 	 "id": "android",

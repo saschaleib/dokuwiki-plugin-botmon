@@ -81,8 +81,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name'])
 					?  $INFO['userinfo']['name'] : '');
 
-
-
 		// clean the page ID
 		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
 

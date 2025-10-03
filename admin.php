@@ -42,7 +42,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	<h1>Bot Monitoring Plugin</h1>
 	<nav id="botmon__tabs">
 		<ul class="tabs" role="tablist">
-			<li role="presentation" class="active"><a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Today</a></li>
+			<li role="presentation" class="active"><a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Latest</a></li>
 		</ul>
 	</nav>';
 
@@ -51,7 +51,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	}
 
 	echo '<article role="tabpanel" id="botmon__today"">
-		<h2 class="a11y">Today</h2>
+		<h2 class="a11y">Latest data</h2>
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
 			<details id="botmon__today__overview" open>
@@ -68,6 +68,12 @@ class admin_plugin_botmon extends AdminPlugin {
 					<dl id="botmon__today__wm_overview"></dl>
 					<dl id="botmon__today__wm_clients"></dl>
 					<dl id="botmon__today__wm_platforms"></dl>
+				</div>
+			</details>
+			<details id="botmon__today__traffic">
+				<summary>Web traffic (humans only)</summary>
+				<div class="botmon_traffic_grid">
+					<dl id="botmon__today__wm_pages"></dl>
 					<dl id="botmon__today__wm_referers"></dl>
 				</div>
 			</details>
