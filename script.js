@@ -607,8 +607,6 @@ BotMon.live = {
 				});
 
 				BotMon.live.gui.status.hideBusy('Done.');
-
-				console.log(me._pagesList);
 			},
 
 			// get a list of known bots:
@@ -1729,7 +1727,7 @@ BotMon.live = {
 				// update known bots list:
 				const botElement = document.getElementById('botmon__botslist'); /* Known bots */
 				if (botElement) {
-					botElement.innerHTML = `<dt>Top visiting bots:</dt>`;
+					botElement.innerHTML = `<dt>Top known bots:</dt>`;
 
 					let botList = BotMon.live.data.analytics.getTopBots(maxItemsPerList);
 					botList.forEach( (botInfo) => {
@@ -2169,17 +2167,17 @@ BotMon.live = {
 				const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
 					ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
 					ipItem.appendChild(make('a', {
-						'class': 'icon_only extlink dnscheck',
-						'href': `https://dnschecker.org/ip-location.php?ip=${encodeURIComponent(data.ip)}`,
-						'target': 'dnscheck',
-						'title': "View this address on DNSChecker.org"
-					} , "Check Address"));
-					ipItem.appendChild(make('a', {
 						'class': 'icon_only extlink ipinfo',
 						'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
 						'target': 'ipinfo',
 						'title': "View this address on IPInfo.io"
 					} , "DNS Info"));
+					ipItem.appendChild(make('a', {
+						'class': 'icon_only extlink abuseipdb',
+						'href': `https://www.abuseipdb.com/check/${encodeURIComponent(data.ip)}`,
+						'target': 'abuseipdb',
+						'title': "Check this address on AbuseIPDB.com"
+					} , "Check on AbuseIPDB"));
 				dl.appendChild(ipItem);
 
 				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {

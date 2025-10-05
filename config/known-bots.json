@@ -40,6 +40,12 @@
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
+	{"id": "baidu",
+	 "n": "Baidu", "geo": "CN",
+	 "r": ["Baiduspider", "Baiduspider-image", "Baiduspider-video", "Baiduspider-news", "Baiduspider-favo", "Baiduspider-cpro", "Baiduspider-ads", "Baiduspider-render"],
+	 "rx": ["Baiduspider"],
+	 "url": "http://www.baidu.com/search/spider.html"
+	},
 	{"id": "reddit",
 	 "n": "RedditBot",
 	 "r": ["Applebot"],
