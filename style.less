@@ -405,10 +405,30 @@
 		}
 	}
 	.botmon_bots_grid {
-		grid-template-columns: 1fr 1fr 1fr;
+		&[data-geoip="disabled"] {
+			& {
+				grid-template-columns: 1fr 1fr 1fr;
+			}
+			#botmon__botcountries {
+				display: none;
+			}
+		}
+		&:not([data-geoip="disabled"]) {
+			grid-template-columns: 1fr 1fr 1fr 1fr;
+		}
 	}
 	.botmon_webmetrics_grid {
-		grid-template-columns: 1fr 1fr 1fr;
+		&[data-geoip="disabled"] {
+			& {
+				grid-template-columns: 1fr 1fr 1fr;
+			}
+			#botmon__today__wm_countries {
+				display: none;
+			}
+		}
+		&:not([data-geoip="disabled"]) {
+			grid-template-columns: 1fr 1fr 1fr 1fr;
+		}
 	}
 	.botmon_traffic_grid {
 		grid-template-columns: 2fr 1fr;
@@ -824,9 +844,18 @@
 }
 /* layout overrides for narrow screens: */
 @media (max-width: 670px) {
-	#botmon__admin {
-		.botmon_bots_grid, .botmon_webmetrics_grid {
-			grid-template-columns: 100%;
+	#botmon__admin #botmon__today {
+		.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
+			& {
+				grid-template-columns: 1fr !important;
+			}
+			dt {
+				margin: .5em 0;
+			}
+			dl {
+				border-left: transparent none 0;
+				padding-left: 0;
+			}
 		}
 	}
 }

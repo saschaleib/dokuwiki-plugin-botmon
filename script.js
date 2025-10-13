@@ -614,8 +614,6 @@ BotMon.live = {
 							me.addToIPRanges(pv.ip);
 						});*/
 
-						// add to the country lists:
-						me.addToCountries(v.geo, v._country, v._type);
 
 					} else { /* humans only */
 
@@ -628,6 +626,9 @@ BotMon.live = {
 							me.addToPagesList(pv.pg);
 						});
 					}
+
+					// add to the country lists:
+					me.addToCountries(v.geo, v._country, v._type);
 	
 				});
 
@@ -859,11 +860,8 @@ BotMon.live = {
 
 			/* countries of visits */
 			_countries: {
-				'user': [],
 				'human': [],
-				'likelyBot': [],
-				'known_bot': []
-
+				'bot': []
 			},
 			/**
 			 * Adds a country code to the statistics.
@@ -879,16 +877,12 @@ BotMon.live = {
 				switch (type) {
 					
 					case BM_USERTYPE.KNOWN_USER:
-						arr = me._countries.user;
-						break;
 					case BM_USERTYPE.PROBABLY_HUMAN:
 						arr = me._countries.human;
 						break;
 					case BM_USERTYPE.LIKELY_BOT:
-						arr = me._countries.likelyBot;
-						break;
 					case BM_USERTYPE.KNOWN_BOT:
-						arr = me._countries.known_bot;
+						arr = me._countries.bot;
 						break;
 					default:
 						console.warn(`Unknown user type ${type} in function addToCountries.`);
@@ -912,7 +906,7 @@ BotMon.live = {
 			/**
 			 * Returns a list of countries with visit counts, sorted by visit count in descending order.
 			 * 
-			 * @param {BM_USERTYPE} type The type of visitors to return.
+			 * @param {BM_USERTYPE} type array of types type of visitors to return.
 			 * @param {number} max The maximum number of entries to return.
 			 * @return {Array} A list of objects with properties 'iso' (ISO 3166-1 alpha-2 country code) and 'count' (visit count).
 			 */
@@ -924,17 +918,11 @@ BotMon.live = {
 				let arr = null;
 				switch (type) {
 					
-					case BM_USERTYPE.KNOWN_USER:
-						arr = me._countries.user;
-						break;
-					case BM_USERTYPE.PROBABLY_HUMAN:
+					case 'human':
 						arr = me._countries.human;
 						break;
-					case BM_USERTYPE.LIKELY_BOT:
-						arr = me._countries.likelyBot;
-						break;
-					case BM_USERTYPE.KNOWN_BOT:
-						arr = me._countries.known_bot;
+					case 'bot':
+						arr = me._countries.bot;
 						break;
 					default:
 						console.warn(`Unknown user type ${type} in function getCountryList.`);
@@ -1778,7 +1766,7 @@ BotMon.live = {
 				}
 
 				// update the suspected bot IP ranges list:
-				/*const botIps = document.getElementById('botmon__today__botips');
+				/*const botIps = document.getElementById('botmon__botips');
 				if (botIps) {
 					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 5)"));
 
@@ -1792,10 +1780,10 @@ BotMon.live = {
 				}*/
 
 				// update the top bot countries list:
-				const botCountries = document.getElementById('botmon__today__countries');
+				const botCountries = document.getElementById('botmon__botcountries');
 				if (botCountries) {
 					botCountries.appendChild(makeElement('dt', {}, `Top bot Countries:`));
-					const countryList = BotMon.live.data.analytics.getCountryList('likely_bot', 5);
+					const countryList = BotMon.live.data.analytics.getCountryList('bot', 5);
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
 						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
@@ -1884,6 +1872,19 @@ BotMon.live = {
 							wmplatforms.appendChild(pDd);
 						});
 					}
+				}
+
+				// update the top bot countries list:
+				const usrCountries = document.getElementById('botmon__today__wm_countries');
+				if (usrCountries) {
+					usrCountries.appendChild(makeElement('dt', {}, `Top visitor Countries:`));
+					const usrCtryList = BotMon.live.data.analytics.getCountryList('human', 5);
+					usrCtryList.forEach( (cInfo) => {
+						const cLi = makeElement('dd');
+						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						usrCountries.appendChild(cLi);
+					});
 				}
 
 				// update the top pages;

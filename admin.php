@@ -32,6 +32,9 @@ class admin_plugin_botmon extends AdminPlugin {
 
 		global $conf;
 
+		// display GeoIP data?
+		$geoIPconf = $this->getConf('geoiplib');
+
 		// spinner animation as SVG image:
 		$svg = '<svg width="12" height="12" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" id="botmon__today__busy"><defs><linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#666"></stop><stop offset="100%" stop-color="#666"></stop></linearGradient></defs><circle cx="25" cy="25" r="20" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-dasharray="31.4 31.4"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"></animateTransform></circle></svg>';
 
@@ -56,18 +59,20 @@ class admin_plugin_botmon extends AdminPlugin {
 		<div id="botmon__today__content">
 			<details id="botmon__today__overview" open>
 				<summary>Bots overview</summary>
-				<div class="botmon_bots_grid">
+				<div class="botmon_bots_grid" data-geoip="' . $geoIPconf  . '">
 					<dl id="botmon__today__botsvshumans"></dl>
 					<dl id="botmon__botslist"></dl>
-					<dl id="botmon__today__countries"></dl>
+					<dl id="botmon__botips"><dt>Suspected bots’ top <abbr>IP</abbr> ranges</dt><dd><mark>TODO</mark></dd></dl>
+					<dl id="botmon__botcountries"></dl>
 				</div>
 			</details>
 			<details id="botmon__today__webmetrics">
 				<summary>Humans overview</summary>
-				<div class="botmon_webmetrics_grid">
+				<div class="botmon_webmetrics_grid" data-geoip="' . $geoIPconf  . '">
 					<dl id="botmon__today__wm_overview"></dl>
 					<dl id="botmon__today__wm_clients"></dl>
 					<dl id="botmon__today__wm_platforms"></dl>
+					<dl id="botmon__today__wm_countries"></dl>
 				</div>
 			</details>
 			<details id="botmon__today__traffic">
