@@ -189,7 +189,7 @@ BotMon.live = {
 		//console.info('BotMon.live.init()');
 
 		// set the title:
-		const tDiff = '(<abbr title="Coordinated Universal Time">UTC</abbr>' + (BotMon._timeDiff != '' ? `, ${BotMon._timeDiff}` : '' ) + ')';
+		const tDiff = '<abbr title="Coordinated Universal Time">UTC</abbr> ' + (BotMon._timeDiff != '' ? ` (offset: ${BotMon._timeDiff}` : '' ) + ')';
 		BotMon.live.gui.status.setTitle(`Data for <time datetime="${BotMon._datestr}">${BotMon._datestr}</time> ${tDiff}`);
 
 		// init sub-objects:
@@ -2281,10 +2281,8 @@ BotMon.live = {
 					/* add bot evaluation details: */
 					if (data._eval) {
 						dl.appendChild(make('dt', {}, "Bot evaluation:"));
-						const evalDd = make('dd');
-						const testList = make('ul',{
-							'class': 'eval'
-						});
+						const evalDd = make('dd', {'class': 'eval'});
+						const testList = make('ul');
 						data._eval.forEach( test => {
 
 							const tObj = BotMon.live.data.rules.getRuleInfo(test);

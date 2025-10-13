@@ -681,7 +681,7 @@
 				}
 			}
 
-			ul.eval {
+			dd.eval > ul {
 				li {
 					display: flex;
 					justify-content: space-between;
@@ -812,7 +812,7 @@
 					}
 				}
 
-				ul.eval {
+				dd.eval > ul {
 					li:nth-child(odd) {
 						background-color: #333;
 					}
@@ -843,6 +843,27 @@
 	}
 }
 /* layout overrides for narrow screens: */
+@media (max-width: 800px) {
+	#botmon__admin #botmon__today #botmon__today__visitorlists {
+		dl.visitor_details {
+			& {
+				display: block;
+				margin-top: .5rem;
+			}
+			dt {
+				margin-left: .67rem;
+				font-size: smaller;
+			}
+			dd {
+				margin-left: 1.5rem;
+			}
+			dd.pages, dd.eval {
+				margin-left: 0;
+			}
+		}
+	}
+}
+
 @media (max-width: 670px) {
 	#botmon__admin #botmon__today {
 		.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
