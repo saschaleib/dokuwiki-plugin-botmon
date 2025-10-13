@@ -154,6 +154,31 @@ const BotMon = {
 
 			return null;
 
+		},
+
+		// calcualte a reduced ration between two numbers
+		// adapted from https://stackoverflow.com/questions/3946373/math-in-js-how-do-i-get-a-ratio-from-a-percentage
+		_getRatio: function(a, b, tolerance) {
+
+			var bg = b;
+			var sm = a;
+			if (a > b) {
+				var bg = a;
+				var sm = b;
+			}
+			
+			for (var i = 1; i < 1000000; i++) {
+				var d = sm / i;
+				var res = bg / d;
+				var howClose = Math.abs(res - res.toFixed(0));
+				if (howClose < tolerance) {
+					if (a > b) {
+						return res.toFixed(0) + ':' + i;
+					} else {
+						return i + ':' + res.toFixed(0);
+					}
+				}
+			}
 		}
 	}
 };
@@ -974,6 +999,20 @@ BotMon.live = {
 				const me = BotMon.live.data.analytics;
 
 				return me._makeTopList(me._platforms, max);
+			},
+
+			/* bounces are counted, not calculates: */
+			getBounceCount: function(type) {
+				
+				const me = BotMon.live.data.analytics;
+				var bounces = 0;
+				const list = me.groups[type];
+				
+				list.forEach(it => {
+					bounces += (it._pageViews.length <= 1 ? 1 : 0);
+				});
+
+				return bounces;
 			}
 		},
 
@@ -1688,7 +1727,7 @@ BotMon.live = {
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Page views by category:"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bots’ metrics:"));
 
 					for (let i = 0; i <= 4; i++) {
 						const dd = makeElement('dd');
@@ -1696,24 +1735,24 @@ BotMon.live = {
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Registered users:";
-								value = data.bots.users;
-								break;
-							case 1:
-								title = "Probably humans:";
-								value = data.bots.human;
-								break;
-							case 2:
-								title = "Suspected bots:";
-								value = data.bots.suspected;
-								break;
-							case 3:
-								title = "Known bots:";
+								title = "Page views by known bots:";
 								value = data.bots.known;
 								break;
-							case 4:
-								title = "Total:";
+							case 1:
+								title = "Page views by suspected bots:";
+								value = data.bots.suspected;
+								break;
+							case 2:
+								title = "Page views by humans:";
+								value = data.bots.users + data.bots.human;
+								break;
+							case 3:
+								title = "Total page views:";
 								value = data.totalPageViews;
+								break;
+							case 4:
+								title = "Humans-to-bots ratio:";
+								value = BotMon.t._getRatio(data.bots.users + data.bots.human, data.bots.suspected + data.bots.known, 100);
 								break;
 							default:
 								console.warn(`Unknown list type ${i}.`);
@@ -1768,24 +1807,34 @@ BotMon.live = {
 				// update the webmetrics overview:
 				const wmoverview = document.getElementById('botmon__today__wm_overview');
 				if (wmoverview) {
-					const bounceRate = Math.round(data.totalVisits / data.totalPageViews * 100);
 
-					wmoverview.appendChild(makeElement('dt', {}, "Visitor overview"));
-					for (let i = 0; i < 3; i++) { 
+					const humanVisits = BotMon.live.data.analytics.groups.users.length + BotMon.live.data.analytics.groups.humans.length;
+					const bounceRate = Math.round(100 * (BotMon.live.data.analytics.getBounceCount('users') + BotMon.live.data.analytics.getBounceCount('humans')) / humanVisits);
+
+					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics"));
+					for (let i = 0; i <= 4; i++) { 
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Total page views:";
-								value = data.totalPageViews;
+								title = "Page views by registered users:";
+								value = data.bots.users;
 								break;
 							case 1:
-								title = "Total visitors (est.):";
-								value = data.totalVisits;
+								title = "Page views by “probably humans”:";
+								value = data.bots.human;
 								break;
 							case 2:
-								title = "Bounce rate (est.):";
+								title = "Total human page views:";
+								value = data.bots.users + data.bots.human;
+								break;
+							case 3:
+								title = "Total human visits:";
+								value = humanVisits;
+								break;
+							case 4:
+								title = "Humans’ bounce rate:";
 								value = bounceRate + '%';
 								break;
 							default:
