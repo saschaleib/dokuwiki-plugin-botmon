@@ -60,6 +60,10 @@
 		{"func": "matchLang", "params": [],
 		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
 		 "bot": 30
+		},
+		{"func": "matchesClient", "params": ["whatsapp","applemsgs"],
+		 "id": "previewClient", "desc": "Client is known to only load a page preview",
+		 "bot": -90
 		}
 	]
 }

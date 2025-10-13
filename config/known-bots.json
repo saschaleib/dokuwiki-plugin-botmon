@@ -48,7 +48,7 @@
 	},
 	{"id": "reddit",
 	 "n": "RedditBot",
-	 "r": ["Applebot"],
+	 "r": ["RedditBot"],
 	 "rx": [" redditbot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.reddit.com/feedback"
 	},
@@ -93,12 +93,6 @@
 	 "r": ["PerplexityBot", "Perplexity‑User"],
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
-	},
-	{"id": "applemsgs",
-	 "n": "Apple Messages",
-	 "r": [],
-	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"],
-	 "url": "https://developer.apple.com/documentation/technotes/tn3156-create-rich-previews-for-messages"
 	},
 	{"id": "metabots",
 	 "n": "Meta/Facebook", "geo": "US",
