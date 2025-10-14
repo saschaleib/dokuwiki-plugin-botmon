@@ -1,6 +1,6 @@
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
-/* 12.09.2025 - 0.3.0 - beta */
+/* 14.10.2025 - 0.5.0 - pre-release */
 /* Author: Sascha Leib <ad@hominem.info> */
 
 // enumeration of user types:
@@ -607,13 +607,12 @@ BotMon.live = {
 					}
 
 					// perform actions depending on the visitor type:
-					if (v._type == BM_USERTYPE.KNOWN_BOT || v._type == BM_USERTYPE.LIKELY_BOT) { /* bots only */
-						
-						// add bot views to IP range information:
-						/*v._pageViews.forEach( pv => {
-							me.addToIPRanges(pv.ip);
-						});*/
+					if (v._type == BM_USERTYPE.KNOWN_BOT ) { /* known bots only */
 
+					} else if (v._type == BM_USERTYPE.LIKELY_BOT) { /* probable bots only */
+
+						// add bot views to IP range information:
+						me.addToIpRanges(v);
 
 					} else { /* humans only */
 
@@ -1001,7 +1000,44 @@ BotMon.live = {
 				});
 
 				return bounces;
-			}
+			},
+
+			_ipOwners: [],
+
+			/* adds a visit to the ip ranges arrays */
+			addToIpRanges: function(v) {
+				//console.info('addToIpRanges', v.ip);
+
+				const me = BotMon.live.data.analytics;
+				const ipRanges = BotMon.live.data.ipRanges;
+
+				let isp = 'null'; // default ISP id
+				let name = 'Unknown'; // default ISP name
+
+				// is there already a known IP range assigned?
+				if (v._ipRange) {
+					isp = v._ipRange.g;
+				} 
+
+				let ispRec = me._ipOwners.find( it => it.id == isp);
+				if (!ispRec) {
+					ispRec = {
+						'id': isp,
+						'n': ipRanges.getOwner( isp ) || "Unknown",
+						'count': v._pageViews.length
+					};
+					me._ipOwners.push(ispRec);
+				} else {
+					ispRec.count += v._pageViews.length;
+				}
+			},
+
+			getTopBotISPs: function(max) {
+
+				const me = BotMon.live.data.analytics;
+
+				return me._makeTopList(me._ipOwners, max);
+			},
 		},
 
 		// information on "known bots":
@@ -1272,17 +1308,17 @@ BotMon.live = {
 
 			},
 
-			getOwner: function(rangeInfo) {
+			getOwner: function(gid) {
 
 				const me = BotMon.live.data.ipRanges;
 
 				for (let i=0; i < me._groups.length; i++) {
 					const it = me._groups[i];
-					if (it.id == rangeInfo.g) {
+					if (it.id == gid) {
 						return it.name;
 					}
 				}
-				return `Unknown (“${rangeInfo.g})`;
+				return null;
 			},
 
 			match: function(ip) {
@@ -1482,6 +1518,7 @@ BotMon.live = {
 
 					if (ipInfo) {
 						visitor._ipInKnownBotRange = true;
+						visitor._ipRange = ipInfo;
 					}
 
 					return (ipInfo !== null);
@@ -1715,32 +1752,36 @@ BotMon.live = {
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Bots’ metrics:"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Page views"));
 
-					for (let i = 0; i <= 4; i++) {
+					for (let i = 0; i <= 5; i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Page views by known bots:";
+								title = "Known bots:";
 								value = data.bots.known;
 								break;
 							case 1:
-								title = "Page views by suspected bots:";
+								title = "Suspected bots:";
 								value = data.bots.suspected;
 								break;
 							case 2:
-								title = "Page views by humans:";
-								value = data.bots.users + data.bots.human;
+								title = "Probably humans:";
+								value = data.bots.human;
 								break;
 							case 3:
-								title = "Total page views:";
-								value = data.totalPageViews;
+								title = "Registered users:";
+								value = data.bots.users;
 								break;
 							case 4:
-								title = "Humans-to-bots ratio:";
-								value = BotMon.t._getRatio(data.bots.users + data.bots.human, data.bots.suspected + data.bots.known, 100);
+								title = "Total:";
+								value = data.totalPageViews;
+								break;
+							case 5:
+								title = "Bots-humans ratio:";
+								value = BotMon.t._getRatio(data.bots.suspected + data.bots.known, data.bots.users + data.bots.human, 100);
 								break;
 							default:
 								console.warn(`Unknown list type ${i}.`);
@@ -1754,7 +1795,7 @@ BotMon.live = {
 				// update known bots list:
 				const botElement = document.getElementById('botmon__botslist'); /* Known bots */
 				if (botElement) {
-					botElement.innerHTML = `<dt>Top known bots:</dt>`;
+					botElement.appendChild(makeElement('dt', {}, `Top known bots`));
 
 					let botList = BotMon.live.data.analytics.getTopBots(maxItemsPerList);
 					botList.forEach( (botInfo) => {
@@ -1766,23 +1807,24 @@ BotMon.live = {
 				}
 
 				// update the suspected bot IP ranges list:
-				/*const botIps = document.getElementById('botmon__botips');
+				const botIps = document.getElementById('botmon__botips');
 				if (botIps) {
-					botIps.appendChild(makeElement('dt', {}, "Bot IP ranges (top 5)"));
+					botIps.appendChild(makeElement('dt', {}, "Top bot ISPs"));
 
-					const ipList = BotMon.live.data.analytics.getTopBotIPRanges(5);
-					ipList.forEach( (ipInfo) => {
+					const ispList = BotMon.live.data.analytics.getTopBotISPs(5);
+					console.log(ispList);
+					ispList.forEach( (netInfo) => {
 						const li = makeElement('dd');
-						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + ipInfo.typ }, ipInfo.ip));
-						li.appendChild(makeElement('span', {'class': 'count' }, ipInfo.num));
+						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip_' + netInfo.id }, netInfo.name));
+						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count));
 						botIps.append(li)
 					});
-				}*/
+				}
 
 				// update the top bot countries list:
 				const botCountries = document.getElementById('botmon__botcountries');
 				if (botCountries) {
-					botCountries.appendChild(makeElement('dt', {}, `Top bot Countries:`));
+					botCountries.appendChild(makeElement('dt', {}, `Top bot Countries`));
 					const countryList = BotMon.live.data.analytics.getCountryList('bot', 5);
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
@@ -2292,7 +2334,7 @@ BotMon.live = {
 							if (tObj.func == 'fromKnownBotIP') {
 								const rangeInfo = BotMon.live.data.ipRanges.match(data.ip);
 								if (rangeInfo) {
-									const owner = BotMon.live.data.ipRanges.getOwner(rangeInfo);
+									const owner = BotMon.live.data.ipRanges.getOwner(rangeInfo.g);
 									tDesc += ' (range: “' + rangeInfo.cidr + '”, ' + owner + ')';
 								}
 							}

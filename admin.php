@@ -58,11 +58,11 @@ class admin_plugin_botmon extends AdminPlugin {
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
 			<details id="botmon__today__overview" open>
-				<summary>Bots overview</summary>
+				<summary>Overview</summary>
 				<div class="botmon_bots_grid" data-geoip="' . $geoIPconf  . '">
 					<dl id="botmon__today__botsvshumans"></dl>
 					<dl id="botmon__botslist"></dl>
-					<dl id="botmon__botips"><dt>Suspected bots’ top <abbr>IP</abbr> ranges</dt><dd><mark>TODO</mark></dd></dl>
+					<dl id="botmon__botips"></dl>
 					<dl id="botmon__botcountries"></dl>
 				</div>
 			</details>
