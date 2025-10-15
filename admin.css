@@ -99,6 +99,7 @@
 		&.cl_operaold::before { background-position-y: -380px }
 		&.cl_whatsapp::before { background-position-y: -400px }
 		&.cl_applemsgs::before { background-position-y: -420px }
+		&.cl_goognblm::before { background-position-y: -440px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Country flags */
@@ -804,7 +805,6 @@
 				color: #ADADB3;
 			}
 		}
-
 
 		#botmon__latest {
 

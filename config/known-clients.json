@@ -94,5 +94,9 @@
 	{"n": "Apple Messages",
 	 "id": "applemsgs",
 	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"]
+	},
+	{"n": "Google NotebookLM",
+	 "id": "goognblm",
+	 "rx": ["Google-NotebookLM"]
 	}
 ]
