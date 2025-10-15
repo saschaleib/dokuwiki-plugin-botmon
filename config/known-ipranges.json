@@ -5,6 +5,7 @@
 		{"id": "amazon-microsoft", "name": "Amazon or Microsoft"},
 		{"id": "brasilnet", "name": "BrasilNet"},
 		{"id": "charter", "name": "Charter Communications Inc."},
+		{"id": "chinanet", "name": "Chinanet"},
 		{"id": "cnisp", "name": "China ISP"},
 		{"id": "cnmob", "name": "China Mobile Communications Corp."},
 		{"id": "google", "name": "Google LLC"},

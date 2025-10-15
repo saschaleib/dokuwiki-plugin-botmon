@@ -389,7 +389,6 @@
 		background-size: 20px;
 	}
 
-
 	/* grid layout for the overview: */
 	.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
 		& {
@@ -435,7 +434,7 @@
 	}
 
 	/* the "today" tab: */
-	#botmon__today {
+	#botmon__latest {
 
 		/* item header */
 		header {
@@ -747,13 +746,40 @@
 			}
 		}
 	}
+
+	/* the log tab: */
+	#botmon__log {
+
+		#botmon__loglist {
+			& {
+				border: #999 solid 1px;
+				background-color: #F0F0F0;
+				margin: 0; padding: .5em;
+				border-radius: .5em 1pt 1pt .5em;
+				list-style: none inside;
+				display: block;
+				min-height: 24rem;
+				max-height: 32rem;
+				overflow: hidden auto
+			}
+			li {
+				&:nth-child(even) {
+					background-color: #DFDFDF;
+				}
+				&.info { color: #626262; font-style: italic;}
+				&.success { color: #217121; }
+				&.error { color: #bb2929; }
+			}
+		}
+		
+	}
 }
 
 /* dark mode overrides */
 @media (prefers-color-scheme: dark) {
 	body.darkmode.mode_admin #botmon__admin {
 
-		#botmon__today {
+		#botmon__latest {
 
 			header {
 				background-color: #0c0c0d;
@@ -844,7 +870,7 @@
 }
 /* layout overrides for narrow screens: */
 @media (max-width: 800px) {
-	#botmon__admin #botmon__today #botmon__today__visitorlists {
+	#botmon__admin #botmon__latest #botmon__today__visitorlists {
 		dl.visitor_details {
 			& {
 				display: block;
@@ -865,7 +891,7 @@
 }
 
 @media (max-width: 670px) {
-	#botmon__admin #botmon__today {
+	#botmon__admin #botmon__latest {
 		.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
 			& {
 				grid-template-columns: 1fr !important;

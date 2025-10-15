@@ -84,7 +84,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	public function insertAdminHeader(Event $event, $param) {
 
 		$event->data['link'][] = ['rel' => 'stylesheet', 'href' => DOKU_BASE.'lib/plugins/botmon/admin.css', 'defer' => 'defer'];
-		$event->data['script'][] = ['href' => DOKU_BASE.'lib/plugins/botmon/admin.js', 'defer' => 'defer', '_data' => ''];
+		$event->data['script'][] = ['src' => DOKU_BASE.'lib/plugins/botmon/admin.js', 'defer' => 'defer', '_data' => ''];
 	}
 
 

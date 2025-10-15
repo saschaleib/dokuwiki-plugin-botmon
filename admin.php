@@ -35,6 +35,8 @@ class admin_plugin_botmon extends AdminPlugin {
 		// display GeoIP data?
 		$geoIPconf = $this->getConf('geoiplib');
 
+		$hasOldLogFiles = $this->hasOldLogFiles();
+
 		// spinner animation as SVG image:
 		$svg = '<svg width="12" height="12" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg" id="botmon__today__busy"><defs><linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#666"></stop><stop offset="100%" stop-color="#666"></stop></linearGradient></defs><circle cx="25" cy="25" r="20" fill="none" stroke="url(#gradient)" stroke-width="8" stroke-dasharray="31.4 31.4"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"></animateTransform></circle></svg>';
 
@@ -45,15 +47,11 @@ class admin_plugin_botmon extends AdminPlugin {
 	<h1>Bot Monitoring Plugin</h1>
 	<nav id="botmon__tabs">
 		<ul class="tabs" role="tablist">
-			<li role="presentation" class="active"><a role="tab" href="#botmon__panel1" aria-controls="botmon__panel1" id="botmon__tab1" aria-selected="true">Latest</a></li>
+			<li role="presentation" class="active"><a role="tab" href="#botmon__latest" aria-controls="botmon__latest" id="botmon__tab1" aria-selected="true">Latest</a></li>
+			<li role="presentation"><a role="tab" href="#botmon__log" aria-controls="botmon__log" id="botmon__tab3">Log</a></li>
 		</ul>
-	</nav>';
-
-	if ($this->hasOldLogFiles()) {
-		echo '<div class="info"><strong>Note:</strong> There are old log files that can be deleted. <a href="' . $pluginPath . '/cleanup.php" target="_blank">Click here</a> to run a delete script, or use <em>cron</em> to automatically delete them.</div>';
-	}
-
-	echo '<article role="tabpanel" id="botmon__today"">
+	</nav>
+	<article role="tabpanel" id="botmon__latest">
 		<h2 class="a11y">Latest data</h2>
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
@@ -92,12 +90,26 @@ class admin_plugin_botmon extends AdminPlugin {
 			<span id="botmon__today__status">Initialising&nbsp;&hellip;</span>
 		</footer>
 	</article>
-</div><!-- End of BotMon Admin Tool -->';
+	<article role="tabpanel" id="botmon__log">
+		<h2>Process log</h2>
+		<ul id="botmon__loglist">';
+
+		/* proces old logs */
+		if ($hasOldLogFiles) {
+
+			$helper = $this->loadHelper('botmon', true);
+
+			$helper->cleanup();
+		} else {
+			echo '<li>No files to process.</li>';
+		}
+
+		echo '</article></div><!-- End of BotMon Admin Tool -->';
 
 	}
 
 	/**
-	 * Check if there are old log files that can be deleted.
+	 * Check if there are old log files to be handled
 	 * 
 	 * @return bool true if there are old log files, false otherwise
 	 */

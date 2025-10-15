@@ -32,8 +32,7 @@ const BotMon = {
 		//console.info('BotMon.init()');
 
 		// find the plugin basedir:
-		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.indexOf('/exe/'))
-			+ '/plugins/botmon/';
+		this._baseDir = document.currentScript.src.substring(0, document.currentScript.src.lastIndexOf('/')+1);
 
 		// read the page language from the DOM:
 		this._lang = document.getRootNode().documentElement.lang || this._lang;
@@ -186,7 +185,7 @@ const BotMon = {
 /* everything specific to the "Latest" tab is self-contained in the "live" object: */
 BotMon.live = {
 	init: function() {
-		//console.info('BotMon.live.init()');
+		console.info('BotMon.live.init()');
 
 		// set the title:
 		const tDiff = '<abbr title="Coordinated Universal Time">UTC</abbr> ' + (BotMon._timeDiff != '' ? ` (offset: ${BotMon._timeDiff}` : '' ) + ')';
@@ -1011,6 +1010,10 @@ BotMon.live = {
 				const me = BotMon.live.data.analytics;
 				const ipRanges = BotMon.live.data.ipRanges;
 
+				// Number of IP address segments to look at:
+				const kIP4Segments = 1;
+				const kIP6Segments = 2;
+
 				let isp = 'null'; // default ISP id
 				let name = 'Unknown'; // default ISP name
 
@@ -1691,7 +1694,7 @@ BotMon.live = {
 						// assign the columns to an object:
 						const data = {};
 						cols.forEach( (colVal,i) => {
-							colName = columns[i] || `col${i}`;
+							const colName = columns[i] || `col${i}`;
 							const colValue = (colName == 'ts' ? new Date(colVal) : colVal.trim());
 							data[colName] = colValue;
 						});
@@ -1729,9 +1732,11 @@ BotMon.live = {
 
 	gui: {
 		init: function() {
-			// init the lists view:
-			this.lists.init();
+			console.log('BotMon.live.gui.init()');
+			// init sub-objects:
+			BotMon.t._callInit(this);
 		},
+
 
 		/* The Overview / web metrics section of the live tab */
 		overview: {
