@@ -47,8 +47,8 @@ class admin_plugin_botmon extends AdminPlugin {
 	<h1>Bot Monitoring Plugin</h1>
 	<nav id="botmon__tabs">
 		<ul class="tabs" role="tablist">
-			<li role="presentation" class="active"><a role="tab" href="#botmon__latest" aria-controls="botmon__latest" id="botmon__tab1" aria-selected="true">Latest</a></li>
-			<li role="presentation"><a role="tab" href="#botmon__log" aria-controls="botmon__log" id="botmon__tab3">Log</a></li>
+			<li role="presentation"><a role="tab" href="#botmon__latest" aria-controls="botmon__latest" id="botmon__tab1" aria-selected="true">Latest</a></li>
+			<li role="presentation"><a role="tab" href="#botmon__log" aria-controls="botmon__log" id="botmon__tab3" aria-selected="false">Log</a></li>
 		</ul>
 	</nav>
 	<article role="tabpanel" id="botmon__latest">
@@ -90,8 +90,8 @@ class admin_plugin_botmon extends AdminPlugin {
 			<span id="botmon__today__status">Initialising&nbsp;&hellip;</span>
 		</footer>
 	</article>
-	<article role="tabpanel" id="botmon__log">
-		<h2>Process log</h2>
+	<article role="tabpanel" id="botmon__log" hidden>
+		<h2 class="a11y">Process log</h2>
 		<ul id="botmon__loglist">';
 
 		/* proces old logs */
