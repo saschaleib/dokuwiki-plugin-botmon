@@ -54,5 +54,9 @@
 	{"n": "Windows Server",
 	 "id": "winsrvr",
 	 "rx": [ "Windows Server (\\d+)[\\s\\);,\\.]"]
+	},
+	{"n": "App",
+	 "id": "app",
+	 "rx": [ "WhatsApp/(\\d+\\.\\d+)", "Facebot Twitterbot\\/(\\d\\.\\d)", "Google-NotebookLM"]
 	}
 ]

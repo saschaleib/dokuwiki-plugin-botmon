@@ -74,6 +74,7 @@
 		&.pf_hmos::before { background-position-y: -220px }
 		&.pf_tizen::before { background-position-y: -240px }
 		&.pf_fire::before { background-position-y: -260px }
+		&.pf_app::before { background-position-y: -280px }
 		&.pf_other::before { background-image: url('img/more.svg') }
 
 		/* browser icons */

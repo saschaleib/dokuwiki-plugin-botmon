@@ -27,11 +27,11 @@
 		},
 		{"func": "noRecord", "params": ["log"],
 		 "id": "noClient", "desc": "No client-side JS log was recorded",
-		 "bot": 40
+		 "bot": 50
 		},
 		{"func": "noRecord", "params": ["tck"],
 		 "id": "noTicks", "desc": "No client ticks were recorded",
-		 "bot": 10
+		 "bot": 20
 		},
 		{"func": "noReferrer",
 		 "id": "noRefs", "desc": "No referer field",
