@@ -37,6 +37,8 @@
 		&.ipaddr::before { background-image: url('img/addr.png') }
 		&.ip4::before { background-position-y: -20px }
 		&.ip6::before { background-position-y: -40px }
+		&.ipnet::before { background-position-y: -60px }
+		&.ipother::before { background-image: url('img/more.svg') }
 
 		/* Bot icons */
 		&.bot::before { background-image: url('img/bots.png') }
@@ -784,7 +786,7 @@
 				&:nth-child(even) {
 					background-color: #DFDFDF;
 				}
-				&.info { color: #626262; font-style: italic;}
+				&.skipped { color: #626262; font-style: italic;}
 				&.success { color: #217121; }
 				&.error { color: #bb2929; }
 			}

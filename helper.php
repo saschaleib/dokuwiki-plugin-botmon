@@ -35,7 +35,7 @@ class helper_plugin_botmon extends Plugin {
 			if ($bName == '' || $bName == 'logfiles' || $bName == 'empty' || $fName == '.htaccess') {
 				// echo "File “{$fName}” ignored.\n";
 			} else if ($bName == $today || $bName == $yesterday) {
-				echo "<li class='info'>File “{$fName}” skipped.</li>\n";
+				echo "<li class='skipped'>File “{$fName}” skipped.</li>\n";
 			} else {
 				if (unlink(DOKU_PLUGIN . 'botmon/logs/' . $file)) {
 					echo "<li class='success'>File “{$fName}” deleted.</li>\n";
@@ -44,7 +44,7 @@ class helper_plugin_botmon extends Plugin {
 				}
 			}
 		}
-		echo "<li class='info'>Done.</li>\n";
+		echo "<li>Done.</li>\n";
 	}
 
 }

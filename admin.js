@@ -824,6 +824,7 @@ BotMon.live = {
 				const other = {
 					'id': 'other',
 					'name': "Others",
+					'typ': 'other',
 					'count': 0
 				};
 				let total = 0; // adding up the items
@@ -834,6 +835,7 @@ BotMon.live = {
 							const rIt = {
 								id: it.id,
 								name: (it.n ? it.n : it.id),
+								typ: it.typ || it.id,
 								count: it.count
 							};
 							rList.push(rIt);
@@ -1001,7 +1003,7 @@ BotMon.live = {
 				return bounces;
 			},
 
-			_ipOwners: [],
+			_ipRanges: [],
 
 			/* adds a visit to the ip ranges arrays */
 			addToIpRanges: function(v) {
@@ -1012,34 +1014,86 @@ BotMon.live = {
 
 				// Number of IP address segments to look at:
 				const kIP4Segments = 1;
-				const kIP6Segments = 2;
+				const kIP6Segments = 3;
 
-				let isp = 'null'; // default ISP id
-				let name = 'Unknown'; // default ISP name
+				let ipGroup = ''; // group name
+				let ipSeg = []; // IP segment array
+				let rawIP = ''; // raw ip prefix
+				let ipName = ''; // IP group display name
 
+				const ipType = v.ip.indexOf(':') > 0 ? BM_IPVERSION.IPv6 : BM_IPVERSION.IPv4;
+				const ipAddr = BotMon.t._ip2Num(v.ip);
+				
 				// is there already a known IP range assigned?
 				if (v._ipRange) {
-					isp = v._ipRange.g;
-				} 
 
-				let ispRec = me._ipOwners.find( it => it.id == isp);
-				if (!ispRec) {
-					ispRec = {
-						'id': isp,
-						'n': ipRanges.getOwner( isp ) || "Unknown",
-						'count': v._pageViews.length
-					};
-					me._ipOwners.push(ispRec);
-				} else {
-					ispRec.count += v._pageViews.length;
+					ipGroup = v._ipRange.g; // group name
+					ipName = ipRanges.getOwner( v._ipRange.g ) || "Unknown";
+
+				} else { // no known IP range, let's collect necessary information:
+
+
+					// collect basic IP address info:
+					if (ipType == BM_IPVERSION.IPv6) {
+						ipSeg = ipAddr.split(':');
+						const prefix = v.ip.split(':').slice(0, kIP6Segments).join(':');
+						rawIP = ipSeg.slice(0, kIP6Segments).join(':');
+						ipGroup = 'ip6-' + rawIP.replaceAll(':', '-');
+						ipName = prefix + '::' + '/' + (16 * kIP6Segments);
+					} else {
+						ipSeg = ipAddr.split('.');
+						const prefix = v.ip.split('.').slice(0, kIP4Segments).join('.');
+						rawIP = ipSeg.slice(0, kIP4Segments).join('.') ;
+						ipGroup = 'ip4-' + rawIP.replaceAll('.', '-');
+						ipName = prefix + '.0.0.0'.substring(0, 1+(4-kIP4Segments)*2) + '/' + (8 * kIP4Segments);
+					}
 				}
+
+				// check if record already exists:
+				let ipRec = me._ipRanges.find( it => it.g == ipGroup);
+				if (!ipRec) {
+
+					// ip info record initialised:
+					ipRec = {
+						g: ipGroup,
+						n: ipName,
+						count: 0
+					}
+
+					// existing record?
+					if (v._ipRange) {
+
+						ipRec.from = v._ipRange.from;
+						ipRec.to = v._ipRange.to;
+						ipRec.typ = 'net';
+
+					} else { // no known IP range, let's collect necessary information:
+
+						// complete the ip info record:
+						if (ipType == BM_IPVERSION.IPv6) {
+							ipRec.from = rawIP + ':0000:0000:0000:0000:0000:0000:0000'.substring(0, (8-kIP6Segments)*5);
+							ipRec.to = rawIP + ':FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF'.substring(0, (8-kIP6Segments)*5);
+							ipRec.typ = '6';
+						} else {
+							ipRec.from = rawIP + '.000.000.000.000'.substring(0, (4-kIP4Segments)*4);
+							ipRec.to = rawIP + '.255.255.255.254'.substring(0, (4-kIP4Segments)*4);
+							ipRec.typ = '4';
+						}
+					}
+
+					me._ipRanges.push(ipRec);
+				}
+
+				// add to counter:
+				ipRec.count += v._pageViews.length;
+
 			},
 
 			getTopBotISPs: function(max) {
 
 				const me = BotMon.live.data.analytics;
 
-				return me._makeTopList(me._ipOwners, max);
+				return me._makeTopList(me._ipRanges, max);
 			},
 		},
 
@@ -1817,6 +1871,8 @@ BotMon.live = {
 
 				const maxItemsPerList = 5; // how many list items to show?
 
+				const kNoData = '–'; // shown when data is missing
+
 				// shortcut for neater code:
 				const makeElement = BotMon.t._makeElement;
 
@@ -1831,23 +1887,23 @@ BotMon.live = {
 						switch(i) {
 							case 0:
 								title = "Known bots:";
-								value = data.bots.known;
+								value = data.bots.known || kNoData;
 								break;
 							case 1:
 								title = "Suspected bots:";
-								value = data.bots.suspected;
+								value = data.bots.suspected || kNoData;
 								break;
 							case 2:
 								title = "Probably humans:";
-								value = data.bots.human;
+								value = data.bots.human || kNoData;
 								break;
 							case 3:
 								title = "Registered users:";
-								value = data.bots.users;
+								value = data.bots.users || kNoData;
 								break;
 							case 4:
 								title = "Total:";
-								value = data.totalPageViews;
+								value = data.totalPageViews || kNoData;
 								break;
 							case 5:
 								title = "Bots-humans ratio:";
@@ -1879,13 +1935,13 @@ BotMon.live = {
 				// update the suspected bot IP ranges list:
 				const botIps = document.getElementById('botmon__botips');
 				if (botIps) {
-					botIps.appendChild(makeElement('dt', {}, "Top bot ISPs"));
+					botIps.appendChild(makeElement('dt', {}, "Top bot Networks"));
 
 					const ispList = BotMon.live.data.analytics.getTopBotISPs(5);
-					console.log(ispList);
+					//console.log(ispList);
 					ispList.forEach( (netInfo) => {
 						const li = makeElement('dd');
-						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip_' + netInfo.id }, netInfo.name));
+						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + netInfo.typ }, netInfo.name));
 						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count));
 						botIps.append(li)
 					});
@@ -1918,20 +1974,20 @@ BotMon.live = {
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Page views by registered users:";
-								value = data.bots.users;
+								title = "Registered users’ page views:";
+								value = data.bots.users || kNoData;
 								break;
 							case 1:
-								title = "Page views by “probably humans”:";
-								value = data.bots.human;
+								title = "“Probably humans” page views:";
+								value = data.bots.human || kNoData;
 								break;
 							case 2:
 								title = "Total human page views:";
-								value = data.bots.users + data.bots.human;
+								value = (data.bots.users + data.bots.human) || kNoData;
 								break;
 							case 3:
 								title = "Total human visits:";
-								value = humanVisits;
+								value = humanVisits || kNoData;
 								break;
 							case 4:
 								title = "Humans’ bounce rate:";
