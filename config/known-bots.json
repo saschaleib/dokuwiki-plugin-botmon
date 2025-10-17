@@ -40,9 +40,15 @@
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
+	{"id": "baidu",
+	 "n": "Baidu Spiders", "geo": "CN",
+	 "r": ["Baiduspider", "Baiduspider-image", "Baiduspider-video", "Baiduspider-news", "Baiduspider-favo", "Baiduspider-cpro", "Baiduspider-ads", "Baiduspider-render"],
+	 "rx": ["Baiduspider"],
+	 "url": "http://www.baidu.com/search/spider.html"
+	},
 	{"id": "reddit",
 	 "n": "RedditBot",
-	 "r": ["Applebot"],
+	 "r": ["RedditBot"],
 	 "rx": [" redditbot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.reddit.com/feedback"
 	},
@@ -51,12 +57,6 @@
 	 "r": ["Slurp"],
 	 "rx": ["Slurp[\\s;\\)]"],
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
-	},
-	{"id": "yahoo",
-	 "n": "Yahoo! Link Preview",
-	 "r": [],
-	 "rx": ["Yahoo Link Preview;"],
-	 "url": "https://help.yahoo.com/kb/mail/yahoo-link-preview-SLN23615.html"
 	},
 	{"id": "ddg",
 	 "n": "DuckDuck Bot",
@@ -72,8 +72,8 @@
 	},
 	{"id": "openai",
 	 "n": "OpenAI/ChatGPT", "geo": "US",
-	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
-	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
+	 "r": ["OAI-SearchBot", "GPTBot"],
+	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "claude",
@@ -88,16 +88,10 @@
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
-	{"id": "applemsgs",
-	 "n": "Apple Messages",
-	 "r": [],
-	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"],
-	 "url": "https://developer.apple.com/documentation/technotes/tn3156-create-rich-previews-for-messages"
-	},
 	{"id": "metabots",
 	 "n": "Meta/Facebook", "geo": "US",
-	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
-	 "rx": ["facebook\\w+\\/(\\d+\\.\\d+)", "meta-\\w+\\/(\\d+\\.\\d+)"],
+	 "r": ["facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent"],
+	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.\\d+)", "meta-externala\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
 	},
 	{"id": "qwant",
@@ -291,12 +285,6 @@
 	 "r": ["IbouBot"],
 	 "rx": ["IbouBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://ibou.io/iboubot.html"
-	},
-	{"id": "gohttp",
-	 "n": "Go HTTP Clients",
-	 "r": [],
-	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"],
-	 "url": "https://github.com/golang/goen.wi"
 	},
 	{"id": "bnl",
 	 "n": "BnL Harvester",

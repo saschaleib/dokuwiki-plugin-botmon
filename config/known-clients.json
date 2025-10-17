@@ -63,7 +63,7 @@
 	 "id": "oldedge",
 	 "rx": [ "\\sEdg\\/([7-9]\\d)\\.", "\\sEdge\\/([7-9]\\d)\\.", "EdgiOS\\/([7-9]\\d)\\." ]
 	},
-	{"n": "Old Chrome",
+	{"n": "Chrome Old",
 	 "id": "chromeold",
 	 "rx": [ "\\sChrome\\/(\\d\\d\\.\\d+)[\\.\\s;]" ]
 	},
@@ -86,5 +86,37 @@
 	{"n": "Firefox",
 	 "id": "firefox",
 	 "rx": [ "\\sFirefox\\/(\\d\\d\\d)\\." ]
+	},
+	{"n": "WhatsApp",
+	 "id": "whatsapp",
+	 "rx": [ "WhatsApp/(\\d+\\.\\d+)" ]
+	},
+	{"n": "Apple Messages",
+	 "id": "applemsgs",
+	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"]
+	},
+	{"n": "Google NotebookLM",
+	 "id": "goognblm",
+	 "rx": ["Google-NotebookLM"]
+	},
+	{"n": "ChatGPT User",
+	 "id": "chatgpt",
+	 "rx": ["ChatGPT-User\\/(\\d\\.\\d)"]
+	},
+	{"n": "Meta Apps (User)",
+	 "id": "meta",
+	 "rx": ["facebookexternalhit\\/(\\d\\.\\d)", "meta-externalfetcher\\/(\\d\\.\\d)"]
+	},
+	{"n": "Yahoo! Link Preview",
+	 "id": "yahoolp",
+	 "rx": ["Yahoo Link Preview;"]
+	},
+	{"n": "Undici-based crawler",
+	 "id": "undici",
+	 "rx": ["undici"]
+	},
+	{"n": "GoHTTP-based crawler",
+	 "id": "gohttp",
+	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"]
 	}
 ]

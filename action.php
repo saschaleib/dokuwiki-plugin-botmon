@@ -21,9 +21,15 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	 */
 	public function register(EventHandler $controller) {
 
-		// insert header data into the page:
-		$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertHeader');
+		global $ACT;
 
+		// insert header data into the page:
+		if ($ACT == 'show') {
+			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertHeader');
+		} else if ($ACT == 'admin' && isset($_REQUEST['page']) && $_REQUEST['page'] == 'botmon') {
+			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertAdminHeader');
+		}
+	
 		// write to the log after the page content was displayed:
 		$controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'writeServerLog');
 
@@ -36,6 +42,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	/**
 	 * Inserts tracking code to the page header
+	 * (only called on 'show' actions)
 	 *
 	 * @param Event $event event object by reference
 	 * @return void
@@ -51,21 +58,35 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name']) ?  $INFO['userinfo']['name'] : '');
 
 		// build the tracker code:
-		$code = NL . DOKU_TAB . "document._botmon = {'t0': Date.now(), 'session': '" . json_encode($this->sessionId) . "'};" . NL;
+		$code = "document._botmon = {'t0': Date.now(), 'session': '" . json_encode($this->sessionId) . "'};" . NL;
 		if ($username) {
-			$code .= DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
+			$code .= DOKU_TAB . DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
 		}
 
 		// add the deferred script loader::
-		$code .= DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
-		$code .= DOKU_TAB . DOKU_TAB . "const e=document.createElement('script');" . NL;
-		$code .= DOKU_TAB . DOKU_TAB . "e.async=true;e.defer=true;" . NL;
-		$code .= DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;
-		$code .= DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
-		$code .= DOKU_TAB . "});" . NL . DOKU_TAB;
+		$code .= DOKU_TAB . DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "const e=document.createElement('script');" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "e.async=true;e.defer=true;" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
+		$code .= DOKU_TAB . DOKU_TAB . "});";
 
 		$event->data['script'][] = ['_data' => $code];
 	}
+
+	/**
+	 * Inserts tracking code to the page header
+	 * (only called on 'show' actions)
+	 *
+	 * @param Event $event event object by reference
+	 * @return void
+	 */
+	public function insertAdminHeader(Event $event, $param) {
+
+		$event->data['link'][] = ['rel' => 'stylesheet', 'href' => DOKU_BASE.'lib/plugins/botmon/admin.css', 'defer' => 'defer'];
+		$event->data['script'][] = ['src' => DOKU_BASE.'lib/plugins/botmon/admin.js', 'defer' => 'defer', '_data' => ''];
+	}
+
 
 	/**
 	 * Writes data to the server log.
@@ -94,7 +115,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$_SERVER['HTTP_USER_AGENT'] ?? '', /* User agent */
 			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
 			substr($conf['lang'],0,2), /* page language */
-			implode(',', array_unique(array_map( function($it) { return substr($it,0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
+			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode() /* GeoIP country code */
 		);
 

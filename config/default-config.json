@@ -27,11 +27,11 @@
 		},
 		{"func": "noRecord", "params": ["log"],
 		 "id": "noClient", "desc": "No client-side JS log was recorded",
-		 "bot": 40
+		 "bot": 50
 		},
 		{"func": "noRecord", "params": ["tck"],
 		 "id": "noTicks", "desc": "No client ticks were recorded",
-		 "bot": 10
+		 "bot": 20
 		},
 		{"func": "noReferrer",
 		 "id": "noRefs", "desc": "No referer field",
@@ -40,6 +40,10 @@
 		{"func": "matchesClient", "params": ["brave","operaold","msie","webkit"],
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
+		},
+		{"func": "matchesClient", "params": ["undici","gohttp"],
+		 "id": "botClient", "desc": "Client identifier indicates web crawler",
+		 "bot": 100
 		},
 		{"func": "combinationTest", "params": [["macos","chromeold"],["macos","msie"],["winold","edge"],["winold","brave"]],
 		 "id": "suspPC", "desc": "Suspicious combination of platform and client",
@@ -60,6 +64,10 @@
 		{"func": "matchLang", "params": [],
 		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
 		 "bot": 30
+		},
+		{"func": "matchesClient", "params": ["whatsapp","applemsgs","goognblm"],
+		 "id": "previewClient", "desc": "User-triggered bot load (e.g. preview)",
+		 "bot": -120
 		}
 	]
 }
