@@ -105,6 +105,7 @@
 		&.cl_goognblm::before { background-position-y: -440px }
 		&.cl_chatgpt::before { background-position-y: -460px }
 		&.cl_meta::before { background-position-y: -480px }
+		&.cl_yahoolp::before { background-position-y: -500px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Country flags */
