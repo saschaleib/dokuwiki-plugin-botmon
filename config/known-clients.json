@@ -98,5 +98,21 @@
 	{"n": "Google NotebookLM",
 	 "id": "goognblm",
 	 "rx": ["Google-NotebookLM"]
+	},
+	{"n": "ChatGPT",
+	 "id": "chatgpt",
+	 "rx": ["ChatGPT-User\\/(\\d\\.\\d)"]
+	},
+	{"n": "Meta Apps",
+	 "id": "meta",
+	 "rx": ["facebookexternalhit\\/(\\d\\.\\d)", "meta-externalfetcher\\/(\\d\\.\\d)"]
+	},
+	{"n": "Undici-based crawler",
+	 "id": "undici",
+	 "rx": ["undici"]
+	},
+	{"n": "Go HTTP crawler",
+	 "id": "gohttp",
+	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"]
 	}
 ]

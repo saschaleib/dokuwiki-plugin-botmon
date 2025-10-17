@@ -78,8 +78,8 @@
 	},
 	{"id": "openai",
 	 "n": "OpenAI/ChatGPT", "geo": "US",
-	 "r": ["OAI-SearchBot", "ChatGPT-User", "GPTBot"],
-	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "ChatGPT-User\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
+	 "r": ["OAI-SearchBot", "GPTBot"],
+	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "claude",
@@ -96,8 +96,8 @@
 	},
 	{"id": "metabots",
 	 "n": "Meta/Facebook", "geo": "US",
-	 "r": ["facebookexternalhit", "facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent","meta-externalfetcher"],
-	 "rx": ["facebook\\w+\\/(\\d+\\.\\d+)", "meta-\\w+\\/(\\d+\\.\\d+)"],
+	 "r": ["facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent"],
+	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.\\d+)", "meta-externala\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
 	},
 	{"id": "qwant",
@@ -291,12 +291,6 @@
 	 "r": ["IbouBot"],
 	 "rx": ["IbouBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://ibou.io/iboubot.html"
-	},
-	{"id": "gohttp",
-	 "n": "Go HTTP Clients",
-	 "r": [],
-	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"],
-	 "url": "https://github.com/golang/goen.wi"
 	},
 	{"id": "bnl",
 	 "n": "BnL Harvester",

@@ -57,6 +57,6 @@
 	},
 	{"n": "App",
 	 "id": "app",
-	 "rx": [ "WhatsApp/(\\d+\\.\\d+)", "Facebot Twitterbot\\/(\\d\\.\\d)", "Google-NotebookLM"]
+	 "rx": [ "WhatsApp/(\\d+\\.\\d+)", "Facebot Twitterbot\\/(\\d\\.\\d)", "Google-NotebookLM", "ChatGPT-User", "meta-externalfetcher"]
 	}
 ]

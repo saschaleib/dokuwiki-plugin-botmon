@@ -1045,7 +1045,7 @@ BotMon.live = {
 						const prefix = v.ip.split('.').slice(0, kIP4Segments).join('.');
 						rawIP = ipSeg.slice(0, kIP4Segments).join('.') ;
 						ipGroup = 'ip4-' + rawIP.replaceAll('.', '-');
-						ipName = prefix + '.0.0.0'.substring(0, 1+(4-kIP4Segments)*2) + '/' + (8 * kIP4Segments);
+						ipName = prefix + '.x.x.x'.substring(0, 1+(4-kIP4Segments)*2) + '/' + (8 * kIP4Segments);
 					}
 				}
 

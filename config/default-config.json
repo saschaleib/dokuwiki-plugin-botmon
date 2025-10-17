@@ -41,6 +41,10 @@
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
 		},
+		{"func": "matchesClient", "params": ["undici","gohttp"],
+		 "id": "botClient", "desc": "Client identifier indicates web crawler",
+		 "bot": 100
+		},
 		{"func": "combinationTest", "params": [["macos","chromeold"],["macos","msie"],["winold","edge"],["winold","brave"]],
 		 "id": "suspPC", "desc": "Suspicious combination of platform and client",
 		 "bot": 30
