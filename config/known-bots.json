@@ -58,12 +58,6 @@
 	 "rx": ["Slurp[\\s;\\)]"],
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
 	},
-	{"id": "yahoo",
-	 "n": "Yahoo! Link Preview",
-	 "r": [],
-	 "rx": ["Yahoo Link Preview;"],
-	 "url": "https://help.yahoo.com/kb/mail/yahoo-link-preview-SLN23615.html"
-	},
 	{"id": "ddg",
 	 "n": "DuckDuck Bot",
 	 "r": ["DuckDuckBot","DuckAssistBot","DuckDuckGo-Favicons-Bot"],
