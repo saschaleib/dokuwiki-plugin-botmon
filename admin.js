@@ -1156,7 +1156,7 @@ BotMon.live = {
 
 				// check for unknown bots:
 				if (!botInfo) {
-					const botmatch = agent.match(/([\s\d\w\-]*bot|[\s\d\w\-]*crawler|[\s\d\w\-]*spider)[\/\s;\),\\.$]/i);
+					const botmatch = agent.match(/([\s\d\w\-]*bot|[\s\d\w\-]*crawler|[\s\d\w\-]*spider)[\/\s\w\-;\),\\.$]/i);
 					if(botmatch) {
 						botInfo = {'id': ( botmatch[1] || "other_" ), 'n': "Other" + ( botmatch[1] ? " (" + botmatch[1] + ")" : "" ) , "bot": botmatch[1] };
 					}
@@ -1543,15 +1543,15 @@ BotMon.live = {
 				},
 
 				// test for specific client identifiers:
-				/*matchesClients: function(visitor, ...list) {
+				matchesUserAgent: function(visitor, ...list) {
 
 					for (let i=0; i<list.length; i++) {
-						if (visitor._client.id == list[i]) {
-								return true
+						if (visitor.agent == list[i]) {
+							return true
 						}
 					};
 					return false;
-				},*/
+				},
 
 				// unusual combinations of Platform and Client:
 				combinationTest: function(visitor, ...combinations) {
@@ -2299,6 +2299,12 @@ BotMon.live = {
 					}, data.id));
 				}
 
+				// seen by icon:
+				span1.appendChild(make('span', {
+					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
+					'title': "Seen by: " + data._seenBy.join('+')
+				}, data._seenBy.join(', ')));
+
 				// country flag:
 				if (data.geo && data.geo !== 'ZZ') {
 					span1.appendChild(make('span', {
@@ -2411,6 +2417,19 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "User-Agent:"));
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
+				if (data.ref && data.ref !== '') {
+					dl.appendChild(make('dt', {}, "Referrer:"));
+					
+					const refInfo = BotMon.live.data.analytics.getRefererInfo(data.ref);
+					const refDd = dl.appendChild(make('dd', {
+						'class': 'has_icon referer ref_' + refInfo.id
+					}));
+					refDd.appendChild(make('a', {
+						'href': data.ref,
+						'target': 'refTarget'
+					}, data.ref));
+				}
+
 				dl.appendChild(make('dt', {}, "Languages:"));
 				dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
 
@@ -2427,7 +2446,7 @@ BotMon.live = {
 				dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
 
 				dl.appendChild(make('dt', {}, "Seen by:"));
-				dl.appendChild(make('dd', undefined, data._seenBy.join(', ') ));
+				dl.appendChild(make('dd', {'class': 'has_icon seenby sb_' + data._seenBy.join('')}, data._seenBy.join(', ') ));
 
 				dl.appendChild(make('dt', {}, "Visited pages:"));
 				const pagesDd = make('dd', {'class': 'pages'});

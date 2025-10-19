@@ -116,6 +116,7 @@
 			background:url(img/flags.png) no-repeat 0 0;
 			background-size: 20px auto;
 		}
+		&.ctry_eu::before { background-position-y: -161px }
 		&.ctry_ad::before { background-position-y: -441px }
 		&.ctry_ae::before { background-position-y: -461px }
 		&.ctry_af::before { background-position-y: -481px }
@@ -380,6 +381,17 @@
 		&.ref_facebook::before { background-position-y: -280px }
 		&.ref_discord::before { background-position-y: -300px }
 		&.ref_other::before { background-image: url('img/more.svg') }
+
+		/* seen-by icons */	
+		&.seenby::before { background-image: url('img/stages.png') }
+		&.sb_srv::before { background-position-y: -20px }
+		&.sb_log::before { background-position-y: -40px }
+		&.sb_srvlog::before { background-position-y: -60px }
+		&.sb_tck::before { background-position-y: -80px }
+		&.sb_srvtck::before { background-position-y: -100px }
+		&.sb_logtck::before { background-position-y: -120px }
+		&.sb_srvlogtck::before { background-position-y: -140px }
+
 	}
 
 	.page_icon {

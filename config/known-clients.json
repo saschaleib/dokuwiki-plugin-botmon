@@ -89,7 +89,7 @@
 	},
 	{"n": "WhatsApp",
 	 "id": "whatsapp",
-	 "rx": [ "WhatsApp/(\\d+\\.\\d+)" ]
+	 "rx": [ "WhatsApp/(\\d+\\.?\\d*)" ]
 	},
 	{"n": "Apple Messages",
 	 "id": "applemsgs",

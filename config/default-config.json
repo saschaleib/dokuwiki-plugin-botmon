@@ -23,7 +23,7 @@
 		},
 		{"func": "smallPageCount", "params": [1],
 		 "id": "onePage", "desc": "Visiter viewed only a single page",
-		 "bot": 30
+		 "bot": 20
 		},
 		{"func": "noRecord", "params": ["log"],
 		 "id": "noClient", "desc": "No client-side JS log was recorded",
@@ -31,7 +31,7 @@
 		},
 		{"func": "noRecord", "params": ["tck"],
 		 "id": "noTicks", "desc": "No client ticks were recorded",
-		 "bot": 20
+		 "bot": 10
 		},
 		{"func": "noReferrer",
 		 "id": "noRefs", "desc": "No referer field",
@@ -44,6 +44,10 @@
 		{"func": "matchesClient", "params": ["undici","gohttp"],
 		 "id": "botClient", "desc": "Client identifier indicates web crawler",
 		 "bot": 100
+		},
+		{"func": "matchesUserAgent", "params": [""],
+		 "id": "noUA", "desc": "Didn’t even bother to send a user-agent string",
+		 "bot": 50
 		},
 		{"func": "combinationTest", "params": [["macos","chromeold"],["macos","msie"],["winold","edge"],["winold","brave"]],
 		 "id": "suspPC", "desc": "Suspicious combination of platform and client",
