@@ -103,6 +103,14 @@
 	 "id": "chatgpt",
 	 "rx": ["ChatGPT\\-User\\/(\\d\\.\\d);"]
 	},
+	{"n": "Claude (User)",
+	 "id": "claude",
+	 "rx": ["Claude\\-User\\/(\\d\\.\\d);"]
+	},
+	{"n": "Perplexity (User)",
+	 "id": "perplexity",
+	 "rx": ["Perplexity‑User\\/(\\d+\\.\\d+);"]
+	},
 	{"n": "Meta Apps (User)",
 	 "id": "meta",
 	 "rx": ["facebookexternalhit\\/(\\d\\.\\d)", "meta-externalfetcher\\/(\\d\\.\\d)"]

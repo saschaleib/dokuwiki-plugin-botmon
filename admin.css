@@ -107,6 +107,8 @@
 		&.cl_meta::before { background-position-y: -480px }
 		&.cl_yahoolp::before { background-position-y: -500px }
 		&.cl_tiktok::before { background-position-y: -520px }
+		&.cl_claude::before { background-position-y: -540px }
+		&.cl_perplexity::before { background-position-y: -560px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Country flags */

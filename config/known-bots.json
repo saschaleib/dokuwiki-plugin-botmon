@@ -1,47 +1,47 @@
 [	{"id": "bingbot",
-	 "n": "BingBot", "geo": "US",
+	 "n": "BingBot",
 	 "r": ["bingbot"],
 	 "rx": ["\\sbingbot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.bing.com/bingbot.htm"
 	},
 	{"id": "googlebot",
-	 "n": "GoogleBot", "geo": "US",
+	 "n": "GoogleBot",
 	 "r": ["Googlebot"],
 	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)"],
 	 "url": "http://www.google.com/bot.html"
 	},
 	{"id": "googleads",
-	 "n": "Google Ads", "geo": "US",
+	 "n": "Google Ads",
 	 "r": ["AdsBot-Google", "AdsBot-Google-Mobile", "Mediapartners-Google"],
 	 "rx": ["AdsBot-Google;","AdsBot-Google-Mobile;", "Mediapartners-Google\\/(\\d+\\.\\d+);"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
 	{"id": "googleapi",
-	 "n": "Google API Crawler", "geo": "US",
+	 "n": "Google API Crawler",
 	 "r": ["APIs-Google"],
 	 "rx": ["APIs-Google"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
 	},
 	{"id": "googleother",
-	 "n": "GoogleOther", "geo": "US",
+	 "n": "GoogleOther",
 	 "r": ["GoogleOther"],
 	 "rx": ["\\sGoogleOther(\\-\\w+)?[\\)\\/]"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers#googleother"
 	},
 	{"id": "googinspct",
-	 "n": "Google-InspectionTool", "geo": "US",
+	 "n": "Google-InspectionTool",
 	 "r": ["Google-InspectionTool"],
 	 "rx": ["\\sGoogle-InspectionTool(\\-\\w+)?[\\)\\/]"],
 	 "url": "https://support.google.com/webmasters/answer/9012289"
 	},
 	{"id": "applebot",
-	 "n": "Applebot", "geo": "US",
+	 "n": "Applebot",
 	 "r": ["Applebot"],
 	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
 	{"id": "baidu",
-	 "n": "Baidu Spiders", "geo": "CN",
+	 "n": "Baidu Spiders",
 	 "r": ["Baiduspider", "Baiduspider-image", "Baiduspider-video", "Baiduspider-news", "Baiduspider-favo", "Baiduspider-cpro", "Baiduspider-ads", "Baiduspider-render"],
 	 "rx": ["Baiduspider"],
 	 "url": "http://www.baidu.com/search/spider.html"
@@ -53,7 +53,7 @@
 	 "url": "http://www.reddit.com/feedback"
 	},
 	{"id": "slurp",
-	 "n": "Slurp (Yahoo!)", "geo": "US",
+	 "n": "Slurp (Yahoo!)",
 	 "r": ["Slurp"],
 	 "rx": ["Slurp[\\s;\\)]"],
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
@@ -71,25 +71,25 @@
 	 "url": "https://marginalia-search.com/"
 	},
 	{"id": "openai",
-	 "n": "OpenAI/ChatGPT", "geo": "US",
+	 "n": "OpenAI/ChatGPT",
 	 "r": ["OAI-SearchBot", "GPTBot"],
 	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
 	{"id": "claude",
-	 "n": "Anthropic Claude", "geo": "US",
+	 "n": "Anthropic Claude",
 	 "r": ["ClaudeBot", "Claude-User", "Claude-SearchBot"],
 	 "rx": ["ClaudeBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://darkvisitors.com/agents/claudebot"
 	},
 	{"id": "perplexity",
-	 "n": "Perplexity", "geo": "US",
+	 "n": "Perplexity",
 	 "r": ["PerplexityBot", "Perplexity‑User"],
 	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
 	{"id": "metabots",
-	 "n": "Meta/Facebook", "geo": "US",
+	 "n": "Meta/Facebook",
 	 "r": ["facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent"],
 	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.\\d+)", "meta-externala\\w+\\/(\\d+\\.\\d+)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
@@ -101,13 +101,13 @@
 	 "url": "https://help.qwant.com/bot/"
 	},
 	{"id": "yandex",
-	 "n": "Yandex", "geo": "CN",
+	 "n": "Yandex",
 	 "r": ["YandexBot", "YandexAdNet", "YandexBlogs", "YandexImages", "YandexImageResizer", "YandexMarket", "YandexMedia", "YandexOntoDB", "YandexSitelinks","YandexSpravBot", "YandexVertis", "YandexVerticals", "YandexVideo", "YandexWebmaster", "YandexComBot"],
 	 "rx": ["Yandex\\w+\\/(\\d+\\.\\d+);"],
 	 "url": "http://yandex.com/bots"
 	},
 	{"id": "seznambot",
-	 "n": "SeznamBot", "geo": "CZ",
+	 "n": "SeznamBot",
 	 "r": ["SeznamBot"],
 	 "rx": ["SeznamBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://o-seznam.cz/napoveda/vyhledavani/en/seznambot-crawler/"
@@ -119,19 +119,19 @@
 	 "url": "https://ahrefs.com/robot/"
 	},
 	{"id": "ccbot",
-	 "n": "CommonCrawl Bot", "geo": "US",
+	 "n": "CommonCrawl Bot",
 	 "r": ["CCBot"],
 	 "rx": ["CCBot\\/(\\d+\\.\\d+)[\\s\\.;]*"],
 	 "url": "https://commoncrawl.org/bot.html"
 	},
 	{"id": "mjbot",
-	 "n": "Majestic Crawler (UK)", "geo": "GB",
+	 "n": "Majestic Crawler (UK)",
 	 "r": ["MJ12bot"],
 	 "rx": ["MJ12bot\\/v?(\\d+\\.\\d+)[\\s\\.;]"],
 	 "url": "http://www.majestic12.co.uk/bot.php"
 	},
 	{"id": "petal",
-	 "n": "PetalSearch Bot (CN)", "geo": "CN",
+	 "n": "PetalSearch Bot (CN)",
 	 "r": ["PetalBot", "AspiegelBot"],
 	 "rx": ["[\\s;]PetalBot[\\s\\/;]", "AspiegelBot[\\)$]"],
 	 "url": "https://webmaster.petalsearch.com/site/petalbot"
@@ -149,7 +149,7 @@
 	 "url": "http://www.semrush.com/bot.html"
 	},
 	{"id": "bytespider",
-	 "n": "Bytespider (ByteDance, TikTok)", "geo": "CN",
+	 "n": "Bytespider (ByteDance, TikTok)",
 	 "r": ["Bytespider"],
 	 "rx": ["Bytespider[;$]"],
 	 "url": "https://darkvisitors.com/agents/bytespider"
@@ -173,7 +173,7 @@
 	 "url": "https://serpstatbot.com/"
 	},
 	{"id": "netestate",
-	 "n": "netEstate NE Crawler", "geo": "DE",
+	 "n": "netEstate NE Crawler",
 	 "r": ["netEstate NE Crawler"],
 	 "rx": ["netEstate NE Crawler\\s"],
 	 "url": "http://www.website-datenbank.de/"
@@ -197,7 +197,7 @@
 	 "url": "https://darkvisitors.com/agents/mauibot"
 	},
 	{"id": "plagaware",
-	 "n": "PlagAwareBot (DE)", "geo": "DE",
+	 "n": "PlagAwareBot (DE)",
 	 "r": ["PlagAwareBot"],
 	 "rx": ["PlagAwareBot\\/(\\d+\\.\\d+)"],
 	 "url": "https://www.plagaware.com/bot"
@@ -227,7 +227,7 @@
 	 "url": "http://www.sogou.com/docs/help/webmasters.htm#07"
 	},
 	{"id": "amazon",
-	 "n": "Amazonbot", "geo": "US",
+	 "n": "Amazonbot",
 	 "r": ["Amazonbot"],
 	 "rx": ["Amazonbot\\/(\\d+\\.\\d+)[;\\s\\(\\.]"],
 	 "url": "https://developer.amazon.com/amazonbot"
@@ -257,7 +257,7 @@
 	 "url": "https://github.com/CeramicTeam/CeramicTerracotta"
 	},
 	{"id": "halobot",
-	 "n": "HaloBot", "geo": "FR",
+	 "n": "HaloBot",
 	 "r": ["HaloBot"],
 	 "rx": [" HaloBot\\/(\\d+)\\."],
 	 "url": "https://www.haloscan.com/"
