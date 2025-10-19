@@ -256,12 +256,6 @@
 	 "rx": ["TerraCotta"],
 	 "url": "https://github.com/CeramicTeam/CeramicTerracotta"
 	},
-	{"id": "tiktok",
-	 "n": "TikTok Spider", "geo": "CN",
-	 "r": ["TikTokSpider"],
-	 "rx": ["TikTokSpider"],
-	 "url": "https://darkvisitors.com/agents/tiktokspider"
-	},
 	{"id": "halobot",
 	 "n": "HaloBot", "geo": "FR",
 	 "r": ["HaloBot"],

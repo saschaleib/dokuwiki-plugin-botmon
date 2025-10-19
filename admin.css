@@ -106,6 +106,7 @@
 		&.cl_chatgpt::before { background-position-y: -460px }
 		&.cl_meta::before { background-position-y: -480px }
 		&.cl_yahoolp::before { background-position-y: -500px }
+		&.cl_tiktok::before { background-position-y: -520px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Country flags */
@@ -391,7 +392,6 @@
 		&.sb_srvtck::before { background-position-y: -100px }
 		&.sb_logtck::before { background-position-y: -120px }
 		&.sb_srvlogtck::before { background-position-y: -140px }
-
 	}
 
 	.page_icon {

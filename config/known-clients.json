@@ -95,6 +95,10 @@
 	 "id": "applemsgs",
 	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"]
 	},
+	{"n": "TikTok",
+	 "id": "tiktok",
+	 "rx": ["TikTokSpider;"]
+	},
 	{"n": "Google NotebookLM",
 	 "id": "goognblm",
 	 "rx": ["Google-NotebookLM"]
