@@ -75,10 +75,6 @@
 	 "id": "safari",
 	 "rx": [ "\\sSafari\\/(\\d+)" ]
 	},
-	{"n": "AppleWebKit",
-	 "id": "webkit",
-	 "rx": [ "AppleWebKit\\/(\\d*)\\." ]
-	},
 	{"n": "Firefox Old",
 	 "id": "ffold",
 	 "rx": [ "\\sFirefox\\/(\\d\\d?)\\.", "\\sFirefox\\s" ]
@@ -103,9 +99,9 @@
 	 "id": "goognblm",
 	 "rx": ["Google-NotebookLM"]
 	},
-	{"n": "ChatGPT User",
+	{"n": "ChatGPT (User)",
 	 "id": "chatgpt",
-	 "rx": ["ChatGPT-User\\/(\\d\\.\\d)"]
+	 "rx": ["ChatGPT\\-User\\/(\\d\\.\\d);"]
 	},
 	{"n": "Meta Apps (User)",
 	 "id": "meta",
@@ -122,5 +118,9 @@
 	{"n": "GoHTTP-based crawler",
 	 "id": "gohttp",
 	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"]
+	},
+	{"n": "AppleWebKit",
+	 "id": "webkit",
+	 "rx": [ "AppleWebKit\\/(\\d*)\\." ]
 	}
 ]

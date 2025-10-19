@@ -69,7 +69,7 @@
 		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
 		 "bot": 30
 		},
-		{"func": "matchesClient", "params": ["whatsapp","applemsgs","goognblm","tiktok"],
+		{"func": "matchesClient", "params": ["whatsapp","applemsgs","goognblm","tiktok","chatgpt"],
 		 "id": "previewClient", "desc": "User-triggered bot load (e.g. preview)",
 		 "bot": -120
 		}

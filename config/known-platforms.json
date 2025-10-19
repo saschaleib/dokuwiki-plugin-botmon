@@ -5,7 +5,7 @@
 	},
 	{"n": "Linux",
 	 "id": "linux",
-	 "rx": [ "\\sLinux\\s" ]
+	 "rx": [ "[\\s\\(]Linux\\s" ]
 	},
 	{"n": "BSD",
 	 "id": "bsd",
