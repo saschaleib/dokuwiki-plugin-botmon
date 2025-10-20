@@ -46,8 +46,8 @@
 			&.bot_googleother::before, &.bot_googinspct::before { background-position-y: -20px }
 		&.bot_bingbot::before { background-position-y: -40px }
 		&.bot_applebot::before { background-position-y: -60px }
-		&.bot_openai::before { background-position-y: -80px }
-		&.bot_metabots::before { background-position-y: -100px }
+		&.bot_openai::before, &.bot_chatgpt::before { background-position-y: -80px }
+		&.bot_metabots::before, &.bot_metauser::before { background-position-y: -100px }
 		&.bot_ahrefs::before { background-position-y: -120px }
 		&.bot_seznambot::before { background-position-y: -140px }
 		&.bot_claude::before { background-position-y: -160px }
@@ -58,6 +58,12 @@
 		&.bot_ibou::before { background-position-y: -260px }
 		&.bot_discord::before { background-position-y: -280px }
 		&.bot_twitter::before { background-position-y: -300px }
+		&.bot_goognblm::before { background-position-y: -320px }
+		&.bot_whatsapp::before { background-position-y: -340px }
+		&.bot_perplexity::before, &.bot_perplexityusr::before { background-position-y: -360px }
+		&.bot_tiktok::before { background-position-y: -380px }
+		&.bot_claudeusr::before { background-position-y: -400px }
+		&.bot_yahoolp::before { background-position-y: -420px }
 		&.bot_other::before { background-image: url('img/more.svg') }
 
 		/* platform icons */	
@@ -100,15 +106,6 @@
 		&.cl_ecosia::before { background-position-y: -340px }
 		&.cl_webkit::before { background-position-y: -360px }
 		&.cl_operaold::before { background-position-y: -380px }
-		&.cl_whatsapp::before { background-position-y: -400px }
-		&.cl_applemsgs::before { background-position-y: -420px }
-		&.cl_goognblm::before { background-position-y: -440px }
-		&.cl_chatgpt::before { background-position-y: -460px }
-		&.cl_meta::before { background-position-y: -480px }
-		&.cl_yahoolp::before { background-position-y: -500px }
-		&.cl_tiktok::before { background-position-y: -520px }
-		&.cl_claude::before { background-position-y: -540px }
-		&.cl_perplexity::before { background-position-y: -560px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Country flags */

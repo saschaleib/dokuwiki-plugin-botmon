@@ -83,42 +83,6 @@
 	 "id": "firefox",
 	 "rx": [ "\\sFirefox\\/(\\d\\d\\d)\\." ]
 	},
-	{"n": "WhatsApp",
-	 "id": "whatsapp",
-	 "rx": [ "WhatsApp/(\\d+\\.?\\d*)" ]
-	},
-	{"n": "Apple Messages",
-	 "id": "applemsgs",
-	 "rx": ["Facebot Twitterbot\\/(\\d\\.\\d)"]
-	},
-	{"n": "TikTok",
-	 "id": "tiktok",
-	 "rx": ["TikTokSpider;"]
-	},
-	{"n": "Google NotebookLM",
-	 "id": "goognblm",
-	 "rx": ["Google-NotebookLM"]
-	},
-	{"n": "ChatGPT (User)",
-	 "id": "chatgpt",
-	 "rx": ["ChatGPT\\-User\\/(\\d\\.\\d);"]
-	},
-	{"n": "Claude (User)",
-	 "id": "claude",
-	 "rx": ["Claude\\-User\\/(\\d\\.\\d);"]
-	},
-	{"n": "Perplexity (User)",
-	 "id": "perplexity",
-	 "rx": ["Perplexity‑User\\/(\\d+\\.\\d+);"]
-	},
-	{"n": "Meta Apps (User)",
-	 "id": "meta",
-	 "rx": ["facebookexternalhit\\/(\\d\\.\\d)", "meta-externalfetcher\\/(\\d\\.\\d)"]
-	},
-	{"n": "Yahoo! Link Preview",
-	 "id": "yahoolp",
-	 "rx": ["Yahoo Link Preview;"]
-	},
 	{"n": "Undici-based crawler",
 	 "id": "undici",
 	 "rx": ["undici"]

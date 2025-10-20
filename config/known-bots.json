@@ -34,14 +34,20 @@
 	 "rx": ["\\sGoogle-InspectionTool(\\-\\w+)?[\\)\\/]"],
 	 "url": "https://support.google.com/webmasters/answer/9012289"
 	},
+	{"id": "goognblm",
+	 "n": "Google NotebookLM User",
+	 "r": ["Google-NotebookLM"],
+	 "rx": ["Google-NotebookLM"],
+	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-user-triggered-fetchers"
+	},
 	{"id": "applebot",
 	 "n": "Applebot",
-	 "r": ["Applebot"],
-	 "rx": ["Applebot\\/(\\d+\\.\\d+);"],
+	 "r": ["Applebot", "Applebot-Extended"],
+	 "rx": ["Applebot\\/(\\d+\\.\\d+);", "Applebot\\-Extended\\/(\\d+\\.\\d+);"],
 	 "url": "http://www.apple.com/go/applebot"
 	},
 	{"id": "baidu",
-	 "n": "Baidu Spiders",
+	 "n": "Baidu Bots",
 	 "r": ["Baiduspider", "Baiduspider-image", "Baiduspider-video", "Baiduspider-news", "Baiduspider-favo", "Baiduspider-cpro", "Baiduspider-ads", "Baiduspider-render"],
 	 "rx": ["Baiduspider"],
 	 "url": "http://www.baidu.com/search/spider.html"
@@ -57,6 +63,12 @@
 	 "r": ["Slurp"],
 	 "rx": ["Slurp[\\s;\\)]"],
 	 "url": "http://help.yahoo.com/help/us/ysearch/slurp"
+	},
+	{"id": "yahoolp",
+	 "n": "Yahoo! Link Preview (User)",
+	 "r": ["Yahoo Link Preview"],
+	 "rx": ["Yahoo Link Preview;"],
+	 "url": "https://help.yahoo.com/kb/SLN23615.html"
 	},
 	{"id": "ddg",
 	 "n": "DuckDuck Bot",
@@ -76,22 +88,46 @@
 	 "rx": ["OAI-SearchBot\\/(\\d+\\.\\d+);", "GPTBot\\/(\\d+\\.\\d+);"],
 	 "url": "https://platform.openai.com/docs/bots/"
 	},
+	{"id": "chatgpt",
+	 "n": "ChatGPT User",
+	 "r": ["ChatGPT-User"],
+	 "rx": ["ChatGPT\\-User\\/(\\d\\.\\d);"],
+	 "url": "https://platform.openai.com/docs/bots/"
+	},
 	{"id": "claude",
 	 "n": "Anthropic Claude",
-	 "r": ["ClaudeBot", "Claude-User", "Claude-SearchBot"],
+	 "r": ["ClaudeBot", "Claude-SearchBot"],
 	 "rx": ["ClaudeBot\\/(\\d+\\.\\d+);"],
-	 "url": "https://darkvisitors.com/agents/claudebot"
+	 "url": "https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
+	},
+	{"id": "claudeusr",
+	 "n": "ClaudeAI User",
+	 "r": ["Claude-User"],
+	 "rx": ["Claude-User\\/(\\d+\\.\\d+);"],
+	 "url": "https://support.claude.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-can-site-owners-block-the-crawler"
 	},
 	{"id": "perplexity",
-	 "n": "Perplexity",
-	 "r": ["PerplexityBot", "Perplexity‑User"],
-	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);", "Perplexity‑User\\/(\\d+\\.\\d+);"],
+	 "n": "Perplexity Bot",
+	 "r": ["PerplexityBot"],
+	 "rx": ["PerplexityBot\\/(\\d+\\.\\d+);"],
+	 "url": "https://perplexity.ai/perplexitybot"
+	},
+	{"id": "perplexityusr",
+	 "n": "Perplexity User",
+	 "r": ["Perplexity‑User"],
+	 "rx": ["Perplexity\\-User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
 	{"id": "metabots",
 	 "n": "Meta/Facebook",
-	 "r": ["facebookcatalog","meta-webindexer","meta-externalads","meta-externalagent"],
+	 "r": ["meta-webindexer","meta-externalads","meta-externalagent"],
 	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.\\d+)", "meta-externala\\w+\\/(\\d+\\.\\d+)"],
+	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
+	},
+	{"id": "metauser",
+	 "n": "Meta/Facebook User",
+	 "r": ["facebookexternalhit","facebookcatalog"],
+	 "rx": ["facebookexternalhit\\/(\\d+\\.?\\d*)", "meta-externalfetcher\\/(\\d\\.\\d)", "facebookcatalog\\/(\\d+\\.?\\d*)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
 	},
 	{"id": "qwant",
@@ -203,16 +239,28 @@
 	 "url": "https://www.plagaware.com/bot"
 	},
 	{"id": "discord",
-	 "n": "Discord",
+	 "n": "Discord User",
 	 "r": ["Discordbot"],
 	 "rx": ["Discordbot\\/(\\d\\.\\d);"],
 	 "url": "https://datadome.co/bots/discordbot/"
 	},
 	{"id": "twitter",
-	 "n": "Twitterbot",
+	 "n": "Twitter User",
 	 "r": ["Twitterbot"],
-	 "rx": ["Twitterbot\\/(\\d+\\.\\d+)"],
+	 "rx": ["^Twitterbot\\/(\\d\\.?\\d*)"],
 	 "url": "https://datadome.co/bots/twitterbot/"
+	},
+	{"id": "whatsapp",
+	 "n": "WhatsApp User",
+	 "r": ["WhatsApp"],
+	 "rx": ["WhatsApp/(\\d+\\.?\\d*)"],
+	 "url": "https://darkvisitors.com/agents/whatsapp/"
+	},
+	{"id": "tiktok",
+	 "n": "TikTok User",
+	 "r": ["TikTokSpider"],
+	 "rx": ["TikTokSpider;"],
+	 "url": "https://darkvisitors.com/agents/tiktokspider"
 	},
 	{"id": "blexbot",
 	 "n": "BLEXBot",

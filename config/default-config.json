@@ -59,7 +59,7 @@
 		},
 		{"func": "loadSpeed", "params": [3, 20],
 		 "id": "speedRun", "desc": "Average time between page loads is less than 20 seconds",
-		 "bot": 80
+		 "bot": 60
 		},
 		{"func": "noAcceptLang",
 		 "id": "noAcc", "desc": "No “Accept-Language” header",
