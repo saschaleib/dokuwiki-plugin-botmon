@@ -30,6 +30,11 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertAdminHeader');
 		}
 	
+		// Override the page rendering, if a captcha needs to be displayed:
+		if ($ACT !== 'admin') {
+			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'showCaptcha');
+		}
+
 		// write to the log after the page content was displayed:
 		$controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'writeServerLog');
 
@@ -38,7 +43,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	/* session information */
 	private $sessionId = null;
 	private $sessionType = '';
-	private $ipAddress = null;
 
 	/**
 	 * Inserts tracking code to the page header
@@ -107,7 +111,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		// create the log array:
 		$logArr = Array(
-			$_SERVER['REMOTE_ADDR'], /*$this->ipAddress, // remote IP */
+			$_SERVER['REMOTE_ADDR'], /* remote IP */
 			$pageId, /* page ID */
 			$this->sessionId, /* Session ID */
 			$this->sessionType, /* session ID type */
@@ -140,7 +144,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	private function getCountryCode() {
 
-		$country = ( $this->ipAddress == 'localhost' ? 'local' : 'ZZ' ); // default if no geoip is available!
+		$country = ( $_SERVER['REMOTE_ADDR'] == '127.0.0.1' ? 'local' : 'ZZ' ); // default if no geoip is available!
 
 		$lib = $this->getConf('geoiplib'); /* which library to use? (can only be phpgeoip or disabled) */
 
@@ -160,9 +164,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	private function getSessionInfo() {
 
-		$this->ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
-		if ($this->ipAddress == '127.0.0.1' || $this->ipAddress == '::1') $this->ipAddress = 'localhost';
-
 		// what is the session identifier?
 		if (isset($_SESSION)) {
 			$sesKeys = array_keys($_SESSION); /* DokuWiki Session ID preferred */
@@ -178,8 +179,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$this->sessionId = session_id();
 			$this->sessionType = 'php';
 		}
-		if (!$this->sessionId && $this->ipAddress) { /* no PHP session ID, try IP address */
-			$this->sessionId = $this->ipAddress;
+		if (!$this->sessionId) { /* no PHP session ID, try IP address */
+			$this->sessionId = $_SERVER['REMOTE_ADDR'];
 			$this->sessionType = 'ip';
 		}
 		if (!$this->sessionId) { /* if everything else fails, just us a random ID */
@@ -187,4 +188,42 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$this->sessionType = 'rand';
 		}
 	}
+
+	public function showCaptcha(Event $event) {
+
+		if ($this->getConf('useCaptcha') && $this->checkCaptchaCookie()) {
+
+				$event->preventDefault(); // don't show normal content
+				$this->insertDadaFiller(); // show dada filler instead!
+				$this->insertCaptchaLoader(); // and load the captcha
+
+		} else {
+			echo '<p>Normal page.</p>';
+		}
+	}
+
+	private function checkCaptchaCookie() {
+
+		$cookieVal = isset($_COOKIE['_c_']) ? $_COOKIE['_c_'] : '';
+		$seed = $this->getConf('captchaSeed');
+
+		return ($cookieVal == $seed ? 0 : 1); // #TODO: encrypt with other data
+	}
+
+	private function insertCaptchaLoader() {
+		
+	}
+
+	private function insertDadaFiller() {
+		// #TODO: make a dada filler
+
+		echo '<h1>'; tpl_pagetitle(); echo "</h1>\n";
+
+		echo '<script> alert("Hello world!"); </script>';
+
+		echo "<p>Placeholder text while the captcha is being displayed.</p>\n";
+
+
+	}
+
 }
