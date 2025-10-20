@@ -107,7 +107,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		// create the log array:
 		$logArr = Array(
-			$this->ipAddress, /* remote IP */
+			$_SERVER['REMOTE_ADDR'], /*$this->ipAddress, // remote IP */
 			$pageId, /* page ID */
 			$this->sessionId, /* Session ID */
 			$this->sessionType, /* session ID type */
