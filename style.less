@@ -1,1 +1,37 @@
-/* This file is no longer in use */
+body.botmon_captcha {
+	main {
+		h1 {
+			color: transparent !important;
+			text-shadow: 0 0 .25em rgba(0,.0,0,.8);
+		}
+		p, h2, h3, h4, h5, h6 {
+			color: transparent !important;
+			text-shadow: 0 0 .35em rgba(0,0,0,.5);
+			user-select: none;
+		}
+	}
+	#botmon_captcha_box {
+			border: red dotted 2pt;
+			position: fixed;
+			width: 400px;
+			height: 400px;
+			top: ~"calc(50vh - 200px)";
+			left: ~"calc(50vw - 200px)";
+			border-radius: .5rem;
+			margin: 0; padding: .5rem;
+		}
+}
+
+/* dark mode overrides */
+@media (prefers-color-scheme: dark) {
+	body.darkmode.botmon_captcha {
+		main {
+			h1 {
+				text-shadow: 0 0 .25em rgba(170,170,170,.75);
+			}
+			p, h2, h3, h4, h5, h6 {
+				text-shadow: 0 0 .35em rgba(170,170,170,.75);
+			}
+		}
+	}
+}

@@ -62,7 +62,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name']) ?  $INFO['userinfo']['name'] : '');
 
 		// build the tracker code:
-		$code = "document._botmon = {'t0': Date.now(), 'session': '" . json_encode($this->sessionId) . "'};" . NL;
+		$code = "document._botmon = {t0: Date.now(), session: " . json_encode($this->sessionId) . ", seed: " . json_encode($this->getConf('captchaSeed')) . ", ip: " . json_encode($_SERVER['REMOTE_ADDR']) . "};" . NL;
 		if ($username) {
 			$code .= DOKU_TAB . DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
 		}
@@ -74,7 +74,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "e.src='".DOKU_BASE."lib/plugins/botmon/client.js';" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "});";
-
 		$event->data['script'][] = ['_data' => $code];
 	}
 
@@ -90,7 +89,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$event->data['link'][] = ['rel' => 'stylesheet', 'href' => DOKU_BASE.'lib/plugins/botmon/admin.css', 'defer' => 'defer'];
 		$event->data['script'][] = ['src' => DOKU_BASE.'lib/plugins/botmon/admin.js', 'defer' => 'defer', '_data' => ''];
 	}
-
 
 	/**
 	 * Writes data to the server log.
@@ -191,39 +189,216 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	public function showCaptcha(Event $event) {
 
-		if ($this->getConf('useCaptcha') && $this->checkCaptchaCookie()) {
+		$useCaptcha = $this->getConf('useCaptcha');
 
-				$event->preventDefault(); // don't show normal content
-				$this->insertDadaFiller(); // show dada filler instead!
-				$this->insertCaptchaLoader(); // and load the captcha
-
-		} else {
-			echo '<p>Normal page.</p>';
+		if ($useCaptcha !== 'disabled' && $this->checkCaptchaCookie()) {
+			echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
+			$event->preventDefault(); // don't show normal content
+			switch ($useCaptcha) {
+				case 'blank':
+					$this->insertBlankBox();  // show dada filler instead of text
+					break;
+				case 'dada':
+					$this->insertDadaFiller();  // show dada filler instead of text
+					break;
+			}
+			$this->insertCaptchaLoader(); // and load the captcha
 		}
 	}
 
 	private function checkCaptchaCookie() {
 
-		$cookieVal = isset($_COOKIE['_c_']) ? $_COOKIE['_c_'] : '';
-		$seed = $this->getConf('captchaSeed');
+		$cookieVal = isset($_COOKIE['captcha']) ? $_COOKIE['captcha'] : null;
 
-		return ($cookieVal == $seed ? 0 : 1); // #TODO: encrypt with other data
+		$today = new DateTime();
+		$isodate = substr((new DateTime())->format('c'), 0, 10);
+
+		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $isodate;
+
+		return $cookieVal !== hash('sha256', $raw);
 	}
 
 	private function insertCaptchaLoader() {
+		echo '<script>' . NL;
+
+		// add the deferred script loader::
+		echo  DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
+		echo  DOKU_TAB . DOKU_TAB . "const cj=document.createElement('script');" . NL;
+		echo  DOKU_TAB . DOKU_TAB . "cj.async=true;cj.defer=true;cj.type='text/javascript';" . NL;
+		echo  DOKU_TAB . DOKU_TAB . "cj.src='".DOKU_BASE."lib/plugins/botmon/captcha.js';" . NL;
+		echo  DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(cj);" . NL;
+		echo  DOKU_TAB . "});";
+		echo '</script>' . NL;
+
+	}
+
+	// inserts a blank box to ensure there is enough space for the captcha:
+	private function insertBlankBox() {
+
+		echo '<p style="min-height: 100px;">&nbsp;</p>';
+	}
+	
+	/* Generates a few paragraphs of Dada text to show instead of the article content */
+	private function insertDadaFiller() {
+
+		global $conf;
+		global $TOC;
+		global $ID;
+
+		// list of languages to search for the wordlist
+		$langs = array_unique([$conf['lang'], 'la']);
+
+		// find path to the first available wordlist:
+		foreach ($langs as $lang) {
+			$filename = __DIR__ .'/lang/' . $lang . '/wordlist.txt'; /* language-specific wordlist */
+			if (file_exists($filename)) {
+				break;
+			}
+		}
+
+		// load the wordlist file:
+		if (file_exists($filename)) {
+			$words = array();
+			$totalWeight = 0;
+			$lines = file($filename, FILE_SKIP_EMPTY_LINES);
+			foreach ($lines as $line) {
+				$arr = explode("\t", $line);
+				$arr[1] = ( count($arr) > 1 ? (int) trim($arr[1]) : 1 );
+				$totalWeight += (int) $arr[1];
+				array_push($words, $arr);
+			}
+		} else {
+			echo '<script> console.log("Can’t generate filler text: wordlist file not found!"); </script>';
+			return;
+		}
+
+		// If a TOC exists, use it for the headlines:
+		if(is_array($TOC)) {
+			$toc = $TOC;
+		} else {
+			$meta = p_get_metadata($ID, '', METADATA_RENDER_USING_CACHE);
+			//$tocok = (isset($meta['internal']['toc']) ? $meta['internal']['toc'] : $tocok = true);
+			$toc = isset($meta['description']['tableofcontents']) ? $meta['description']['tableofcontents'] : null;
+		}
+		if (!$toc) { // no TOC, generate my own:
+			$hlCount = mt_rand(0, (int) $conf['tocminheads']);
+			$toc = array();
+			for ($i=0; $i<$hlCount; $i++) {
+				array_push($toc, $this->dadaMakeHeadline($words, $totalWeight)); // $toc
+			}
+		}
+		
+		// if H1 heading is not in the TOC, add a chappeau section:
+		$chapeauCount = mt_rand(1, 3);
+		if ((int) $conf['toptoclevel'] > 1) {
+			echo "<div class=\"level1\">\n";
+			for ($i=0; $i<$chapeauCount; $i++) {
+				echo $this->dadaMakeParagraph($words, $totalWeight);
+			}
+			echo "</div>\n";
+		}
+
+		//  text sections for each sub-headline:
+		foreach ($toc as $hl) {
+			echo $this->dadaMakeSection($words, $totalWeight, $hl);
+		}
+	}
+
+	private function dadaMakeSection($words, $totalWeight, $hl) {
+
+		global $conf;
+
+		// how many paragraphs?
+		$paragraphCount = mt_rand(1, 4);
+
+		// section level
+		$topTocLevel = (int) $conf['toptoclevel'];
+		$secLevel = $hl['level'] + 1;;
+
+		// return value:
+		$sec = "";
+
+		// make a headline:
+		if ($topTocLevel > 1 || $secLevel > 1) {
+			$sec .= "<h{$secLevel} id=\"{$hl['hid']}\">{$hl['title']}</h{$secLevel}>\n";
+		}
+
+		// add the paragraphs:
+		$sec .= "<div class=\"level{$secLevel}\">\n";
+		for ($i=0; $i<$paragraphCount; $i++) {
+			$sec .= $this->dadaMakeParagraph($words, $totalWeight);
+		}
+		$sec .= "</div>\n";
+
+		return $sec;
+	}
+
+	private function dadaMakeHeadline($words, $totalWeight) {
+
+		// how many words to generate?
+		$wordCount = mt_rand(2, 5);
+
+		// function returns an array:
+		$r = Array();
+
+		// generate the headline:
+		$hlArr = array();
+		for ($i=0; $i<$wordCount; $i++) {
+			array_push($hlArr, $this->dadaSelectRandomWord($words, $totalWeight));
+		}
+
+		$r['title'] =  ucfirst(implode(' ', $hlArr));
+
+		$r['hid'] = preg_replace('/[^\w\d\-]+/i', '_', strtolower($r['title']));
+		$r['type'] = 'ul'; // always ul!
+		$r['level'] = 1; // always level 1 for now
+
+		return $r;
+	}
+
+	private function dadaMakeParagraph($words, $totalWeight) {
+
+		// how many words to generate?
+		$sentenceCount = mt_rand(2, 5);
+
+		$paragraph = array();
+		for ($i=0; $i<$sentenceCount; $i++) {
+			array_push($paragraph, $this->dadaMakeSentence($words, $totalWeight));
+		}
+
+		return "<p>\n" . implode(' ', $paragraph) . "\n</p>\n";
 		
 	}
 
-	private function insertDadaFiller() {
-		// #TODO: make a dada filler
+	private function dadaMakeSentence($words, $totalWeight) {
+		
+		// how many words to generate?
+		$wordCount = mt_rand(4, 20);
 
-		echo '<h1>'; tpl_pagetitle(); echo "</h1>\n";
+		// generate the sentence:
+		$sentence = array();
+		for ($i=0; $i<$wordCount; $i++) {
+			array_push($sentence, $this->dadaSelectRandomWord($words, $totalWeight));
+		}
 
-		echo '<script> alert("Hello world!"); </script>';
+		return ucfirst(implode(' ', $sentence)) . '.';
 
-		echo "<p>Placeholder text while the captcha is being displayed.</p>\n";
+	}
 
+	private function dadaSelectRandomWord($list, $totalWeight) {
 
+		// get a random selection:
+		$rand = mt_rand(0, $totalWeight);
+
+		// match the selection to the weighted list:
+		$cumulativeWeight = 0;
+		for ($i=0; $i<count($list); $i++) {
+			$cumulativeWeight += $list[$i][1];
+			if ($cumulativeWeight >= $rand) {
+				return $list[$i][0];
+			}
+		}
+		return '***';
 	}
 
 }
