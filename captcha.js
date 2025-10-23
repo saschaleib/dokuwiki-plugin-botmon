@@ -1,6 +1,6 @@
 "use strict";
 /* DokuWiki BotMon Captcha JavaScript */
-/* 22.10.2025 - 0.1.0 - pre-release */
+/* 23.10.2025 - 0.1.2 - pre-release */
 /* Author: Sascha Leib <ad@hominem.info> */
 
 const $BMCaptcha = {
@@ -20,20 +20,25 @@ const $BMCaptcha = {
 		const dlg = document.createElement('dialog');
 		dlg.setAttribute('closedby', 'none');
 		dlg.setAttribute('open', 'open');
+		dlg.classList.add('checking');
 		dlg.id = 'botmon_captcha_box';
-		dlg.innerHTML = '<h2>Captcha box</h2><p>Checking if you are a human …</p><p></p>';
+		dlg.innerHTML = '<h2>Captcha box</h2><p>Making sure you are a human:</p>';
 
 		// Checkbox:
 		const lbl = document.createElement('label');
+		lbl.innerHTML = '<span class="confirm">Click to confirm.</span><span class="busy"></span><span class="checking">Checking&nbsp;&hellip;</span><span class="loading">Loading&nbsp;&hellip;</span>';
 		const cb = document.createElement('input');
 		cb.setAttribute('type', 'checkbox');
+		cb.setAttribute('disabled', 'disabled');
 		cb.addEventListener('click', $BMCaptcha._cbCallback);
-		lbl.appendChild(cb);
-		lbl.appendChild(document.createTextNode('I am a human.'));
+		lbl.prepend(cb);
 
 		dlg.appendChild(lbl);
 
 		bm_parent.appendChild(dlg);
+
+		// call the delayed callback in a couple of seconds:
+		setTimeout($BMCaptcha._delayedCallback, 1500);
 	},
 
 	/* creates a digest hash for the cookie function */
@@ -147,19 +152,42 @@ const $BMCaptcha = {
 		if (e.target.checked) {
 			//document.getElementById('botmon_captcha_box').close();
 
-			// make a hash for the cookie:
-			const seed = document._botmon.seed || '';
-			const extIp = document._botmon.ip || '0.0.0.0';
-			const d = new Date(document._botmon.t0);
-			const raw = seed + '|' + location.hostname + '|' + extIp + '|' + d.toISOString().substring(0, 10);
+			const dat = [ // the data to encode
+				document._botmon.seed || '',
+				location.hostname,
+				document._botmon.ip || '0.0.0.0',
+				(document._botmon.t0 ? new Date(document._botmon.t0) : new Date()).toISOString().substring(0, 10)
+			];
+			const hash = $BMCaptcha.digest.hash(dat.join('|'));
 
-			const hash = $BMCaptcha.digest.hash(raw);
-			console.log('Setting cookie to:', raw, ' --> ', hash);
-			document.cookie = "captcha=" + hash + ';';
+			// set the cookie:
+			document.cookie = "DWConfirm=" + hash + ';path=/;';
 
+			// change the interface:
+			const dlg = document.getElementById('botmon_captcha_box');
+			if (dlg) {
+				dlg.classList.remove('ready');
+				dlg.classList.add('loading');
+			}
+
+			// reload the page:
 			window.location.reload(true);
 		}
-	}
+	},
+
+	_delayedCallback: function() {
+		const dlg = document.getElementById('botmon_captcha_box');
+		if (dlg) {
+			dlg.classList.remove('checking');
+			dlg.classList.add('ready');
+
+			const input = dlg.getElementsByTagName('input')[0];
+			if (input) {
+				input.removeAttribute('disabled');
+				input.focus();
+			}
+		}
+	},
 
 }
 // initialise the captcha module:

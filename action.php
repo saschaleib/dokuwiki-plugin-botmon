@@ -208,14 +208,16 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	private function checkCaptchaCookie() {
 
-		$cookieVal = isset($_COOKIE['captcha']) ? $_COOKIE['captcha'] : null;
+		$cookieVal = isset($_COOKIE['DWConfirm']) ? $_COOKIE['DWConfirm'] : null;
 
-		$today = new DateTime();
-		$isodate = substr((new DateTime())->format('c'), 0, 10);
+		$today = substr((new DateTime())->format('c'), 0, 10);
 
-		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $isodate;
+		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today;
+		$expected = hash('sha256', $raw);
 
-		return $cookieVal !== hash('sha256', $raw);
+		//echo '<ul><li>cookie: ' . $cookieVal . '</li><li>expected: ' . $expected . '</li><li>matches: ' .($cookieVal == $expected ? 'true' : 'false') . '</li></ul>';
+
+		return $cookieVal !== $expected;
 	}
 
 	private function insertCaptchaLoader() {

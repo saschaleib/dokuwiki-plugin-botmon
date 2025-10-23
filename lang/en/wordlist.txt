@@ -520,7 +520,6 @@ road	8
 late	8
 stand	8
 suppose	8
-la	8
 daughter	8
 real	8
 nearly	8
@@ -1955,7 +1954,6 @@ ends	2
 shop	2
 stairs	2
 pardon	2
-gay	2
 beg	2
 seldom	2
 kinds	2

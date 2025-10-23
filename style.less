@@ -11,15 +11,95 @@ body.botmon_captcha {
 		}
 	}
 	#botmon_captcha_box {
-			border: red dotted 2pt;
+		& {
 			position: fixed;
 			width: 400px;
-			height: 400px;
-			top: ~"calc(50vh - 200px)";
+			height: 220px;
+			top: ~"calc(50vh - 110px)";
 			left: ~"calc(50vw - 200px)";
-			border-radius: .5rem;
-			margin: 0; padding: .5rem;
+			background: #1C1B22 none;
+			border: #7C7B82 solid 1pt;
+			border-radius: 12px;
+			margin: 0; padding: 18px;
+			font-family: system-ui, sans-serif;
+			box-shadow: .25rem .25rem .5rem rgba(0,0,0,.5);
+			box-sizing: border-box;
 		}
+		& * {
+			color: #EDEDF5;
+			margin: 0;
+		}
+		h2 {
+			font-size: 24px;
+			line-height: 32px;
+			padding: 0 0 12px 0;
+		}
+		p {
+			font-size: 16px;
+			line-height: 20px;
+			padding: 6px 0;
+		}
+		label {
+			& {
+				display: grid;
+				grid-template-columns: 32px auto;
+				column-gap: 8px;
+				align-items: center;
+				padding: 24px;
+				margin: 16px 0 0 0;
+				background-color: #32313A;
+				border: #7C7B82 solid 1px;
+				border-radius: 3px;
+				font-size: 16px;
+			}
+			span.busy {
+				display: inline-block;
+				width: 24px; height: 24px;
+				background: transparent url('img/busy-light.svg') center no-repeat;
+				background-size: 24px;
+			}
+		}
+		input[type="checkbox"] {
+			width: 24px; height: 24px;
+			border: 2px solid #00CADB;
+			border-radius: 4px;
+			appearance: none;
+		}
+		input[type="checkbox"]:focus {
+			outline: none;
+			box-shadow: 0 0 6px rgba(0, 202, 219, .8);
+		}
+
+		input[type="checkbox"]:disabled {
+			display: none;
+		}
+		&.checking {
+			input[type="checkbox"], span.confirm, span.loading { display: none;}
+			span.busy, span.checking { display: initial; }
+			label, input[type="checkbox"] { cursor: none; }
+		}
+		&.ready {
+			input[type="checkbox"], span.confirm { display: initial;}
+			span.busy, span.checking, span.loading { display: none; }
+			label, input[type="checkbox"] { cursor: pointer; }
+		}
+		&.loading {
+			span.busy, span.loading { display: initial; }
+			input[type="checkbox"], span.confirm, span.checking { display: none;}
+			label { cursor: busy; }
+		}
+	}
+}
+
+// smaller screens:
+@media (max-width: 480px) {
+	body.botmon_captcha #botmon_captcha_box {
+		width: 100vw;
+		height: auto;
+		left: 0; top: 80px;
+		border-radius: 2px;
+		z-index: 10001;
+	}
 }
 
 /* dark mode overrides */
@@ -31,6 +111,20 @@ body.botmon_captcha {
 			}
 			p, h2, h3, h4, h5, h6 {
 				text-shadow: 0 0 .35em rgba(170,170,170,.75);
+			}
+		}
+		#botmon_captcha_box {
+			& {
+				background-color: #FFF;
+				border-color: #9F9EA1;
+				box-shadow: .25rem .25rem .5rem rgba(0,0,0,.25);
+			}
+			& * {
+				color: #15141A;
+			}
+			label {
+				background-color: #EEE;
+				border-color: #9F9EA1;
 			}
 		}
 	}
