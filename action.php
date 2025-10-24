@@ -43,6 +43,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	/* session information */
 	private $sessionId = null;
 	private $sessionType = '';
+	private $showCaptcha = '-';
 
 	/**
 	 * Inserts tracking code to the page header
@@ -118,8 +119,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$_SERVER['HTTP_REFERER'] ?? '', /* HTTP Referrer */
 			substr($conf['lang'],0,2), /* page language */
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
-			$this->getCountryCode() /* GeoIP country code */
-		);
+			$this->getCountryCode(), /* GeoIP country code */
+			$this->showCaptcha /* show captcha? */		);
 
 		//* create the log line */
 		$filename = __DIR__ .'/logs/' . gmdate('Y-m-d') . '.srv.txt'; /* use GMT date for filename */
@@ -191,7 +192,10 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		$useCaptcha = $this->getConf('useCaptcha');
 
-		if ($useCaptcha !== 'disabled' && $this->checkCaptchaCookie()) {
+		if ($useCaptcha !== 'disabled' && $this->checkCaptchaCookie() && !$this->captchaWhitelisted()) {
+
+			$this->showCaptcha = 'Y'; // captcha will be shown.
+
 			echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
 			$event->preventDefault(); // don't show normal content
 			switch ($useCaptcha) {
@@ -203,6 +207,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 					break;
 			}
 			$this->insertCaptchaLoader(); // and load the captcha
+		} else {
+			$this->showCaptcha = 'N'; // do not show a captcha
 		}
 	}
 
@@ -218,6 +224,42 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		//echo '<ul><li>cookie: ' . $cookieVal . '</li><li>expected: ' . $expected . '</li><li>matches: ' .($cookieVal == $expected ? 'true' : 'false') . '</li></ul>';
 
 		return $cookieVal !== $expected;
+	}
+
+	// check if the visitor's IP is on a whitelist:
+	private function captchaWhitelisted() {
+
+		// normalise IP address:
+		$ip = inet_pton($_SERVER['REMOTE_ADDR']);
+
+		// find which file to open:
+		$prefixes = ['user', 'default'];
+		foreach ($prefixes as $pre) {
+			$filename = __DIR__ .'/config/' . $pre . '-whitelist.txt';
+			if (file_exists($filename)) {
+				break;
+			}
+		}
+
+		if (file_exists($filename)) {
+			$lines = file($filename, FILE_SKIP_EMPTY_LINES);
+			foreach ($lines as $line) {
+				if (trim($line) !== '' && !str_starts_with($line, '#')) {
+					$col = explode("\t", $line);
+					if (count($col) >= 2) {						
+						$from = inet_pton($col[0]);
+						$to = inet_pton($col[1]);
+
+						if ($ip >= $from && $ip <= $to) {
+							//echo "<p>Found my IP in range: " . $col[0] . " - " . $col[1] . "</p>";
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	private function insertCaptchaLoader() {

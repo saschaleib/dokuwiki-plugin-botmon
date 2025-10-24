@@ -76,7 +76,7 @@ body.botmon_captcha {
 		&.checking {
 			input[type="checkbox"], span.confirm, span.loading { display: none;}
 			span.busy, span.checking { display: initial; }
-			label, input[type="checkbox"] { cursor: none; }
+			label, input[type="checkbox"] { cursor: wait; }
 		}
 		&.ready {
 			input[type="checkbox"], span.confirm { display: initial;}
@@ -86,7 +86,7 @@ body.botmon_captcha {
 		&.loading {
 			span.busy, span.loading { display: initial; }
 			input[type="checkbox"], span.confirm, span.checking { display: none;}
-			label { cursor: busy; }
+			label { cursor: wait; }
 		}
 	}
 }
