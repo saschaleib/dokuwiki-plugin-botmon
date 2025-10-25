@@ -232,7 +232,7 @@ weiter	13
 gleich	13
 gute	13
 vom	13
-Warte	12
+warte	12
 deinen	12
 ins	12
 denke	12
@@ -2731,3 +2731,4 @@ brauchten	1
 stinkt	1
 treiben	1
 welch	1
+Warte	1

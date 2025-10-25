@@ -108,6 +108,12 @@
 		&.cl_operaold::before { background-position-y: -380px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
+		/* Captcha statuses */
+		&.captcha::before { background-image: url('img/captcha.png') }
+		&.cap_Y::before { background-position-y: -20px }
+		&.cap_YN::before { background-position-y: -40px }
+		&.cap_W::before { background-position-y: -60px }
+
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
 		&.country::before {
@@ -730,19 +736,26 @@
 				background-image: url('img/info.svg')
 			}
 
-			/* pageviews */
-			span.pageviews {
+			/* pages seen */
+			span.pageseen, span.pageviews {
 				border: #999 solid 1px;
 				padding: 0 2px;
 				font-size: smaller;
 				border-radius: .5em;
 				margin-right: .25em;
 			}
-			span.pageviews::before {
+			span.pageseen::before {
 				content : '';
 				display: inline-block;
 				width: 1.25em; height: 1.25em;
 				background: transparent url('img/page.svg') center no-repeat;
+				background-size: 1.25em;
+			}
+			span.pageviews::before {
+				content : '';
+				display: inline-block;
+				width: 1.25em; height: 1.25em;
+				background: transparent url('img/views.svg') center no-repeat;
 				background-size: 1.25em;
 			}
 		}
@@ -890,7 +903,7 @@
 						border-top-color: #CCC;
 					}
 				}
-				span.pageviews {
+				span.pageseen, span.pageviews {
 					border-color: #555;
 				}
 

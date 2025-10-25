@@ -26,7 +26,7 @@ const $BMCaptcha = {
 
 		// Checkbox:
 		const lbl = document.createElement('label');
-		lbl.innerHTML = '<span class="confirm">Click to confirm.</span><span class="busy"></span><span class="checking">Checking&nbsp;&hellip;</span><span class="loading">Loading&nbsp;&hellip;</span>';
+		lbl.innerHTML = '<span class="confirm">Click to confirm.</span><span class="busy"></span><span class="checking">Checking&nbsp;&hellip;</span><span class="loading">Loading&nbsp;&hellip;</span><span class="erricon">&#65533;</span><span class="error">An error occured.</span>';
 		const cb = document.createElement('input');
 		cb.setAttribute('type', 'checkbox');
 		cb.setAttribute('disabled', 'disabled');
@@ -152,26 +152,35 @@ const $BMCaptcha = {
 		if (e.target.checked) {
 			//document.getElementById('botmon_captcha_box').close();
 
-			const dat = [ // the data to encode
-				document._botmon.seed || '',
-				location.hostname,
-				document._botmon.ip || '0.0.0.0',
-				(document._botmon.t0 ? new Date(document._botmon.t0) : new Date()).toISOString().substring(0, 10)
-			];
-			const hash = $BMCaptcha.digest.hash(dat.join('|'));
+			try {
+				var $status = 'loading';
 
-			// set the cookie:
-			document.cookie = "DWConfirm=" + hash + ';path=/;';
+				// generate the hash:
+				const dat = [ // the data to encode
+					document._botmon.seed || '',
+					location.hostname,
+					document._botmon.ip || '0.0.0.0',
+					(new Date()).toISOString().substring(0, 10)
+				];
+				const hash = $BMCaptcha.digest.hash(dat.join('|'));
+
+				// set the cookie:
+				document.cookie = "DWConfirm=" + hash + ';path=/;';
+
+			} catch (err) {
+				console.error(err);
+				$status = 'error';
+			}
 
 			// change the interface:
 			const dlg = document.getElementById('botmon_captcha_box');
 			if (dlg) {
 				dlg.classList.remove('ready');
-				dlg.classList.add('loading');
+				dlg.classList.add( $status );
 			}
 
 			// reload the page:
-			window.location.reload(true);
+			if ($status !== 'error')window.location.reload(true);
 		}
 	},
 

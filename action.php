@@ -23,17 +23,23 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		global $ACT;
 
+		// initialize the session id and type with random data:
+		$this->sessionId = rand(1000000, 9999999);
+		$this->sessionType = 'rnd';
+
 		// insert header data into the page:
-		if ($ACT == 'show') {
+		if ($ACT == 'show' || $ACT == 'edit' || $ACT == 'media') {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertHeader');
+
+			// Override the page rendering, if a captcha needs to be displayed:
+			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'showCaptcha');
+
 		} else if ($ACT == 'admin' && isset($_REQUEST['page']) && $_REQUEST['page'] == 'botmon') {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertAdminHeader');
-		}
-	
-		// Override the page rendering, if a captcha needs to be displayed:
-		if ($ACT !== 'admin') {
-			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'showCaptcha');
-		}
+		} 
+
+		// also show a captcha before the image preview
+		$controller->register_hook('TPL_IMG_DISPLAY', 'BEFORE', $this, 'showImageCaptcha');
 
 		// write to the log after the page content was displayed:
 		$controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'writeServerLog');
@@ -59,14 +65,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		// populate the session id and type:
 		$this->getSessionInfo();
 
-		// is there a user logged in?
-		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name']) ?  $INFO['userinfo']['name'] : '');
-
 		// build the tracker code:
-		$code = "document._botmon = {t0: Date.now(), session: " . json_encode($this->sessionId) . ", seed: " . json_encode($this->getConf('captchaSeed')) . ", ip: " . json_encode($_SERVER['REMOTE_ADDR']) . "};" . NL;
-		if ($username) {
-			$code .= DOKU_TAB . DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
-		}
+		$code = $this->getBMHeader();
 
 		// add the deferred script loader::
 		$code .= DOKU_TAB . DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
@@ -76,6 +76,22 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$code .= DOKU_TAB . DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(e);" . NL;
 		$code .= DOKU_TAB . DOKU_TAB . "});";
 		$event->data['script'][] = ['_data' => $code];
+	}
+
+	/* create the BM object code for insertion into a script element: */
+	private function getBMHeader() {
+	
+		// build the tracker code:
+		$code = DOKU_TAB . DOKU_TAB . "document._botmon = {t0: Date.now(), session: " . json_encode($this->sessionId) . ", seed: " . json_encode($this->getConf('captchaSeed')) . ", ip: " . json_encode($_SERVER['REMOTE_ADDR']) . "};" . NL;
+
+		// is there a user logged in?
+		$username = ( !empty($INFO['userinfo']) && !empty($INFO['userinfo']['name']) ?  $INFO['userinfo']['name'] : '');
+		if ($username) {
+			$code .= DOKU_TAB . DOKU_TAB . 'document._botmon.user = "' . $username . '";'. NL;
+		}
+
+		return $code;
+
 	}
 
 	/**
@@ -120,7 +136,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			substr($conf['lang'],0,2), /* page language */
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode(), /* GeoIP country code */
-			$this->showCaptcha /* show captcha? */		);
+			$this->showCaptcha /* show captcha? */
+		);
 
 		//* create the log line */
 		$filename = __DIR__ .'/logs/' . gmdate('Y-m-d') . '.srv.txt'; /* use GMT date for filename */
@@ -182,37 +199,68 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$this->sessionId = $_SERVER['REMOTE_ADDR'];
 			$this->sessionType = 'ip';
 		}
-		if (!$this->sessionId) { /* if everything else fails, just us a random ID */
-			$this->sessionId = rand(1000000, 9999999);
-			$this->sessionType = 'rand';
-		}
 	}
 
 	public function showCaptcha(Event $event) {
 
 		$useCaptcha = $this->getConf('useCaptcha');
 
-		if ($useCaptcha !== 'disabled' && $this->checkCaptchaCookie() && !$this->captchaWhitelisted()) {
+		$cCode = '-';
+		if ($useCaptcha !== 'disabled') {
+			if ($this->captchaWhitelisted()) {
+				$cCode = 'W'; // whitelisted
+			} elseif ($this->hasCaptchaCookie()) {
+				$cCode  = 'N'; // user already has a cookie
+			} else {
+				$cCode  = 'Y'; // show the captcha
 
-			$this->showCaptcha = 'Y'; // captcha will be shown.
 
-			echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
-			$event->preventDefault(); // don't show normal content
-			switch ($useCaptcha) {
-				case 'blank':
-					$this->insertBlankBox();  // show dada filler instead of text
-					break;
-				case 'dada':
-					$this->insertDadaFiller();  // show dada filler instead of text
-					break;
+				echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
+				$event->preventDefault(); // don't show normal content
+				switch ($useCaptcha) {
+					case 'blank':
+						$this->insertBlankBox();  // show dada filler instead of text
+						break;
+					case 'dada':
+						$this->insertDadaFiller();  // show dada filler instead of text
+						break;
+				}
+				$this->insertCaptchaLoader(); // and load the captcha
 			}
-			$this->insertCaptchaLoader(); // and load the captcha
-		} else {
-			$this->showCaptcha = 'N'; // do not show a captcha
 		}
+		$this->showCaptcha = $cCode; // store the captcha code for the logfile
+
 	}
 
-	private function checkCaptchaCookie() {
+	public function showImageCaptcha(Event $event, $param) {
+		
+		$useCaptcha = $this->getConf('useCaptcha');
+
+		echo '<script>' . $this->getBMHeader($event, $param) . '</script>';
+
+		$cCode = '-';
+		if ($useCaptcha !== 'disabled') {
+			if ($this->captchaWhitelisted()) {
+				$cCode = 'W'; // whitelisted
+			}
+			elseif ($this->hasCaptchaCookie()) {
+				$cCode  = 'N'; // user already has a cookie
+			}
+			else {
+				$cCode  = 'Y'; // show the captcha
+
+				echo '<svg width="100%" height="100%" viewBox="0 0 800 400" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M1,1l798,398" style="fill:none;stroke:#f00;stroke-width:1px;"/><path d="M1,399l798,-398" style="fill:none;stroke:#f00;stroke-width:1px;"/><rect x="1" y="1" width="798" height="398" style="fill:none;stroke:#000;stroke-width:1px;"/></svg>'; // placeholder image
+				$event->preventDefault(); // don't show normal content
+				
+				// TODO Insert dummy image
+				$this->insertCaptchaLoader(); // and load the captcha
+			}
+		};
+
+		$this->showCaptcha = $cCode; // store the captcha code for the logfile
+	}
+
+	private function hasCaptchaCookie() {
 
 		$cookieVal = isset($_COOKIE['DWConfirm']) ? $_COOKIE['DWConfirm'] : null;
 
@@ -223,7 +271,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		//echo '<ul><li>cookie: ' . $cookieVal . '</li><li>expected: ' . $expected . '</li><li>matches: ' .($cookieVal == $expected ? 'true' : 'false') . '</li></ul>';
 
-		return $cookieVal !== $expected;
+		return $cookieVal == $expected;
 	}
 
 	// check if the visitor's IP is on a whitelist:
@@ -251,15 +299,13 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 						$to = inet_pton($col[1]);
 
 						if ($ip >= $from && $ip <= $to) {
-							//echo "<p>Found my IP in range: " . $col[0] . " - " . $col[1] . "</p>";
-							return true;
+							return true; /* IP whitelisted */
 						}
 					}
 				}
 			}
 		}
-
-		return false;
+		return false; /* IP not found in whitelist */
 	}
 
 	private function insertCaptchaLoader() {

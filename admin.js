@@ -291,7 +291,7 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				const timeout = 60 * 60 * 1000; // session timeout: One hour
+				//const timeout = 60 * 60 * 1000; // session timeout: One hour
 
 				if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots match by their bot ID:
 
@@ -303,13 +303,14 @@ BotMon.live = {
 							return v;
 						}
 					}
+
 				} else { // other types match by their DW/PHPIDs:
 
 					// loop over all visitors already registered and check for ID matches:
 					for (let i=0; i<model._visitors.length; i++) {
 						const v = model._visitors[i];
 
-						if ( v.id == visitor.id) { // match the DW/PHP IDs
+						if ( v.id.trim() !== '' && v.id == visitor.id) { // match the DW/PHP IDs
 							return v;
 						}
 					}
@@ -379,21 +380,35 @@ BotMon.live = {
 				// check if it already exists:
 				let visitor = model.findVisitor(nv, type);
 				if (!visitor) {
-					visitor = nv;
-					visitor._seenBy = [type];
-					visitor._pageViews = []; // array of page views
-					visitor._hasReferrer = false; // has at least one referrer
-					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = BotMon.live.data.clients.match(nv.agent) ?? null; // client info
-					visitor._platform = BotMon.live.data.platforms.match(nv.agent); // platform info
+					visitor = {...nv, ...{
+						_seenBy: [type],
+						_viewCount: 0, // number of page views
+						_loadCount: 0, // number of page loads (not necessarily views!)
+						_pageViews: [], // array of page views
+						_hasReferrer: false, // has at least one referrer
+						_jsClient: false, // visitor has been seen logged by client js as well
+						_client: BotMon.live.data.clients.match(nv.agent) ?? null, // client info
+						_platform: BotMon.live.data.platforms.match(nv.agent), // platform info
+						_captcha: {'-': 0, 'Y': 0, 'N': 0, 'W':0} // captcha counter
+					}};
 					model._visitors.push(visitor);
-				} else { // update existing 
-					if (visitor._firstSeen > nv.ts) {
-						visitor._firstSeen = nv.ts;
-					}
+				};
+
+				// update first and last seen:
+				if (visitor._firstSeen > nv.ts) {
+					visitor._firstSeen = nv.ts;
+				}
+				if (visitor._lastSeen < nv.ts) {
+					visitor._lastSeen = nv.ts;
 				}
 
-				// find browser 
+				// update total loads and views (not the same!):
+				visitor._loadCount += 1;
+				visitor._viewCount += (nv.captcha == 'Y' ? 0 : 1);
+
+				// ...because also a captcha is a "load", but not a "view".
+				// let's count the captcha statuses as well:
+				if (nv.captcha) visitor._captcha[nv.captcha] += 1;
 
 				// is this visit already registered?
 				let prereg = model._getPageView(visitor, nv);
@@ -401,13 +416,14 @@ BotMon.live = {
 					// add new page view:
 					prereg = model._makePageView(nv, type);
 					visitor._pageViews.push(prereg);
-				} else {
-					// update last seen date
-					prereg._lastSeen = nv.ts;
-					// increase view count:
-					prereg._viewCount += 1;
-					prereg._tickCount += 1;
 				}
+
+				// update last seen date
+				prereg._lastSeen = nv.ts;
+
+				// increase view count:
+				prereg._loadCount += (visitor.captcha == 'Y' ? 0 : 1);
+				//prereg._tickCount += 1;
 
 				// update referrer state:
 				visitor._hasReferrer = visitor._hasReferrer || 
@@ -520,7 +536,8 @@ BotMon.live = {
 					_lastSeen: data.ts,
 					_seenBy: [type],
 					_jsClient: ( type !== BM_LOGTYPE.SERVER),
-					_viewCount: 1,
+					_viewCount: 0,
+					_loadCount: 0,
 					_tickCount: 0
 				};
 			}
@@ -572,19 +589,19 @@ BotMon.live = {
 
 					// count visits and page views:
 					this.data.totalVisits += 1;
-					this.data.totalPageViews += v._pageViews.length;
+					this.data.totalPageViews += v._viewCount;
 					
 					// check for typical bot aspects:
 					let botScore = 0;
 
 					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
-						this.data.bots.known += v._pageViews.length;
+						this.data.bots.known += v._viewCount;
 						this.groups.knownBots.push(v);
 
 					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
 
-						this.data.bots.users += v._pageViews.length;
+						this.data.bots.users += v._viewCount;
 						this.groups.users.push(v);
 
 					} else {
@@ -596,11 +613,11 @@ BotMon.live = {
 
 						if (e.isBot) { // likely bots
 							v._type = BM_USERTYPE.LIKELY_BOT;
-							this.data.bots.suspected += v._pageViews.length;
+							this.data.bots.suspected += v._viewCount;
 							this.groups.suspectedBots.push(v);
 						} else { // probably humans
 							v._type = BM_USERTYPE.PROBABLY_HUMAN;
-							this.data.bots.human += v._pageViews.length;
+							this.data.bots.human += v._viewCount;
 							this.groups.humans.push(v);
 						}						
 					}
@@ -640,7 +657,7 @@ BotMon.live = {
 				//console.log(BotMon.live.data.analytics.groups.knownBots);
 
 				let botsList = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
-					return b._pageViews.length - a._pageViews.length;
+					return b._viewCount - a._viewCount;
 				});
 
 				const other = {
@@ -659,12 +676,12 @@ BotMon.live = {
 							rList.push({
 								id: it._bot.id,
 								name: (it._bot.n ? it._bot.n : it._bot.id),
-								count: it._pageViews.length
+								count: it._viewCount
 							});
 						} else {
 							other.count += it._pageViews.length;
 						};
-						total += it._pageViews.length;
+						total += it._viewCount;
 					}
 				};
 
@@ -997,7 +1014,7 @@ BotMon.live = {
 				const list = me.groups[type];
 				
 				list.forEach(it => {
-					bounces += (it._pageViews.length <= 1 ? 1 : 0);
+					bounces += (it._viewCount <= 1 ? 1 : 0);
 				});
 
 				return bounces;
@@ -1085,7 +1102,7 @@ BotMon.live = {
 				}
 
 				// add to counter:
-				ipRec.count += v._pageViews.length;
+				ipRec.count += v._viewCount;
 
 			},
 
@@ -1520,12 +1537,13 @@ BotMon.live = {
 
 				// are there at lest num pages loaded?
 				smallPageCount: function(visitor, num) {
-					return (visitor._pageViews.length <= Number(num));
+					return (visitor._viewCount <= Number(num));
 				},
 
 				// There was no entry in a specific log file for this visitor:
 				// note that this will also trigger the "noJavaScript" rule:
 				noRecord: function(visitor, type) {
+					if (!visitor._seenBy.includes('srv')) return false; // only if 'srv' is also specified!
 					return !visitor._seenBy.includes(type);
 				},
 
@@ -1613,7 +1631,7 @@ BotMon.live = {
 				// At least x page views were recorded, but they come within less than y seconds
 				loadSpeed: function(visitor, minItems, maxTime) {
 
-					if (visitor._pageViews.length >= minItems) {
+					if (visitor._viewCount >= minItems) {
 						//console.log('loadSpeed', visitor._pageViews.length, minItems, maxTime);
 
 						const pvArr = visitor._pageViews.map(pv => pv._lastSeen).sort();
@@ -1704,7 +1722,7 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo','captcha'];
 					break;
 				case "log":
 					typeName = "Page load";
@@ -2299,20 +2317,11 @@ BotMon.live = {
 					}, data.id));
 				}
 
-				// seen by icon:
-				span1.appendChild(make('span', {
-					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
-					'title': "Seen by: " + data._seenBy.join('+')
-				}, data._seenBy.join(', ')));
+				span1.appendChild(make('span', { /* page views */
+					'class': 'has_icon pageseen',
+					'title': data._pageViews.length + " page load(s)"
+				}, data._pageViews.length));
 
-				// country flag:
-				if (data.geo && data.geo !== 'ZZ') {
-					span1.appendChild(make('span', {
-						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
-						'data-ctry': data.geo,
-						'title': "Country: " + ( data._country || "Unknown")
-					}, ( data._country || "Unknown") ));
-				}
 
 				// referer icons:
 				if ((data._type == BM_USERTYPE.PROBABLY_HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
@@ -2326,15 +2335,26 @@ BotMon.live = {
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
-					span2.appendChild(make('span', { /* first-seen */
-						'class': 'has_iconfirst-seen',
-						'title': "First seen: " + data._firstSeen.toLocaleString() + " UTC"
-					}, BotMon.t._formatTime(data._firstSeen)));
+				// country flag:
+					if (data.geo && data.geo !== 'ZZ') {
+						span2.appendChild(make('span', {
+							'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+							'data-ctry': data.geo,
+							'title': "Country: " + ( data._country || "Unknown")
+						}, ( data._country || "Unknown") ));
+					}
 
-					span2.appendChild(make('span', { /* page views */
-						'class': 'has_icon pageviews',
-						'title': data._pageViews.length + " page view(s)"
-					}, data._pageViews.length));
+					span2.appendChild(make('span', { // seen-by icon:
+						'class': 'icon_only seenby sb_' + data._seenBy.join(''),
+						'title': "Seen by: " + data._seenBy.join('+')
+					}, data._seenBy.join(', ')));
+
+					const captchaCode = '' + ( data._captcha['Y'] > 0 ? 'Y' : '' ) + ( data._captcha['N'] > 0 ? 'N' : '' ) + ( data._captcha['W'] > 0 ? 'W' : '' );
+					if (captchaCode !== '') {
+						span2.appendChild(make('span', { // captcha status
+							'class': 'icon_only captcha cap_' + captchaCode,
+						}, captchaCode));
+					}
 
 				summary.appendChild(span2);
 
@@ -2414,6 +2434,13 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'lastSeen'}, data._lastSeen.toLocaleString()));
 				}
 
+				dl.appendChild(make('dt', {}, "Actions:"));
+				dl.appendChild(make('dd', {'class': 'views'},
+					"Page loads: " + data._loadCount.toString() +
+					( data._captcha['Y'] > 0 || data._captcha['W'] || data._captcha['-'] > 0 ? ", captchas: " + (data._captcha['Y']+data._captcha['W']+data._captcha['-']).toString() : '') +
+					", views: " + data._viewCount.toString()
+				));
+
 				dl.appendChild(make('dt', {}, "User-Agent:"));
 				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
@@ -2440,6 +2467,12 @@ BotMon.live = {
 						'data-ctry': data.geo,
 						'title': "Country: " + data._country
 					}, data._country + ' (' + data.geo + ')'));
+				}
+				if (data.captcha && data.captcha !=='') {
+					dl.appendChild(make('dt', {}, "Captcha-status:"));
+					dl.appendChild(make('dd', {
+						'class': 'captcha'
+					}, data.captcha));
 				}
 
 				dl.appendChild(make('dt', {}, "Session ID:"));
@@ -2528,12 +2561,19 @@ BotMon.live = {
 						'title': "PageID: " + page.pg
 					}, page.pg)); /* DW Page ID */
 
-					// get the time difference:
-					row1.appendChild(make('span', {
-						'class': 'first-seen',
-						'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
-					}, BotMon.t._formatTime(page._firstSeen)));
-					
+					const rightGroup = row1.appendChild(make('div')); // right-hand group
+
+						// get the time difference:
+						rightGroup.appendChild(make('span', {
+							'class': 'first-seen',
+							'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
+						}, BotMon.t._formatTime(page._firstSeen)));
+						
+						rightGroup.appendChild(make('span', { /* page loads */
+							'class': 'has_icon pageviews',
+							'title': page._viewCount.toString() + " page load(s)"
+						}, page._viewCount.toString()));
+
 				pgLi.appendChild(row1);
 
 				/* LINE 2 */

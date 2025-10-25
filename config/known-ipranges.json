@@ -1,10 +1,12 @@
 {
 	"groups": [
 		{"id": "alibaba", "name": "Alibaba"},
-		{"id": "amazon", "name": "Amazon DS"},
+		{"id": "amazon", "name": "Amazon"},
+		{"id": "bezeq", "name": "Bezeq Int."},
 		{"id": "brasilnet", "name": "BrasilNet"},
 		{"id": "charter", "name": "Charter Inc."},
 		{"id": "chinanet", "name": "Chinanet"},
+		{"id": "cloudflare", "name": "Cloudflare Inc."},
 		{"id": "cnisp", "name": "China ISP"},
 		{"id": "cnmob", "name": "China Mobile"},
 		{"id": "google", "name": "Google LLC"},
@@ -44,7 +46,7 @@
 		{"from": "52.96.0.0", "to": "52.127.255.254", "m": 11, "g": "microsoft"},
 		{"from": "54.0.0.0", "to": "54.255.255.254", "m": 8, "g": "amazon"},
 		{"from": "66.249.64.0", "to": "66.249.95.254", "m": 19, "g": "google"},
-		{"from": "84.37.35.0", "to": "84.37.255.254", "g": "gtt"},
+		{"from": "82.80.0.0", "to": "82.81.255.255", "m": 15, "g": "bezeq"},
 		{"from": "94.74.64.0", "to": "94.74.127.254", "m": 18, "g": "huawei"},
 		{"from": "91.84.96.0", "to": "91.84.127.254", "m": 19, "g": "vdsina"},
 		{"from": "101.0.0.0", "to": "101.255.255.254", "m": 8,"g": "chinanet"},
@@ -98,6 +100,7 @@
 		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "g": "charter"},
 		{"from": "2607:a400::::::", "to": "2607:a400:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "g": "zenlayer"},
 		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "g": "misc_sa"},
+		{"from": "2a09:bac3::::::", "to": "2a09:bac3:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32,"g": "cloudflare"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "g": "netcup"}
 	]
 }

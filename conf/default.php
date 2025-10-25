@@ -6,5 +6,5 @@
  */
 
 $conf['geoiplib']		= 'disabled';
-$conf['useCaptcha']		= 0;
-$conf['captchaSeed']	= 'b472719ba5634d378a7d7f9bfc46659f';
+$conf['useCaptcha']		= 'disabled';
+$conf['captchaSeed']	= 'c53bc5f94929451987efa6c768d8856b';

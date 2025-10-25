@@ -4,11 +4,17 @@ body.botmon_captcha {
 			color: transparent !important;
 			text-shadow: 0 0 .25em rgba(0,.0,0,.8);
 		}
-		p, h2, h3, h4, h5, h6 {
+		p, dt, dd, h2, h3, h4, h5, h6, a:link, a:visited {
 			color: transparent !important;
 			text-shadow: 0 0 .35em rgba(0,0,0,.5);
 			user-select: none;
 		}
+		svg {
+			width: auto; height: auto;
+			-webkit-filter: blur(8px); /* For Safari */
+			filter: blur(8px);
+		}
+		
 	}
 	#botmon_captcha_box {
 		& {
@@ -58,6 +64,9 @@ body.botmon_captcha {
 				background: transparent url('img/busy-light.svg') center no-repeat;
 				background-size: 24px;
 			}
+			span.error, span.erricon {
+				color: #f96c6c;
+			}
 		}
 		input[type="checkbox"] {
 			width: 24px; height: 24px;
@@ -74,19 +83,24 @@ body.botmon_captcha {
 			display: none;
 		}
 		&.checking {
-			input[type="checkbox"], span.confirm, span.loading { display: none;}
+			input[type="checkbox"], span.confirm, span.loading, span.erricon, span.error { display: none;}
 			span.busy, span.checking { display: initial; }
 			label, input[type="checkbox"] { cursor: wait; }
 		}
 		&.ready {
 			input[type="checkbox"], span.confirm { display: initial;}
-			span.busy, span.checking, span.loading { display: none; }
+			span.busy, span.checking, span.loading, span.erricon, span.error { display: none; }
 			label, input[type="checkbox"] { cursor: pointer; }
 		}
 		&.loading {
 			span.busy, span.loading { display: initial; }
-			input[type="checkbox"], span.confirm, span.checking { display: none;}
+			input[type="checkbox"], span.confirm, span.checking, span.erricon, span.error { display: none;}
 			label { cursor: wait; }
+		}
+		&.error {
+			span.erricon, span.error { display: initial; }
+			input[type="checkbox"], span.confirm, span.checking, span.busy, span.loading { display: none;}
+			label { cursor: initial; }
 		}
 	}
 }
