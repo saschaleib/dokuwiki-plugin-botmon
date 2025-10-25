@@ -42,7 +42,7 @@ const BotMon = {
 
 		// get yesterday's date:
 		let d = new Date();
-		d.setDate(d.getDate() - 1);
+		if (BMSettings.showday == 'yesterday') d.setDate(d.getDate() - 1);
 		this._datestr = d.toISOString().slice(0, 10);
 
 		// init the sub-objects:
@@ -185,7 +185,7 @@ const BotMon = {
 /* everything specific to the "Latest" tab is self-contained in the "live" object: */
 BotMon.live = {
 	init: function() {
-		console.info('BotMon.live.init()');
+		//console.info('BotMon.live.init()');
 
 		// set the title:
 		const tDiff = '<abbr title="Coordinated Universal Time">UTC</abbr> ' + (BotMon._timeDiff != '' ? ` (offset: ${BotMon._timeDiff}` : '' ) + ')';
@@ -1056,13 +1056,13 @@ BotMon.live = {
 						const prefix = v.ip.split(':').slice(0, kIP6Segments).join(':');
 						rawIP = ipSeg.slice(0, kIP6Segments).join(':');
 						ipGroup = 'ip6-' + rawIP.replaceAll(':', '-');
-						ipName = prefix + '::' + '/' + (16 * kIP6Segments);
+						ipName = prefix + '::'; // + '/' + (16 * kIP6Segments);
 					} else {
 						ipSeg = ipAddr.split('.');
 						const prefix = v.ip.split('.').slice(0, kIP4Segments).join('.');
 						rawIP = ipSeg.slice(0, kIP4Segments).join('.') ;
 						ipGroup = 'ip4-' + rawIP.replaceAll('.', '-');
-						ipName = prefix + '.x.x.x'.substring(0, 1+(4-kIP4Segments)*2) + '/' + (8 * kIP4Segments);
+						ipName = prefix + '.x.x.x'.substring(0, 1+(4-kIP4Segments)*2); // + '/' + (8 * kIP4Segments);
 					}
 				}
 

@@ -5,6 +5,9 @@
  * @author     Sascha Leib <sascha@leib.be>
  */
 
+$meta['showday'] = array('multichoice',
+						'_choices' => array ('yesterday', 'today'));
+
 $meta['geoiplib'] = array('multichoice',
 						'_choices' => array ('disabled', 'phpgeoip'));
 

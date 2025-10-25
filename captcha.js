@@ -13,6 +13,13 @@ const $BMCaptcha = {
 	},
 
 	install: function() {
+
+		// localisation helper function:
+		let _loc = function(id, alt) {
+			if ($BMLocales && $BMLocales[id]) return $BMLocales[id];
+			return alt;
+		}
+
 		// find the parent element:
 		let bm_parent = document.getElementsByTagName('body')[0];
 
@@ -22,11 +29,14 @@ const $BMCaptcha = {
 		dlg.setAttribute('open', 'open');
 		dlg.classList.add('checking');
 		dlg.id = 'botmon_captcha_box';
-		dlg.innerHTML = '<h2>Captcha box</h2><p>Making sure you are a human:</p>';
+		dlg.innerHTML = '<h2>' + _loc('dlgTitle', 'Title') + '</h2><p>' + _loc('dlgSubtitle', 'Subtitle') + '</p>';
 
 		// Checkbox:
 		const lbl = document.createElement('label');
-		lbl.innerHTML = '<span class="confirm">Click to confirm.</span><span class="busy"></span><span class="checking">Checking&nbsp;&hellip;</span><span class="loading">Loading&nbsp;&hellip;</span><span class="erricon">&#65533;</span><span class="error">An error occured.</span>';
+		lbl.innerHTML = '<span class="confirm">' + _loc('dlgConfirm', "Confirm.") + '</span>' + 
+			'<span class="busy"></span><span class="checking">' + _loc('dlgChecking', "Checking") + '</span>' +
+			'<span class="loading">' + _loc('dlgLoading', "Loading") + '</span>' + 
+			'<span class="erricon">&#65533;</span><span class="error">' + _loc('dlgError', "Error") + '</span>';
 		const cb = document.createElement('input');
 		cb.setAttribute('type', 'checkbox');
 		cb.setAttribute('disabled', 'disabled');

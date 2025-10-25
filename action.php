@@ -309,6 +309,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	}
 
 	private function insertCaptchaLoader() {
+
 		echo '<script>' . NL;
 
 		// add the deferred script loader::
@@ -318,6 +319,17 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		echo  DOKU_TAB . DOKU_TAB . "cj.src='".DOKU_BASE."lib/plugins/botmon/captcha.js';" . NL;
 		echo  DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(cj);" . NL;
 		echo  DOKU_TAB . "});";
+
+		// add the locales for the captcha:
+		echo  DOKU_TAB . '$BMLocales = {' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgTitle": ' . json_encode($this->getLang('bm_dlgTitle')) . ',' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgSubtitle": ' . json_encode($this->getLang('bm_dlgSubtitle')) . ',' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgConfirm": ' . json_encode($this->getLang('bm_dlgConfirm')) . ',' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgChecking": ' . json_encode($this->getLang('bm_dlgChecking')) . ',' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgLoading": ' . json_encode($this->getLang('bm_dlgLoading')) . ',' . NL;
+		echo  DOKU_TAB . DOKU_TAB . '"dlgError": ' . json_encode($this->getLang('bm_dlgError')) . ',' . NL;
+		echo  DOKU_TAB . '};' . NL;
+		
 		echo '</script>' . NL;
 
 	}

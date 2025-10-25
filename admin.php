@@ -104,7 +104,13 @@ class admin_plugin_botmon extends AdminPlugin {
 			echo '<li>No files to process.</li>';
 		}
 
-		echo '</article></div><!-- End of BotMon Admin Tool -->';
+		echo '</article>' . NL;
+		echo '<script>
+		BMSettings = {
+			showDay: ' . json_encode($this->getConf('showDay')) . '
+		};
+		</script>';
+		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}
 
