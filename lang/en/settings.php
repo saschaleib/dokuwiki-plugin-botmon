@@ -14,4 +14,8 @@ $lang['geoiplib']			= 'Add GeoIP Information<br><small>(requires PHP module to b
 	$lang['geoiplib_o_phpgeoip']	= 'Use GeoIP Module';
 
 $lang['useCaptcha']		= 'Enable Captcha<br><small>(Experimental, read the manual first!)</small>';
-$lang['captchaSeed']	= 'Captcha Seed<br><small>(Best use a random number, e.g. <a href="https://www.browserling.com/tools/random-hex" target="_blank">here</a> )</small>';
+	$lang['useCaptcha_o_disabled']	= 'Disabled';
+	$lang['useCaptcha_o_blank']	= 'Show empty background';
+	$lang['useCaptcha_o_dada']	= 'Show placeholder text';
+
+	$lang['captchaSeed']	= 'Captcha Seed<br><small>(Best use a random number, e.g. <a href="https://www.browserling.com/tools/random-hex" target="_blank">here</a> )</small>';

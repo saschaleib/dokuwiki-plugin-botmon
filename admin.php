@@ -107,7 +107,7 @@ class admin_plugin_botmon extends AdminPlugin {
 		echo '</article>' . NL;
 		echo '<script>
 		BMSettings = {
-			showDay: ' . json_encode($this->getConf('showDay')) . '
+			showday: ' . json_encode($this->getConf('showday')) . '
 		};
 		</script>';
 		echo '</div><!-- End of BotMon Admin Tool -->';

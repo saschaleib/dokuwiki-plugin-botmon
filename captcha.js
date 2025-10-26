@@ -27,12 +27,15 @@ const $BMCaptcha = {
 		const dlg = document.createElement('dialog');
 		dlg.setAttribute('closedby', 'none');
 		dlg.setAttribute('open', 'open');
+		dlg.setAttribute('role', 'alertdialog');
+		dlg.setAttribute('aria-labelledby', 'botmon_captcha_title');
 		dlg.classList.add('checking');
 		dlg.id = 'botmon_captcha_box';
-		dlg.innerHTML = '<h2>' + _loc('dlgTitle', 'Title') + '</h2><p>' + _loc('dlgSubtitle', 'Subtitle') + '</p>';
+		dlg.innerHTML = '<h2 id="botmon_captcha_title">' + _loc('dlgTitle', 'Title') + '</h2><p>' + _loc('dlgSubtitle', 'Subtitle') + '</p>';
 
 		// Checkbox:
 		const lbl = document.createElement('label');
+		lbl.setAttribute('aria-live', 'assertive');
 		lbl.innerHTML = '<span class="confirm">' + _loc('dlgConfirm', "Confirm.") + '</span>' + 
 			'<span class="busy"></span><span class="checking">' + _loc('dlgChecking', "Checking") + '</span>' +
 			'<span class="loading">' + _loc('dlgLoading', "Loading") + '</span>' + 

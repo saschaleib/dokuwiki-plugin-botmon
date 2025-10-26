@@ -182,7 +182,7 @@ const BotMon = {
 	}
 };
 
-/* everything specific to the "Latest" tab is self-contained in the "live" object: */
+/* everything specific to the 'Latest' tab is self-contained in the 'live' object: */
 BotMon.live = {
 	init: function() {
 		//console.info('BotMon.live.init()');
@@ -2306,15 +2306,15 @@ BotMon.live = {
 				} else { /* others */
 
 					
-					/*span1.appendChild(make('span', { // IP-Address
+					span1.appendChild(make('span', { // IP-Address
 						'class': 'has_icon ipaddr ip' + ipType,
 						'title': "IP-Address: " + data.ip
-					}, data.ip));*/
+					}, data.ip));
 
-					span1.appendChild(make('span', { /* Internal ID */
+					/*span1.appendChild(make('span', { // Internal ID
 						'class': 'has_icon session typ_' + data.typ,
 						'title': "ID: " + data.id
-					}, data.id));
+					}, data.id));*/
 				}
 
 				span1.appendChild(make('span', { /* page views */
