@@ -23,9 +23,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		global $ACT;
 
-		// initialize the session id and type with random data:
-		$this->sessionId = rand(1000000, 9999999);
-		$this->sessionType = 'rnd';
+		// populate the session id and type:
+		$this->setSessionInfo();
 
 		// insert header data into the page:
 		if ($ACT == 'show' || $ACT == 'edit' || $ACT == 'media') {
@@ -62,8 +61,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		global $INFO;
 
-		// populate the session id and type:
-		$this->getSessionInfo();
 
 		// build the tracker code:
 		$code = $this->getBMHeader();
@@ -178,7 +175,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		return $country;
 	}
 
-	private function getSessionInfo() {
+	private function setSessionInfo() {
 
 		// what is the session identifier?
 		if (isset($_SESSION)) {
@@ -199,6 +196,12 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			$this->sessionId = $_SERVER['REMOTE_ADDR'];
 			$this->sessionType = 'ip';
 		}
+
+		if (!$this->sessionId) { /* if all fails, use random data */
+			$this->sessionId = rand(100000000, 999999999);
+			$this->sessionType = 'rnd';
+		}
+
 	}
 
 	public function showCaptcha(Event $event) {

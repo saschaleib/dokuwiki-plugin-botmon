@@ -363,6 +363,7 @@
 		&.typ_php::before { background-position-y: -40px }
 		&.typ_ip::before { background-position-y: -60px }
 		&.typ_usr::before { background-position-y: -80px }
+		&.typ_rnd::before { background-position-y: -100px }
 
 		/* External link icons */
 		&.extlink::before { background-image: url('img/links.png') }
