@@ -111,6 +111,7 @@
 		&.cl_ecosia::before { background-position-y: -340px }
 		&.cl_webkit::before { background-position-y: -360px }
 		&.cl_operaold::before { background-position-y: -380px }
+		&.cl_wget::before, &.cl_urllib::before { background-position-y: -400px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Captcha statuses */

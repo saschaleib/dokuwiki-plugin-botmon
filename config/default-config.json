@@ -41,7 +41,7 @@
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
 		},
-		{"func": "matchesClient", "params": ["undici","gohttp"],
+		{"func": "matchesClient", "params": ["undici","gohttp","urllib","wget","curl"],
 		 "id": "botClient", "desc": "Client identifier indicates web crawler",
 		 "bot": 100
 		},
