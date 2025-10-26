@@ -1680,6 +1680,16 @@ BotMon.live = {
 						return (countries.indexOf(visitor.geo) < 0);
 					}
 					return false;
+				},
+
+				// Check if visitor never went beyond a captcha
+				blockedByCaptcha: function(visitor) {
+					return (visitor._captcha.Y > 0 && visitor._captcha.N === 0);
+				},
+
+				// Check if visitor came from a whitelisted IP-address
+				whitelistedByCaptcha: function(visitor) {
+					return (visitor._captcha.W > 0);
 				}
 			}
 		},

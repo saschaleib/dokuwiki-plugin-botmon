@@ -41,7 +41,7 @@
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
 		},
-		{"func": "matchesClient", "params": ["undici","gohttp","urllib","wget","curl"],
+		{"func": "matchesClient", "params": ["undici","gohttp","python","wget","curl"],
 		 "id": "botClient", "desc": "Client identifier indicates web crawler",
 		 "bot": 100
 		},
@@ -69,9 +69,13 @@
 		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
 		 "bot": 30
 		},
-		{"func": "matchesClient", "params": ["whatsapp","applemsgs","goognblm","tiktok","meta","chatgpt","claude","perplexity"],
-		 "id": "previewClient", "desc": "User-triggered bot load (e.g. preview)",
-		 "bot": -120
+		{"func": "blockedByCaptcha", "params": [],
+		 "id": "blockedByCaptcha", "desc": "Visitor was blocked by captcha",
+		 "bot": 20
+		},
+		{"func": "whitelistedByCaptcha", "params": [],
+		 "id": "whitelistedByCaptcha", "desc": "Visitor uses a whitelisted IP address",
+		 "bot": -30
 		}
 	]
 }
