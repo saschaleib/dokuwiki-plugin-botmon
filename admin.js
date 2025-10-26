@@ -389,7 +389,9 @@ BotMon.live = {
 						_jsClient: false, // visitor has been seen logged by client js as well
 						_client: BotMon.live.data.clients.match(nv.agent) ?? null, // client info
 						_platform: BotMon.live.data.platforms.match(nv.agent), // platform info
-						_captcha: {'-': 0, 'Y': 0, 'N': 0, 'W':0} // captcha counter
+						_captcha: {'X': 0, 'Y': 0, 'N': 0, 'W':0, 'H': 0,
+							_str: function() { return (this.X > 0 ? 'X' : '') + (this.Y > 0 ? 'Y' : '') + (this.N > 0 ? 'N' : '') + (this.W > 0 ? 'W' : '') + (this.H > 0 ? 'H' : ''); }
+						} // captcha counter
 					}};
 					model._visitors.push(visitor);
 				};
@@ -540,6 +542,19 @@ BotMon.live = {
 					_loadCount: 0,
 					_tickCount: 0
 				};
+			},
+
+			// helper function to make a human-readable title from the Captcha statuses:
+			_makeCaptchaTitle: function(cObj) {
+				const cStr = cObj._str();
+				switch (cStr) {
+					case 'Y':
+					case 'NY': return "Blocked by captcha";
+					case 'YN': return "Captcha solved";
+					case 'W': return "IP Address whitelisted";
+					case 'H': return "HEAD request, no captcha";
+					default: return "Undefined: " + cStr;
+				}
 			}
 		},
 
@@ -2255,8 +2270,9 @@ BotMon.live = {
 
 			_makeVisitorItem: function(data, type) {
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const make = BotMon.t._makeElement;
+				const model = BotMon.live.data.model;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
@@ -2349,11 +2365,14 @@ BotMon.live = {
 						'title': "Seen by: " + data._seenBy.join('+')
 					}, data._seenBy.join(', ')));
 
-					const captchaCode = '' + ( data._captcha['Y'] > 0 ? 'Y' : '' ) + ( data._captcha['N'] > 0 ? 'N' : '' ) + ( data._captcha['W'] > 0 ? 'W' : '' );
-					if (captchaCode !== '') {
+					// captcha status:
+					const cCode = ( data._captcha ? data._captcha._str() : '');
+					if (cCode !== '') {
+						const cTitle = model._makeCaptchaTitle(data._captcha)
 						span2.appendChild(make('span', { // captcha status
-							'class': 'icon_only captcha cap_' + captchaCode,
-						}, captchaCode));
+							'class': 'icon_only captcha cap_' + cCode,
+							'title': "Captcha-status: " + cTitle
+						}, cTitle));
 					}
 
 				summary.appendChild(span2);
@@ -2367,8 +2386,9 @@ BotMon.live = {
 
 			_makeVisitorDetails: function(data, type) {
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const make = BotMon.t._makeElement;
+				const model = BotMon.live.data.model;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
@@ -2468,11 +2488,12 @@ BotMon.live = {
 						'title': "Country: " + data._country
 					}, data._country + ' (' + data.geo + ')'));
 				}
+
 				if (data.captcha && data.captcha !=='') {
 					dl.appendChild(make('dt', {}, "Captcha-status:"));
 					dl.appendChild(make('dd', {
 						'class': 'captcha'
-					}, data.captcha));
+					}, model._makeCaptchaTitle(data._captcha)));
 				}
 
 				dl.appendChild(make('dt', {}, "Session ID:"));

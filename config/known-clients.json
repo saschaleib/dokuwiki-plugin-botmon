@@ -87,13 +87,13 @@
 	 "id": "undici",
 	 "rx": ["undici"]
 	},
-	{"n": "GoHTTP-based crawler",
+	{"n": "GoHTTP-based bot",
 	 "id": "gohttp",
 	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"]
 	},
 	{"n": "Python URLlib-based crawler",
-	 "id": "urllib",
-	 "rx": ["Python\\-urllib\\/(\\d+\\.?\\d*)", "quic\\-go\\-HTTP\\/(\\d+)"]
+	 "id": "python",
+	 "rx": ["Python\\-?\\w*\\/(\\d+\\.?\\d*)"]
 	},
 	{"n": "AppleWebKit",
 	 "id": "webkit",

@@ -111,7 +111,8 @@
 		&.cl_ecosia::before { background-position-y: -340px }
 		&.cl_webkit::before { background-position-y: -360px }
 		&.cl_operaold::before { background-position-y: -380px }
-		&.cl_wget::before, &.cl_urllib::before { background-position-y: -400px }
+		&.cl_wget::before { background-position-y: -400px }
+		&.cl_python::before { background-position-y: -420px }
 		&.cl_other::before { background-image: url('img/more.svg') }
 
 		/* Captcha statuses */
@@ -119,6 +120,8 @@
 		&.cap_Y::before { background-position-y: -20px }
 		&.cap_YN::before { background-position-y: -40px }
 		&.cap_W::before { background-position-y: -60px }
+		&.cap_H::before { background-position-y: -80px }
+		&.cap_X::before { background-position-y: -100px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
