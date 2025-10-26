@@ -13,5 +13,5 @@ $meta['geoiplib'] = array('multichoice',
 
 //$meta['useCaptcha'] = array('onoff');
 $meta['useCaptcha'] = array('multichoice',
-						'_choices' => array ('disabled', 'blank', 'dada'));
+						'_choices' => array ('disabled', 'loremipsum', 'dada'));
 $meta['captchaSeed'] = array('string');
