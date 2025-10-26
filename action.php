@@ -26,12 +26,15 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		// populate the session id and type:
 		$this->setSessionInfo();
 
+		// temporary fix: save the method of the request:
+		$this->tempMethod = $_SERVER['REQUEST_METHOD'];
+
 		// insert header data into the page:
 		if ($ACT == 'show' || $ACT == 'edit' || $ACT == 'media') {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertHeader');
 
 			// Override the page rendering, if a captcha needs to be displayed:
-			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'showCaptcha');
+			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'insertCaptchaCode');
 
 		} else if ($ACT == 'admin' && isset($_REQUEST['page']) && $_REQUEST['page'] == 'botmon') {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertAdminHeader');
@@ -48,7 +51,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	/* session information */
 	private $sessionId = null;
 	private $sessionType = '';
-	private $showCaptcha = '-';
+	private $showCaptcha = 'X';
+	private $tempMethod = '';
 
 	/**
 	 * Inserts tracking code to the page header
@@ -133,7 +137,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			substr($conf['lang'],0,2), /* page language */
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode(), /* GeoIP country code */
-			$this->showCaptcha /* show captcha? */
+			$this->showCaptcha, /* show captcha? */
+			$this->tempMethod /* show captcha? */
 		);
 
 		//* create the log line */
@@ -204,7 +209,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	}
 
-	public function showCaptcha(Event $event) {
+	public function insertCaptchaCode(Event $event) {
 
 		$useCaptcha = $this->getConf('useCaptcha');
 
@@ -221,8 +226,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 				echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
 				$event->preventDefault(); // don't show normal content
 				switch ($useCaptcha) {
-					case 'blank':
-						$this->insertBlankBox();  // show dada filler instead of text
+					case 'loremipsum':
+						$this->insertLoremIpsum();  // show dada filler instead of text
 						break;
 					case 'dada':
 						$this->insertDadaFiller();  // show dada filler instead of text
@@ -338,9 +343,13 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	}
 
 	// inserts a blank box to ensure there is enough space for the captcha:
-	private function insertBlankBox() {
+	private function insertLoremIpsum() {
 
-		echo '<p style="min-height: 100px;">&nbsp;</p>';
+		echo '<div class="level1">' . NL;
+		echo '<p>' . NL . 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'. NL . '</p>' . NL;
+		echo '<p>' . NL . 'At vero eos et accusamus et iusto odio dignissimos ducimus, qui blanditiis praesentium voluptatum deleniti atque corrupti, quos dolores et quas molestias excepturi sint, obcaecati cupiditate non provident, similique sunt in culpa, qui officia deserunt mollitia animi, id est laborum et dolorum fuga.'. NL . '</p>' . NL;
+		echo '</div>' . NL;
+
 	}
 	
 	/* Generates a few paragraphs of Dada text to show instead of the article content */
