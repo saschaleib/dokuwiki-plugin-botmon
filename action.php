@@ -13,6 +13,26 @@ use dokuwiki\Logger;
 
 class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
+	public function __construct() {
+
+		// determine if a captcha should be loaded:
+		$this->showCaptcha = 'Z';
+
+		$useCaptcha = $this->getConf('useCaptcha'); // should we show a captcha?
+
+		if ($useCaptcha !== 'disabled') {
+			if ($_SERVER['REQUEST_METHOD'] == 'HEAD') {
+				$this->showCaptcha = 'H'; // Method is HEAD, no need for captcha
+			} elseif ($this->captchaWhitelisted()) {
+				$this->showCaptcha = 'W'; // IP is whitelisted, no captcha
+			} elseif ($this->hasCaptchaCookie()) {
+				$this->showCaptcha = 'N'; // No, user already has a cookie, don't show the captcha
+			} else {
+				$this->showCaptcha = 'Y'; // Yes, show the captcha
+			}
+		}
+	}
+
 	/**
 	 * Registers a callback functions
 	 *
@@ -25,9 +45,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		// populate the session id and type:
 		$this->setSessionInfo();
-
-		// temporary fix: save the method of the request:
-		$this->tempMethod = $_SERVER['REQUEST_METHOD'];
 
 		// insert header data into the page:
 		if ($ACT == 'show' || $ACT == 'edit' || $ACT == 'media') {
@@ -52,7 +69,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	private $sessionId = null;
 	private $sessionType = '';
 	private $showCaptcha = 'X';
-	private $tempMethod = '';
 
 	/**
 	 * Inserts tracking code to the page header
@@ -137,8 +153,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			substr($conf['lang'],0,2), /* page language */
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode(), /* GeoIP country code */
-			$this->showCaptcha, /* show captcha? */
-			$this->tempMethod /* show captcha? */
+			$this->showCaptcha /* show captcha? */
 		);
 
 		//* create the log line */
@@ -211,33 +226,45 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 	public function insertCaptchaCode(Event $event) {
 
-		$useCaptcha = $this->getConf('useCaptcha');
+		$useCaptcha = $this->getConf('useCaptcha'); // which background to show?
 
-		$cCode = '-';
-		if ($useCaptcha !== 'disabled') {
-			if ($this->captchaWhitelisted()) {
-				$cCode = 'W'; // whitelisted
-			} elseif ($this->hasCaptchaCookie()) {
-				$cCode  = 'N'; // user already has a cookie
-			} else {
-				$cCode  = 'Y'; // show the captcha
+		// only if we previously determined that we need a captcha:
+		if ($this->showCaptcha == 'Y') {
 
-
-				echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
-				$event->preventDefault(); // don't show normal content
-				switch ($useCaptcha) {
-					case 'loremipsum':
-						$this->insertLoremIpsum();  // show dada filler instead of text
-						break;
-					case 'dada':
-						$this->insertDadaFiller();  // show dada filler instead of text
-						break;
-				}
-				$this->insertCaptchaLoader(); // and load the captcha
+			echo '<h1 class="sectionedit1">'; tpl_pagetitle(); echo "</h1>\n"; // always show the original page title
+			$event->preventDefault(); // don't show normal content
+			switch ($useCaptcha) {
+				case 'loremipsum':
+					$this->insertLoremIpsum();  // show dada filler instead of text
+					break;
+				case 'dada':
+					$this->insertDadaFiller();  // show dada filler instead of text
+					break;
 			}
-		}
-		$this->showCaptcha = $cCode; // store the captcha code for the logfile
 
+			// insert the captcha loader code:
+			echo '<script>' . NL;
+
+			// add the deferred script loader::
+			echo  DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
+			echo  DOKU_TAB . DOKU_TAB . "const cj=document.createElement('script');" . NL;
+			echo  DOKU_TAB . DOKU_TAB . "cj.async=true;cj.defer=true;cj.type='text/javascript';" . NL;
+			echo  DOKU_TAB . DOKU_TAB . "cj.src='".DOKU_BASE."lib/plugins/botmon/captcha.js';" . NL;
+			echo  DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(cj);" . NL;
+			echo  DOKU_TAB . "});";
+
+			// add the translated strings for the captcha:
+			echo  DOKU_TAB . '$BMLocales = {' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgTitle": ' . json_encode($this->getLang('bm_dlgTitle')) . ',' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgSubtitle": ' . json_encode($this->getLang('bm_dlgSubtitle')) . ',' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgConfirm": ' . json_encode($this->getLang('bm_dlgConfirm')) . ',' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgChecking": ' . json_encode($this->getLang('bm_dlgChecking')) . ',' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgLoading": ' . json_encode($this->getLang('bm_dlgLoading')) . ',' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"dlgError": ' . json_encode($this->getLang('bm_dlgError')) . ',' . NL;
+			echo  DOKU_TAB . '};' . NL;
+			
+			echo '</script>' . NL;
+		}
 	}
 
 	public function showImageCaptcha(Event $event, $param) {
@@ -314,32 +341,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			}
 		}
 		return false; /* IP not found in whitelist */
-	}
-
-	private function insertCaptchaLoader() {
-
-		echo '<script>' . NL;
-
-		// add the deferred script loader::
-		echo  DOKU_TAB . "addEventListener('DOMContentLoaded', function(){" . NL;
-		echo  DOKU_TAB . DOKU_TAB . "const cj=document.createElement('script');" . NL;
-		echo  DOKU_TAB . DOKU_TAB . "cj.async=true;cj.defer=true;cj.type='text/javascript';" . NL;
-		echo  DOKU_TAB . DOKU_TAB . "cj.src='".DOKU_BASE."lib/plugins/botmon/captcha.js';" . NL;
-		echo  DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(cj);" . NL;
-		echo  DOKU_TAB . "});";
-
-		// add the locales for the captcha:
-		echo  DOKU_TAB . '$BMLocales = {' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgTitle": ' . json_encode($this->getLang('bm_dlgTitle')) . ',' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgSubtitle": ' . json_encode($this->getLang('bm_dlgSubtitle')) . ',' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgConfirm": ' . json_encode($this->getLang('bm_dlgConfirm')) . ',' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgChecking": ' . json_encode($this->getLang('bm_dlgChecking')) . ',' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgLoading": ' . json_encode($this->getLang('bm_dlgLoading')) . ',' . NL;
-		echo  DOKU_TAB . DOKU_TAB . '"dlgError": ' . json_encode($this->getLang('bm_dlgError')) . ',' . NL;
-		echo  DOKU_TAB . '};' . NL;
-		
-		echo '</script>' . NL;
-
 	}
 
 	// inserts a blank box to ensure there is enough space for the captcha:
