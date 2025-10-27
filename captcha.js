@@ -178,7 +178,8 @@ const $BMCaptcha = {
 				const hash = $BMCaptcha.digest.hash(dat.join('|'));
 
 				// set the cookie:
-				document.cookie = "DWConfirm=" + hash + ';path=/;';
+				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + ';path=/;hostOnly;session;sameSite=strict;'
+					+ (document.location.protocol === 'https:' ? 'secure;' : '');
 
 			} catch (err) {
 				console.error(err);

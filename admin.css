@@ -653,6 +653,7 @@
 				& {
 					display: grid;
 					grid-template-columns: min-content auto;
+					gap: .25em .5em;
 					border-left: transparent none 0;
 					margin: 0 .5rem .25rem 0;
 				}

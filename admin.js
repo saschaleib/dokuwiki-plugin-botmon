@@ -161,6 +161,7 @@ const BotMon = {
 
 			var bg = b;
 			var sm = a;
+			if (a == 0 || b == 0) return '—';
 			if (a > b) {
 				var bg = a;
 				var sm = b;
@@ -291,7 +292,8 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				//const timeout = 60 * 60 * 1000; // session timeout: One hour
+				// combine Bot networks to one visitor?
+				const combineNets = (BMSettings.hasOwnProperty('combineNets') ? BMSettings['combineNets'] : true);;
 
 				if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots match by their bot ID:
 
@@ -303,6 +305,23 @@ BotMon.live = {
 							return v;
 						}
 					}
+
+				} else if (combineNets && visitor.hasOwnProperty('_ipRange')) { // combine with other visits from the same range
+
+					let nonRangeVisitor = null;
+
+					for (let i=0; i<model._visitors.length; i++) {
+						const v = model._visitors[i];
+
+						if ( v.hasOwnProperty('_ipRange') && v._ipRange.g == visitor._ipRange.g ) { // match the IPRange Group IDs
+							return v;
+						} else if ( v.id.trim() !== '' && v.id == visitor.id) { // match the DW/PHP IDs
+							nonRangeVisitor = v;
+						}
+					}
+
+					// if no ip range was found, return the non-range visitor instead
+					if (nonRangeVisitor) return nonRangeVisitor;
 
 				} else { // other types match by their DW/PHPIDs:
 
@@ -346,6 +365,7 @@ BotMon.live = {
 			registerVisit: function(nv, type) {
 				//console.info('registerVisit', nv, type);
 
+
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
@@ -364,6 +384,12 @@ BotMon.live = {
 				// update first and last seen:
 				if (!nv._firstSeen) nv._firstSeen = nv.ts; // first-seen
 				nv._lastSeen = nv.ts; // last-seen
+
+				// known bot IP range?
+				if (nv._type == BM_USERTYPE.UNKNOWN) { // only for unknown visitors
+					const ipInfo = BotMon.live.data.ipRanges.match(nv.ip);
+					if (ipInfo) nv._ipRange = ipInfo;
+				}
 
 				// country name:
 				try {
@@ -549,9 +575,9 @@ BotMon.live = {
 				const cStr = cObj._str();
 				switch (cStr) {
 					case 'Y':
-					case 'NY': return "Blocked by captcha";
-					case 'YN': return "Captcha solved";
-					case 'W': return "IP Address whitelisted";
+					case 'NY': return "Blocked.";
+					case 'YN': return "Solved";
+					case 'W': return "Whitelisted";
 					case 'H': return "HEAD request, no captcha";
 					default: return "Undefined: " + cStr;
 				}
@@ -570,14 +596,36 @@ BotMon.live = {
 
 			// data storage:
 			data: {
-				totalVisits: 0,
-				totalPageViews: 0,
-				humanPageViews: 0,
-				bots: {
-					known: 0,
+				visits: {
+					bots: 0,
 					suspected: 0,
-					human: 0,
-					users: 0
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				views: {
+					bots: 0,
+					suspected: 0,
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				loads: {
+					bots: 0,
+					suspected: 0,
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				captcha: {
+					bots_blocked: 0,
+					bots_passed: 0,
+					bots_whitelisted: 0,
+					humans_blocked: 0,
+					humans_passed: 0,
+					sus_blocked: 0,
+					sus_passed: 0,
+					sus_whitelisted: 0
 				}
 			},
 
@@ -595,6 +643,7 @@ BotMon.live = {
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
+				const data = BotMon.live.data.analytics.data;
 				const me = BotMon.live.data.analytics;
 
 				BotMon.live.gui.status.showBusy("Analysing data …");
@@ -602,21 +651,35 @@ BotMon.live = {
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
 
-					// count visits and page views:
-					this.data.totalVisits += 1;
-					this.data.totalPageViews += v._viewCount;
-					
+					const captchaStr = v._captcha._str();
+
+					// count total visits and page views:
+					data.visits.total += 1;
+					data.loads.total += v._loadCount;
+					data.views.total += v._viewCount;
+
 					// check for typical bot aspects:
 					let botScore = 0;
 
 					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
-						this.data.bots.known += v._viewCount;
+						data.visits.bots += 1;
+						data.views.bots += v._viewCount;
 						this.groups.knownBots.push(v);
+
+						// captcha counter
+						if (captchaStr == 'Y') {
+							data.captcha.bots_blocked += 1;
+						} else if (captchaStr == 'YN') {
+							data.captcha.bots_passed += 1;
+						} else if (captchaStr == 'W') {
+							data.captcha.bots_whitelisted += 1;
+						}
 
 					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
 
-						this.data.bots.users += v._viewCount;
+						data.visits.users += 1;
+						data.views.users += v._viewCount;
 						this.groups.users.push(v);
 
 					} else {
@@ -627,30 +690,54 @@ BotMon.live = {
 						v._botVal = e.val;
 
 						if (e.isBot) { // likely bots
+
 							v._type = BM_USERTYPE.LIKELY_BOT;
-							this.data.bots.suspected += v._viewCount;
+							data.visits.suspected += 1;
+							data.views.suspected += v._viewCount;
 							this.groups.suspectedBots.push(v);
+
+							// captcha counter
+							if (captchaStr == 'Y') {
+								data.captcha.sus_blocked += 1;
+							} else if (captchaStr == 'YN') {
+								data.captcha.sus_passed += 1;
+							} else if (captchaStr == 'W') {
+								data.captcha.sus_whitelisted += 1;
+							}
+
 						} else { // probably humans
+
 							v._type = BM_USERTYPE.PROBABLY_HUMAN;
-							this.data.bots.human += v._viewCount;
+							data.visits.humans += 1;
+							data.views.humans += v._viewCount;
+
 							this.groups.humans.push(v);
+
+							// captcha counter
+							if (captchaStr == 'Y') {
+								data.captcha.humans_blocked += 1;
+							} else if (captchaStr == 'YN') {
+								data.captcha.humans_passed += 1;
+							}
 						}						
 					}
 
 					// perform actions depending on the visitor type:
 					if (v._type == BM_USERTYPE.KNOWN_BOT ) { /* known bots only */
 
+						// no specific actions here.
+
 					} else if (v._type == BM_USERTYPE.LIKELY_BOT) { /* probable bots only */
 
 						// add bot views to IP range information:
 						me.addToIpRanges(v);
 
-					} else { /* humans only */
+					} else { /* registered users and probable humans */
 
 						// add browser and platform statistics:
 						me.addBrowserPlatform(v);
 
-						// add 
+						// add to referrer and pages lists:
 						v._pageViews.forEach( pv => {
 							me.addToRefererList(pv._ref);
 							me.addToPagesList(pv.pg);
@@ -1063,7 +1150,6 @@ BotMon.live = {
 					ipName = ipRanges.getOwner( v._ipRange.g ) || "Unknown";
 
 				} else { // no known IP range, let's collect necessary information:
-
 
 					// collect basic IP address info:
 					if (ipType == BM_IPVERSION.IPv6) {
@@ -1604,14 +1690,7 @@ BotMon.live = {
 				fromKnownBotIP: function(visitor) {
 					//console.info('fromKnownBotIP()', visitor.ip);
 
-					const ipInfo = BotMon.live.data.ipRanges.match(visitor.ip);
-
-					if (ipInfo) {
-						visitor._ipInKnownBotRange = true;
-						visitor._ipRange = ipInfo;
-					}
-
-					return (ipInfo !== null);
+					return visitor.hasOwnProperty('_ipRange');
 				},
 
 				// is the page language mentioned in the client's accepted languages?
@@ -1910,47 +1989,48 @@ BotMon.live = {
 			 */
 			make: function() {
 
-				const data = BotMon.live.data.analytics.data;
-
 				const maxItemsPerList = 5; // how many list items to show?
+				const useCaptcha = BMSettings.useCaptcha || false;
 
 				const kNoData = '–'; // shown when data is missing
+				const kSeparator = ' / ';
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const makeElement = BotMon.t._makeElement;
+				const data = BotMon.live.data.analytics.data;
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Page views"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics"));
 
-					for (let i = 0; i <= 5; i++) {
+					for (let i = 0; i <= ( useCaptcha ? 5 : 3 ); i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Known bots:";
-								value = data.bots.known || kNoData;
+								title = "Total (loads / views / visits):";
+								value = (data.loads.total || kNoData) + kSeparator + (data.views.total || kNoData) + kSeparator + (data.visits.total || kNoData);
 								break;
 							case 1:
-								title = "Suspected bots:";
-								value = data.bots.suspected || kNoData;
+								title = "Known bots (views / visits):";
+								value = (data.views.bots || kNoData) + kSeparator + (data.visits.bots || kNoData);
 								break;
 							case 2:
-								title = "Probably humans:";
-								value = data.bots.human || kNoData;
+								title = "Suspected bots (views / visits):";
+								value = (data.visits.suspected || kNoData) + kSeparator + (data.views.suspected || kNoData)
 								break;
 							case 3:
-								title = "Registered users:";
-								value = data.bots.users || kNoData;
+								title = "Bots-humans ratio (views / visits):";
+								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100) + kSeparator + BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
 								break;
 							case 4:
-								title = "Total:";
-								value = data.totalPageViews || kNoData;
+								title = "Known bots blocked / passed / whitelisted:";
+								value = data.captcha.bots_blocked + kSeparator + data.captcha.bots_passed + kSeparator + data.captcha.bots_whitelisted;
 								break;
 							case 5:
-								title = "Bots-humans ratio:";
-								value = BotMon.t._getRatio(data.bots.suspected + data.bots.known, data.bots.users + data.bots.human, 100);
+								title = "Suspected bots blocked / passed / whitelisted:";
+								value = data.captcha.sus_blocked + kSeparator + data.captcha.sus_passed + kSeparator + data.captcha.sus_whitelisted;
 								break;
 							default:
 								console.warn(`Unknown list type ${i}.`);
@@ -2007,7 +2087,7 @@ BotMon.live = {
 				const wmoverview = document.getElementById('botmon__today__wm_overview');
 				if (wmoverview) {
 
-					const humanVisits = BotMon.live.data.analytics.groups.users.length + BotMon.live.data.analytics.groups.humans.length;
+					const humanVisits = data.views.total;
 					const bounceRate = Math.round(100 * (BotMon.live.data.analytics.getBounceCount('users') + BotMon.live.data.analytics.getBounceCount('humans')) / humanVisits);
 
 					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics"));
@@ -2017,20 +2097,20 @@ BotMon.live = {
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Registered users’ page views:";
-								value = data.bots.users || kNoData;
+								title = "Registered users (views / visits):";
+								value = (data.views.users || kNoData) + kSeparator + (data.visits.users || kNoData);
 								break;
 							case 1:
-								title = "“Probably humans” page views:";
-								value = data.bots.human || kNoData;
+								title = "Probably humans (views / visits):";
+								value = (data.views.humans || kNoData) + kSeparator + (data.visits.humans || kNoData);
 								break;
 							case 2:
 								title = "Total human page views:";
-								value = (data.bots.users + data.bots.human) || kNoData;
+								value = (data.views.users + data.views.humans) || kNoData;
 								break;
 							case 3:
 								title = "Total human visits:";
-								value = humanVisits || kNoData;
+								value = data.views.total || kNoData;
 								break;
 							case 4:
 								title = "Humans’ bounce rate:";
@@ -2292,6 +2372,10 @@ BotMon.live = {
 
 				const sumClass = ( !data._seenBy || data._seenBy.indexOf(BM_LOGTYPE.SERVER) < 0 ? 'noServer' : 'hasServer');
 
+				// combine with other networks?
+				const combineNets = (BMSettings.hasOwnProperty('combineNets') ? BMSettings['combineNets'] : true)
+					&& data.hasOwnProperty('_ipRange');
+
 				const li = make('li'); // root list item
 				const details = make('details');
 				const summary = make('summary', {
@@ -2301,17 +2385,17 @@ BotMon.live = {
 
 				const span1 = make('span'); /* left-hand group */
 
-				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* No platform/client for bots */
-					span1.appendChild(make('span', { /* Platform */
+				/*if (data._type !== BM_USERTYPE.KNOWN_BOT) { // No platform/client for bots // disabled because no longer relevant
+					span1.appendChild(make('span', { // Platform 
 						'class': 'icon_only platform pf_' + (data._platform ? data._platform.id : 'unknown'),
 						'title': "Platform: " + platformName
 					}, platformName));
 
-					span1.appendChild(make('span', { /* Client */
+					span1.appendChild(make('span', { // Client 
 						'class': 'icon_only client client cl_' + (data._client ? data._client.id : 'unknown'),
 						'title': "Client: " + clientName
 					}, clientName));
-				}
+				}*/
 
 				// identifier:
 				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
@@ -2331,16 +2415,22 @@ BotMon.live = {
 
 				} else { /* others */
 
-					
-					span1.appendChild(make('span', { // IP-Address
-						'class': 'has_icon ipaddr ip' + ipType,
-						'title': "IP-Address: " + data.ip
-					}, data.ip));
+					if (combineNets) {
 
-					/*span1.appendChild(make('span', { // Internal ID
-						'class': 'has_icon session typ_' + data.typ,
-						'title': "ID: " + data.id
-					}, data.id));*/
+						const ispName = BotMon.live.data.ipRanges.getOwner( data._ipRange.g ) || data._ipRange.g;
+
+						span1.appendChild(make('span', { // IP-Address
+							'class': 'has_icon ipaddr ipnet',
+							'title': "IP-Range: " + data._ipRange.g
+						}, ispName));
+
+					} else {
+
+						span1.appendChild(make('span', { // IP-Address
+							'class': 'has_icon ipaddr ip' + ipType,
+							'title': "IP-Address: " + data.ip
+						}, data.ip));
+					}
 				}
 
 				span1.appendChild(make('span', { /* page views */
@@ -2362,6 +2452,7 @@ BotMon.live = {
 				const span2 = make('span'); /* right-hand group */
 
 				// country flag:
+				if (!combineNets) { // not for combined networks
 					if (data.geo && data.geo !== 'ZZ') {
 						span2.appendChild(make('span', {
 							'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
@@ -2369,21 +2460,22 @@ BotMon.live = {
 							'title': "Country: " + ( data._country || "Unknown")
 						}, ( data._country || "Unknown") ));
 					}
+				}
 
-					span2.appendChild(make('span', { // seen-by icon:
-						'class': 'icon_only seenby sb_' + data._seenBy.join(''),
-						'title': "Seen by: " + data._seenBy.join('+')
-					}, data._seenBy.join(', ')));
+				span2.appendChild(make('span', { // seen-by icon:
+					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
+					'title': "Seen by: " + data._seenBy.join('+')
+				}, data._seenBy.join(', ')));
 
-					// captcha status:
-					const cCode = ( data._captcha ? data._captcha._str() : '');
-					if (cCode !== '') {
-						const cTitle = model._makeCaptchaTitle(data._captcha)
-						span2.appendChild(make('span', { // captcha status
-							'class': 'icon_only captcha cap_' + cCode,
-							'title': "Captcha-status: " + cTitle
-						}, cTitle));
-					}
+				// captcha status:
+				const cCode = ( data._captcha ? data._captcha._str() : '');
+				if (cCode !== '') {
+					const cTitle = model._makeCaptchaTitle(data._captcha)
+					span2.appendChild(make('span', { // captcha status
+						'class': 'icon_only captcha cap_' + cCode,
+						'title': "Captcha-status: " + cTitle
+					}, cTitle));
+				}
 
 				summary.appendChild(span2);
 
@@ -2569,6 +2661,13 @@ BotMon.live = {
 						dl.appendChild(evalDd);
 					}
 				}
+
+				// for debugging only. Disable on production:
+				dl.appendChild(make('dt', {}, "Debug info:"));
+				const dbgDd = make('dd', {'class': 'debug'});
+				dbgDd.innerHTML = '<pre>' + JSON.stringify(data, null, 4) + '</pre>';
+				dl.appendChild(dbgDd);
+
 				// return the element to add to the UI:
 				return dl;
 			},

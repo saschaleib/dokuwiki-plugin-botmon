@@ -251,7 +251,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			echo  DOKU_TAB . DOKU_TAB . "cj.async=true;cj.defer=true;cj.type='text/javascript';" . NL;
 			echo  DOKU_TAB . DOKU_TAB . "cj.src='".DOKU_BASE."lib/plugins/botmon/captcha.js';" . NL;
 			echo  DOKU_TAB . DOKU_TAB . "document.getElementsByTagName('head')[0].appendChild(cj);" . NL;
-			echo  DOKU_TAB . "});";
+			echo  DOKU_TAB . "});" . NL;
 
 			// add the translated strings for the captcha:
 			echo  DOKU_TAB . '$BMLocales = {' . NL;

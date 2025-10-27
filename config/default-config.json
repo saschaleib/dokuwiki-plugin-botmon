@@ -70,7 +70,7 @@
 		 "bot": 30
 		},
 		{"func": "blockedByCaptcha", "params": [],
-		 "id": "blockedByCaptcha", "desc": "Visitor was blocked by captcha",
+		 "id": "blockedByCaptcha", "desc": "Visitor did not solve the captcha",
 		 "bot": 20
 		},
 		{"func": "whitelistedByCaptcha", "params": [],

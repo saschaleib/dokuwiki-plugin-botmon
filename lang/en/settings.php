@@ -9,6 +9,8 @@ $lang['showday']			= 'Which data to show in the “Latest” tab:';
 	$lang['showday_o_yesterday']		= 'Last full day (yesterday)';
 	$lang['showday_o_today']			= 'Ongoing logs (today)';
 
+$lang['combineNets']	= 'Combine visits from known IP-ranges into one entry:';
+
 $lang['geoiplib']			= 'Add GeoIP Information<br><small>(requires PHP module to be installed)</small>';
 	$lang['geoiplib_o_disabled']		= 'Disabled';
 	$lang['geoiplib_o_phpgeoip']		= 'Use GeoIP Module';

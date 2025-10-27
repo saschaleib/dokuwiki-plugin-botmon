@@ -43,7 +43,7 @@ class admin_plugin_botmon extends AdminPlugin {
 		$pluginPath = $conf['basedir'] . 'lib/plugins/' . $this->getPluginName();
 
 		/* Plugin Headline */
-		echo '<div id="botmon__admin">
+		echo NL . '<div id="botmon__admin">
 	<h1>Bot Monitoring Plugin</h1>
 	<nav id="botmon__tabs">
 		<ul class="tabs" role="tablist">
@@ -92,7 +92,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	</article>
 	<article role="tabpanel" id="botmon__log" hidden>
 		<h2 class="a11y">Process log</h2>
-		<ul id="botmon__loglist">';
+		<ul id="botmon__loglist">' . NL;
 
 		/* proces old logs */
 		if ($hasOldLogFiles) {
@@ -101,15 +101,17 @@ class admin_plugin_botmon extends AdminPlugin {
 
 			$helper->cleanup();
 		} else {
-			echo '<li>No files to process.</li>';
+			echo DOKU_TAB . DOKU_TAB . DOKU_TAB . '<li>No files to process.</li>' . NL;
 		}
 
-		echo '</article>' . NL;
-		echo '<script>
-		BMSettings = {
-			showday: ' . json_encode($this->getConf('showday')) . '
+		echo DOKU_TAB . DOKU_TAB . '</ul>' . NL . DOKU_TAB . '</article>' . NL;
+		echo DOKU_TAB . '<script>
+		const BMSettings = {
+			showday: ' . json_encode($this->getConf('showday')) . ',
+			combineNets: ' . json_encode($this->getConf('combineNets')) . ',
+			useCaptcha: ' . json_encode($this->getConf('useCaptcha') !== 'disabled') . '
 		};
-		</script>';
+	</script>' . NL;
 		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}
