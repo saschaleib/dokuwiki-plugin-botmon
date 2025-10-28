@@ -1,7 +1,7 @@
 base   botmon
 author Sascha Leib
 email  ad@hominem.com
-date   2025-10-26
+date   2025-10-28
 name   Bot Monitoring
 desc   A tool for monitoring and analysing bot traffic to your wiki (under development)
 url    https://www.dokuwiki.org/plugin:botmon

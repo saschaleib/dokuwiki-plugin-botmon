@@ -2663,10 +2663,10 @@ BotMon.live = {
 				}
 
 				// for debugging only. Disable on production:
-				dl.appendChild(make('dt', {}, "Debug info:"));
+				/*dl.appendChild(make('dt', {}, "Debug info:"));
 				const dbgDd = make('dd', {'class': 'debug'});
 				dbgDd.innerHTML = '<pre>' + JSON.stringify(data, null, 4) + '</pre>';
-				dl.appendChild(dbgDd);
+				dl.appendChild(dbgDd);*/
 
 				// return the element to add to the UI:
 				return dl;
