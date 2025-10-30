@@ -123,6 +123,7 @@
 		&.cap_H::before { background-position-y: -80px }
 		&.cap_X::before { background-position-y: -100px }
 		&.cap_YH::before { background-position-y: -120px }
+		&.cap_YNH::before { background-position-y: -140px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */

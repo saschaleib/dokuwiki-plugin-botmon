@@ -730,7 +730,11 @@ BotMon.live = {
 					} else if (v._type == BM_USERTYPE.LIKELY_BOT) { /* probable bots only */
 
 						// add bot views to IP range information:
-						me.addToIpRanges(v);
+						if (v.ip) {
+							me.addToIpRanges(v);
+						} else {
+							console.log(v);
+						}
 
 					} else { /* registered users and probable humans */
 
@@ -1864,8 +1868,12 @@ BotMon.live = {
 					}
 
 					logtxt.split('\n').forEach((line) => {
-						if (line.trim() === '') return; // skip empty lines
+
+						const line2 = line.replaceAll(new RegExp('[\x00-\x1F]','g'), "\u{FFFD}").trim();
+						if (line2 === '') return; // skip empty lines
+
 						const cols = line.split('\t');
+						if (cols.length == 1) return
 
 						// assign the columns to an object:
 						const data = {};
