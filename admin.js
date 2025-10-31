@@ -518,7 +518,7 @@ BotMon.live = {
 				let visitor = model.findVisitor(dat, type);
 				if (!visitor) {
 					console.info(`No visitor with ID “${dat.id}” found, registering as a new one.`);
-					visitor = model.registerVisit(dat, type);
+					visitor = model.registerVisit(dat, type, true);
 				}
 				if (visitor) {
 					// update visitor:
@@ -623,6 +623,7 @@ BotMon.live = {
 					bots_whitelisted: 0,
 					humans_blocked: 0,
 					humans_passed: 0,
+					humans_whitelisted: 0,
 					sus_blocked: 0,
 					sus_passed: 0,
 					sus_whitelisted: 0
@@ -651,7 +652,7 @@ BotMon.live = {
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
 
-					const captchaStr = v._captcha._str();
+					const captchaStr = v._captcha._str().replaceAll(/[^YNW]/g, '');
 
 					// count total visits and page views:
 					data.visits.total += 1;
@@ -663,17 +664,21 @@ BotMon.live = {
 
 					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
-						data.visits.bots += 1;
-						data.views.bots += v._viewCount;
 						this.groups.knownBots.push(v);
 
-						// captcha counter
-						if (captchaStr == 'Y') {
-							data.captcha.bots_blocked += 1;
-						} else if (captchaStr == 'YN') {
-							data.captcha.bots_passed += 1;
-						} else if (captchaStr == 'W') {
-							data.captcha.bots_whitelisted += 1;
+						if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+							data.visits.bots += 1;
+							data.views.bots += v._viewCount;
+
+							// captcha counter
+							if (captchaStr.indexOf('YN') > -1) {
+								data.captcha.bots_passed += 1;
+							} else if (captchaStr.indexOf('Y') > -1) {
+								data.captcha.bots_blocked += 1;
+							}
+							if (captchaStr.indexOf('W') > -1) {
+								data.captcha.bots_whitelisted += 1;
+							}
 						}
 
 					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
@@ -692,32 +697,42 @@ BotMon.live = {
 						if (e.isBot) { // likely bots
 
 							v._type = BM_USERTYPE.LIKELY_BOT;
-							data.visits.suspected += 1;
-							data.views.suspected += v._viewCount;
 							this.groups.suspectedBots.push(v);
 
-							// captcha counter
-							if (captchaStr == 'Y') {
-								data.captcha.sus_blocked += 1;
-							} else if (captchaStr == 'YN') {
-								data.captcha.sus_passed += 1;
-							} else if (captchaStr == 'W') {
-								data.captcha.sus_whitelisted += 1;
+							if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+
+								data.visits.suspected += 1;
+								data.views.suspected += v._viewCount;
+
+								// captcha counter
+								if (captchaStr.indexOf('YN') > -1) {
+									data.captcha.sus_passed += 1;
+								} else if (captchaStr.indexOf('Y') > -1) {
+									data.captcha.sus_blocked += 1;
+								}
+								if (captchaStr.indexOf('W') > -1) {
+									data.captcha.sus_whitelisted += 1;
+								}
 							}
 
 						} else { // probably humans
 
 							v._type = BM_USERTYPE.PROBABLY_HUMAN;
-							data.visits.humans += 1;
-							data.views.humans += v._viewCount;
-
 							this.groups.humans.push(v);
 
-							// captcha counter
-							if (captchaStr == 'Y') {
-								data.captcha.humans_blocked += 1;
-							} else if (captchaStr == 'YN') {
-								data.captcha.humans_passed += 1;
+							if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+								data.visits.humans += 1;
+								data.views.humans += v._viewCount;
+
+								// captcha counter
+								if (captchaStr.indexOf('YN') > -1) {
+									data.captcha.humans_passed += 1;
+								} else if (captchaStr.indexOf('Y') > -1) {
+									data.captcha.humans_blocked += 1;
+								}
+								if (captchaStr.indexOf('W') > -1) {
+									data.captcha.humans_whitelisted += 1;
+								}
 							}
 						}						
 					}
@@ -2011,34 +2026,34 @@ BotMon.live = {
 				if (botsVsHumans) {
 					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics"));
 
-					for (let i = 0; i <= ( useCaptcha ? 5 : 3 ); i++) {
+					for (let i = 0; i <= 6; i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Total (loads / views / visits):";
-								value = (data.loads.total || kNoData) + kSeparator + (data.views.total || kNoData) + kSeparator + (data.visits.total || kNoData);
+								title = "Known bots visits:";
+								value =  data.visits.bots || kNoData;
 								break;
 							case 1:
-								title = "Known bots (views / visits):";
-								value = (data.views.bots || kNoData) + kSeparator + (data.visits.bots || kNoData);
+								title = "Suspected bots visits:";
+								value = data.visits.suspected || kNoData;
 								break;
 							case 2:
-								title = "Suspected bots (views / visits):";
-								value = (data.visits.suspected || kNoData) + kSeparator + (data.views.suspected || kNoData)
-								break;
-							case 3:
-								title = "Bots-humans ratio (views / visits):";
-								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100) + kSeparator + BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
+								title = "Bots-humans ratio visits:";
+								value = BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
 								break;
 							case 4:
-								title = "Known bots blocked / passed / whitelisted:";
-								value = data.captcha.bots_blocked + kSeparator + data.captcha.bots_passed + kSeparator + data.captcha.bots_whitelisted;
+								title = "Known bots views:";
+								value = data.views.bots || kNoData;
 								break;
 							case 5:
-								title = "Suspected bots blocked / passed / whitelisted:";
-								value = data.captcha.sus_blocked + kSeparator + data.captcha.sus_passed + kSeparator + data.captcha.sus_whitelisted;
+								title = "Suspected bots views:";
+								value = data.views.suspected || kNoData;
+								break;
+							case 6:
+								title = "Bots-humans ratio views:";
+								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100);
 								break;
 							default:
 								console.warn(`Unknown list type ${i}.`);
@@ -2095,32 +2110,36 @@ BotMon.live = {
 				const wmoverview = document.getElementById('botmon__today__wm_overview');
 				if (wmoverview) {
 
-					const humanVisits = data.views.total;
+					const humanVisits = data.visits.users + data.visits.humans;
 					const bounceRate = Math.round(100 * (BotMon.live.data.analytics.getBounceCount('users') + BotMon.live.data.analytics.getBounceCount('humans')) / humanVisits);
 
 					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics"));
-					for (let i = 0; i <= 4; i++) { 
+					for (let i = 0; i <= 5; i++) { 
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Registered users (views / visits):";
-								value = (data.views.users || kNoData) + kSeparator + (data.visits.users || kNoData);
+								title = "Registered users visits:";
+								value = data.visits.users || kNoData;
 								break;
 							case 1:
-								title = "Probably humans (views / visits):";
-								value = (data.views.humans || kNoData) + kSeparator + (data.visits.humans || kNoData);
+								title = "Registered users views:";
+								value = data.views.users || kNoData;
 								break;
 							case 2:
-								title = "Total human page views:";
-								value = (data.views.users + data.views.humans) || kNoData;
+								title = "Probably humans visits:";
+								value = data.visits.humans || kNoData;
 								break;
 							case 3:
-								title = "Total human visits:";
-								value = data.views.total || kNoData;
+								title = "Probably humans views:";
+								value = data.views.humans || kNoData;
 								break;
 							case 4:
+								title = "Total human visits / views";
+								value = (data.visits.users + data.visits.humans || kNoData) + kSeparator + ((data.views.users + data.views.humans) || kNoData);
+								break;
+							case 5:
 								title = "Humans’ bounce rate:";
 								value = bounceRate + '%';
 								break;
@@ -2228,6 +2247,131 @@ BotMon.live = {
 							}, rInfo.pct.toFixed(1) + '%'));
 							wmreferers.appendChild(rDd);
 						});
+					}
+				}
+
+				// Update Captcha statistics:
+				const captchaStatsBlock = document.getElementById('botmon__today__captcha');
+				if (captchaStatsBlock) {
+					
+					// first column:
+					const captchaHumans = document.getElementById('botmon__today__cp_humans');
+					if (captchaHumans) {
+						captchaHumans.appendChild(makeElement('dt', {}, "Probably humans:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.humans_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.humans_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.humans_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.humans;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.humans_blocked / data.visits.humans * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Unknown list type ${i}.`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaHumans.appendChild(dd);
+						}
+
+					}
+
+					// second column:
+					const captchaSus = document.getElementById('botmon__today__cp_sus');
+					if (captchaSus) {
+						captchaSus.appendChild(makeElement('dt', {}, "Suspected bots:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.sus_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.sus_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.sus_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.suspected;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.sus_blocked / data.visits.suspected * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Unknown list type ${i}.`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaSus.appendChild(dd);
+						}
+
+					}
+
+					// Third column:
+					const captchaBots = document.getElementById('botmon__today__cp_bots');
+					if (captchaBots) {
+						captchaBots.appendChild(makeElement('dt', {}, "Known bots:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.bots_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.bots_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.bots_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.bots;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.bots_blocked / data.visits.bots * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Unknown list type ${i}.`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaBots.appendChild(dd);
+						}
+
 					}
 				}
 			}

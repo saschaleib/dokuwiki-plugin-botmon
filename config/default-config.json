@@ -3,7 +3,7 @@
 	"rules": [
 		{"func": "fromKnownBotIP",
 		 "id": "botIpRange", "desc": "Common Bot IP range",
-		 "bot": 50
+		 "bot": 40
 		},
 		{"func": "matchesClient", "params": ["aol","msie","ffold","chromeold","oldedge","operaold"],
 		 "id": "oldClient", "desc": "Obsolete browser version",
@@ -75,7 +75,7 @@
 		},
 		{"func": "whitelistedByCaptcha", "params": [],
 		 "id": "whitelistedByCaptcha", "desc": "Visitor uses a whitelisted IP address",
-		 "bot": -30
+		 "bot": -20
 		}
 	]
 }

@@ -426,7 +426,7 @@
 	}
 
 	/* grid layout for the overview: */
-	.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid {
+	.botmon_bots_grid, .botmon_webmetrics_grid, .botmon_traffic_grid, .botmon_captcha_grid {
 		& {
 			display: grid;
 			grid-gap: 0 .33em;
@@ -467,6 +467,9 @@
 	}
 	.botmon_traffic_grid {
 		grid-template-columns: 2fr 1fr;
+	}
+	.botmon_captcha_grid {
+		grid-template-columns: 1fr 1fr 1fr;
 	}
 
 	/* The tabs bar */
