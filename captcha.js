@@ -6,9 +6,8 @@
 const $BMCaptcha = {
 
 	init: function() {
-		/* mark the page to contain the captcha styles */
 		document.getElementsByTagName('body')[0].classList.add('botmon_captcha');
-
+		$BMCaptcha._cbDly = 1.5;
 		$BMCaptcha.install()
 	},
 
@@ -51,7 +50,8 @@ const $BMCaptcha = {
 		bm_parent.appendChild(dlg);
 
 		// call the delayed callback in a couple of seconds:
-		setTimeout($BMCaptcha._delayedCallback, 1500);
+		$BMCaptcha._st = performance.now();
+		setTimeout($BMCaptcha._delayedCallback, $BMCaptcha._cbDly * 1000);
 	},
 
 	/* creates a digest hash for the cookie function */
@@ -175,6 +175,7 @@ const $BMCaptcha = {
 					document._botmon.ip || '0.0.0.0',
 					(new Date()).toISOString().substring(0, 10)
 				];
+				if ($BMCaptcha._st - performance.now() >= 0) dat.push($BMCaptcha._st - performance.now());
 				const hash = $BMCaptcha.digest.hash(dat.join('|'));
 
 				// set the cookie:
@@ -208,10 +209,26 @@ const $BMCaptcha = {
 			if (input) {
 				input.removeAttribute('disabled');
 				input.focus();
+				setTimeout($BMCaptcha._autoCheck, 200, input);
 			}
 		}
 	},
+	_cbDly: null,
+	_st: null,
 
+	_autoCheck: function(e) {
+
+		let bPass = 0;
+		const threshold = 1;
+
+		const pLang = document.documentElement.lang || 'en';
+		if (pLang !== 'en') {
+			const cntLangs = navigator.languages.map(lang => lang.split('-')[0]);
+			if (cntLangs.indexOf(pLang) >= 0) bPass += 1;
+		}
+
+		if (bPass >= threshold) e.click();
+	}
 }
 // initialise the captcha module:
 $BMCaptcha.init();

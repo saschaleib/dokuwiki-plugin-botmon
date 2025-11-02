@@ -16,7 +16,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	public function __construct() {
 
 		// determine if a captcha should be loaded:
-		$this->showCaptcha = 'Z';
+		$this->showCaptcha = 'Z'; // Captcha unknown
 
 		$useCaptcha = $this->getConf('useCaptcha'); // should we show a captcha?
 
@@ -153,7 +153,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			substr($conf['lang'],0,2), /* page language */
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($_SERVER['HTTP_ACCEPT_LANGUAGE'], " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode(), /* GeoIP country code */
-			$this->showCaptcha /* show captcha? */
+			$this->showCaptcha, /* show captcha? */
+			$_SERVER['REQUEST_METHOD'] ?? '' /* request method */
 		);
 
 		//* create the log line */

@@ -1845,7 +1845,7 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo','captcha'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo','captcha','method'];
 					break;
 				case "log":
 					typeName = "Page load";
