@@ -263,7 +263,12 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			echo  DOKU_TAB . DOKU_TAB . '"dlgLoading": ' . json_encode($this->getLang('bm_dlgLoading')) . ',' . NL;
 			echo  DOKU_TAB . DOKU_TAB . '"dlgError": ' . json_encode($this->getLang('bm_dlgError')) . ',' . NL;
 			echo  DOKU_TAB . '};' . NL;
-			
+
+			// captcha configuration options
+			echo  DOKU_TAB . '$BMConfig = {' . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"captchaBypass": ' . json_encode($this->getConf('captchaBypass')) . NL;
+			echo  DOKU_TAB . '};' . NL;
+
 			echo '</script>' . NL;
 		}
 	}

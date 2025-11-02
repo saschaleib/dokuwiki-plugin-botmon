@@ -218,16 +218,15 @@ const $BMCaptcha = {
 
 	_autoCheck: function(e) {
 
-		let bPass = 0;
-		const threshold = 1;
+		const bypass = ($BMConfig['captchaBypass'] || '').split(',');
+		var action = false;
 
-		const pLang = document.documentElement.lang || 'en';
-		if (pLang !== 'en') {
+		if (bypass.indexOf('langmatch') >= 0) { // Languages matching
 			const cntLangs = navigator.languages.map(lang => lang.split('-')[0]);
-			if (cntLangs.indexOf(pLang) >= 0) bPass += 1;
+			if (cntLangs.indexOf(document.documentElement.lang || 'en') >= 0) action = true;
 		}
 
-		if (bPass >= threshold) e.click();
+		if (action) e.click(); // action!
 	}
 }
 // initialise the captcha module:

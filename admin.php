@@ -53,6 +53,13 @@ class admin_plugin_botmon extends AdminPlugin {
 		</ul>
 	</nav>
 	<article role="tabpanel" id="botmon__latest">
+		<script>
+			const BMSettings = {
+				showday: ' . json_encode($this->getConf('showday')) . ',
+				combineNets: ' . json_encode($this->getConf('combineNets')) . ',
+				useCaptcha: ' . json_encode($this->getConf('useCaptcha') !== 'disabled') . '
+			};
+		</script>
 		<h2 class="a11y">Latest data</h2>
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
@@ -116,13 +123,6 @@ class admin_plugin_botmon extends AdminPlugin {
 		}
 
 		echo DOKU_TAB . DOKU_TAB . '</ul>' . NL . DOKU_TAB . '</article>' . NL;
-		echo DOKU_TAB . '<script>
-		const BMSettings = {
-			showday: ' . json_encode($this->getConf('showday')) . ',
-			combineNets: ' . json_encode($this->getConf('combineNets')) . ',
-			useCaptcha: ' . json_encode($this->getConf('useCaptcha') !== 'disabled') . '
-		};
-	</script>' . NL;
 		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}

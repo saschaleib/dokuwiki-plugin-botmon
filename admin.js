@@ -1712,6 +1712,16 @@ BotMon.live = {
 					return visitor.hasOwnProperty('_ipRange');
 				},
 
+				// is the IP address from a specifin known ISP network
+				fromISPRange: function(visitor, ...isps) {
+					if (visitor.hasOwnProperty('_ipRange')) {
+						if (isps.indexOf(visitor._ipRange.g) > -1) {
+							return true;
+						}
+					}
+					return false;
+				},
+
 				// is the page language mentioned in the client's accepted languages?
 				// the parameter holds an array of exceptions, i.e. page languages that should be ignored.
 				matchLang: function(visitor, ...exceptions) {
@@ -2026,7 +2036,7 @@ BotMon.live = {
 				if (botsVsHumans) {
 					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics"));
 
-					for (let i = 0; i <= 6; i++) {
+					for (let i = 0; i <= 5; i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
@@ -2043,15 +2053,15 @@ BotMon.live = {
 								title = "Bots-humans ratio visits:";
 								value = BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
 								break;
-							case 4:
+							case 3:
 								title = "Known bots views:";
 								value = data.views.bots || kNoData;
 								break;
-							case 5:
+							case 4:
 								title = "Suspected bots views:";
 								value = data.views.suspected || kNoData;
 								break;
-							case 6:
+							case 5:
 								title = "Bots-humans ratio views:";
 								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100);
 								break;
@@ -2771,7 +2781,7 @@ BotMon.live = {
 				/* bot evaluation rating */
 				if (data._type !== BM_USERTYPE.KNOWN_BOT && data._type !== BM_USERTYPE.KNOWN_USER) {
 					dl.appendChild(make('dt', undefined, "Bot rating:"));
-					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '–' ) + ' (of ' + BotMon.live.data.rules._threshold + ')'));
+					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '0' ) + ' (of ' + BotMon.live.data.rules._threshold + ')'));
 
 					/* add bot evaluation details: */
 					if (data._eval) {

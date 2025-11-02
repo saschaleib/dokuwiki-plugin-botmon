@@ -21,3 +21,6 @@ $lang['useCaptcha']		= 'Enable Captcha<br><small>(Experimental, read the manual 
 	$lang['useCaptcha_o_dada']			= 'Captcha with Dada placeholder text';
 
 $lang['captchaSeed']	= 'Captcha Seed<br><small>(Enter a random string, e.g. <a href="https://www.browserling.com/tools/random-hex" target="_blank">from here</a>)</small>';
+
+$lang['captchaBypass']		= 'Automatically solve the Captcha, if …<br><small>(Note: this probably does not make much sense for English wikis!)</small>';
+	$lang['captchaBypass_langmatch']		= 'Client and page languages match ';
