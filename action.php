@@ -310,7 +310,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today;
 		$expected = hash('sha256', $raw);
 
-		echo '<!-- cookieVal: ' . $cookieVal . ', expected: ' . $expected . ', seed: ' . $this->getConf('captchaSeed') . ', server: ' . $_SERVER['SERVER_NAME'] . ', ip: ' . $_SERVER['REMOTE_ADDR'] . ', date: ' . $today .'\' -->' . NL;
+		//echo '<!-- cookieVal: ' . $cookieVal . ', expected: ' . $expected . ', seed: ' . $this->getConf('captchaSeed') . ', server: ' . $_SERVER['SERVER_NAME'] . ', ip: ' . $_SERVER['REMOTE_ADDR'] . ', date: ' . $today .'\' -->' . NL;
 
 		return $cookieVal == $expected;
 	}
