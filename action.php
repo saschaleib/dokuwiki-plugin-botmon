@@ -301,6 +301,13 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$this->showCaptcha = $cCode; // store the captcha code for the logfile
 	}
 
+	/**
+	 * Checks if the user has a valid captcha cookie.
+	 * 
+	 * @return boolean
+	 * @access private
+	 * 
+	 **/
 	private function hasCaptchaCookie() {
 
 		$cookieVal = isset($_COOKIE['DWConfirm']) ? $_COOKIE['DWConfirm'] : null;
@@ -310,10 +317,47 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today;
 		$expected = hash('sha256', $raw);
 
-		//echo '<!-- cookieVal: ' . $cookieVal . ', expected: ' . $expected . ', seed: ' . $this->getConf('captchaSeed') . ', server: ' . $_SERVER['SERVER_NAME'] . ', ip: ' . $_SERVER['REMOTE_ADDR'] . ', date: ' . $today .'\' -->' . NL;
+		// for debugging: write captcha data to the log:
+		$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], $expected);
 
 		return $cookieVal == $expected;
 	}
+
+	/**
+	 * Writes data to the captcha log.
+	 *
+	 * @return void
+	 */
+	private function writeCaptchaLog($remote_addr, $cookieVal, $serverName, $expected) {
+
+		$logArr = Array(
+			$remote_addr, /* remote IP */
+			$cookieVal, /* cookie value */
+			$this->getConf('captchaSeed'), /* seed */
+			$serverName, /* server name */
+			$expected, /* expected cookie value */
+			$cookieVal == $expected /* cookie matches expected value? */
+		);
+
+		//* create the log line */
+		$filename = __DIR__ .'/logs/' . gmdate('Y-m-d') . '.captcha.txt'; /* use GMT date for filename */
+		$logline = gmdate('Y-m-d H:i:s'); /* use GMT time for log entries */
+		foreach ($logArr as $tab) {
+			$logline .= "\t" . $tab;
+		};
+
+		/* write the log line to the file */
+		$logfile = fopen($filename, 'a');
+		if (!$logfile) die();
+		if (fwrite($logfile, $logline . "\n") === false) {
+			fclose($logfile);
+			die();
+		}
+
+		/* Done */
+		fclose($logfile);
+	}
+
 
 	// check if the visitor's IP is on a whitelist:
 	private function captchaWhitelisted() {
