@@ -127,7 +127,7 @@
 	{"id": "metauser",
 	 "n": "Meta/Facebook User",
 	 "r": ["facebookexternalhit","facebookcatalog"],
-	 "rx": ["facebookexternalhit\\/(\\d+\\.?\\d*)", "meta-externalfetcher\\/(\\d\\.\\d)", "facebookcatalog\\/(\\d+\\.?\\d*)"],
+	 "rx": ["facebook\\w*\\/(\\d+\\.?\\d*)", "meta\\-?\\w*\\/(\\d\\.\\d)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
 	},
 	{"id": "qwant",
