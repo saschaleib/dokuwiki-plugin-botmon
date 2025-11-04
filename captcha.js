@@ -175,8 +175,8 @@ const $BMCaptcha = {
 					document._botmon.ip || '0.0.0.0',
 					(new Date()).toISOString().substring(0, 10)
 				];
-				if ($BMCaptcha._st - performance.now() >= 0) dat.push($BMCaptcha._st - performance.now());
-				const hash = $BMCaptcha.digest.hash(dat.join('|'));
+				//if ($BMCaptcha._st - performance.now() >= 0) dat.push($BMCaptcha._st - performance.now());
+				const hash = /*$BMCaptcha.digest.hash(*/dat.join('|')/*)*/;
 
 				// set the cookie:
 				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + ';path=/;hostOnly;session;sameSite=strict;'
