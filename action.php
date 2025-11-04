@@ -314,7 +314,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		$today = substr((new DateTime())->format('c'), 0, 10);
 
-		$raw = $this->getConf('captchaSeed') . '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today;
+		$raw = $this->getConf('captchaSeed') /*. '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today */;
 		$expected = $raw; //hash('sha256', $raw);
 
 		// for debugging: write captcha data to the log:
@@ -330,13 +330,16 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	 */
 	private function writeCaptchaLog($remote_addr, $cookieVal, $serverName, $expected) {
 
+		global $INFO;
+
 		$logArr = Array(
 			$remote_addr, /* remote IP */
 			$cookieVal, /* cookie value */
 			$this->getConf('captchaSeed'), /* seed */
 			$serverName, /* server name */
 			$expected, /* expected cookie value */
-			$cookieVal == $expected /* cookie matches expected value? */
+			($cookieVal == $expected ? 'MATCH' : 'WRONG'), /* cookie matches expected value? */
+			$_SERVER['REQUEST_URI'] /* request URI */
 		);
 
 		//* create the log line */

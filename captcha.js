@@ -168,15 +168,16 @@ const $BMCaptcha = {
 			try {
 				var $status = 'loading';
 
-				// generate the hash:
-				const dat = [ // the data to encode
+				// generate the hash: -- disabled until I found the pesky bug in the digest
+				/*const dat = [ // the data to encode
 					document._botmon.seed || '',
 					location.hostname,
 					document._botmon.ip || '0.0.0.0',
 					(new Date()).toISOString().substring(0, 10)
-				];
+				]; */
 				//if ($BMCaptcha._st - performance.now() >= 0) dat.push($BMCaptcha._st - performance.now());
-				const hash = /*$BMCaptcha.digest.hash(*/dat.join('|')/*)*/;
+				//const hash = $BMCaptcha.digest.hash(dat.join('|'));
+				const hash = document._botmon.seed || ''
 
 				// set the cookie:
 				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + ';path=/;hostOnly;session;sameSite=strict;'

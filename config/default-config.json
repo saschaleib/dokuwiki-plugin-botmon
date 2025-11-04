@@ -2,7 +2,7 @@
 	"threshold": 100,
 	"rules": [
 		{"func": "fromKnownBotIP",
-		 "id": "botIpRange", "desc": "Common Bot IP range",
+		 "id": "knownIpRange", "desc": "From known IP range",
 		 "bot": 40
 		},
 		{"func": "matchesClient", "params": ["aol","msie","ffold","chromeold","oldedge","operaold"],
@@ -57,9 +57,13 @@
 		 "id": "impPC", "desc": "Impossible combination of platform and client",
 		 "bot": 70
 		},
+		{"func": "loadSpeed", "params": [3, 10],
+		 "id": "speedRun", "desc": "Average time between page loads is less than 10 seconds",
+		 "bot": 30
+		},
 		{"func": "loadSpeed", "params": [3, 20],
 		 "id": "speedRun", "desc": "Average time between page loads is less than 20 seconds",
-		 "bot": 60
+		 "bot": 30
 		},
 		{"func": "noAcceptLang",
 		 "id": "noAcc", "desc": "No “Accept-Language” header",
