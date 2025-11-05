@@ -357,7 +357,16 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			die();
 		}
 
-		/* Done */
+		// in case of errors, write the cookie data to the log:
+		if (!$cookieVal) {
+			$logline .= "\t" . json_encode(print_r($_COOKIE, true));
+			if (fwrite($logfile, $logline . "\n") === false) {
+				fclose($logfile);
+				die();
+			}
+		}
+
+		/* Done. close the file. */
 		fclose($logfile);
 	}
 
