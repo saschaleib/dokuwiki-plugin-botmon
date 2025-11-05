@@ -191,8 +191,8 @@ const $BMCaptcha = {
 			// change the interface:
 			const dlg = document.getElementById('botmon_captcha_box');
 			if (dlg) {
-				dlg.classList.remove('ready');
 				dlg.classList.add( $status );
+				dlg.classList.remove('ready');
 			}
 
 			// reload the page:
@@ -203,8 +203,8 @@ const $BMCaptcha = {
 	_delayedCallback: function() {
 		const dlg = document.getElementById('botmon_captcha_box');
 		if (dlg) {
-			dlg.classList.remove('checking');
 			dlg.classList.add('ready');
+			dlg.classList.remove('checking');
 
 			const input = dlg.getElementsByTagName('input')[0];
 			if (input) {
