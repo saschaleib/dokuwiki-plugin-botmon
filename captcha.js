@@ -180,7 +180,7 @@ const $BMCaptcha = {
 				const hash = document._botmon.seed || ''
 
 				// set the cookie:
-				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + '; path=/; hostOnly; session; sameSite=strict;'
+				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + '; path=/; session;'
 					+ (document.location.protocol === 'https:' ? ' secure;' : '');
 
 			} catch (err) {
