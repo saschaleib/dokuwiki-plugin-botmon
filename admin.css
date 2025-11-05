@@ -675,7 +675,7 @@
 					grid-template-columns: min-content auto;
 					gap: .25em .5em;
 					border-left: transparent none 0;
-					margin: 0 .5rem .25rem 0;
+					margin: .5rem .5rem .25rem 0;
 				}
 				dt {
 					grid-column: 1;
@@ -686,8 +686,6 @@
 					background-color: transparent;
 				}
 				dd.pages {
-					& {
-					}
 					ul {
 						li {
 							& {
@@ -699,6 +697,9 @@
 							}
 							&:nth-child(odd) {
 								background-color: #DFDFDF;
+							}
+							&.detailled {
+								outline: red dotted 1pt;
 							}
 							div.row {
 								display: flex;

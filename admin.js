@@ -2658,6 +2658,7 @@ BotMon.live = {
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
+				const combinedItem = data.hasOwnProperty('_ipRange');
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
@@ -2677,7 +2678,7 @@ BotMon.live = {
 
 					}
 
-				} else { /* not for bots */
+				} else if (!combinedItem) { /* not for bots or combined items */
 
 					dl.appendChild(make('dt', {}, "Client:")); /* client */
 					dl.appendChild(make('dd', {'class': 'has_icon client cl_' + (data._client ? data._client.id : 'unknown')},
@@ -2687,26 +2688,41 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'has_icon platform pf_' + (data._platform ? data._platform.id : 'unknown')},
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
-					/*dl.appendChild(make('dt', {}, "ID:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
-				}
+					dl.appendChild(make('dt', {}, "IP-Address:"));
+					const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
+						ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink ipinfo',
+							'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
+							'target': 'ipinfo',
+							'title': "View this address on IPInfo.io"
+						} , "DNS Info"));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink abuseipdb',
+							'href': `https://www.abuseipdb.com/check/${encodeURIComponent(data.ip)}`,
+							'target': 'abuseipdb',
+							'title': "Check this address on AbuseIPDB.com"
+						} , "Check on AbuseIPDB"));
+					dl.appendChild(ipItem);
 
-				dl.appendChild(make('dt', {}, "IP-Address:"));
-				const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
-					ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
-					ipItem.appendChild(make('a', {
-						'class': 'icon_only extlink ipinfo',
-						'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
-						'target': 'ipinfo',
-						'title': "View this address on IPInfo.io"
-					} , "DNS Info"));
-					ipItem.appendChild(make('a', {
-						'class': 'icon_only extlink abuseipdb',
-						'href': `https://www.abuseipdb.com/check/${encodeURIComponent(data.ip)}`,
-						'target': 'abuseipdb',
-						'title': "Check this address on AbuseIPDB.com"
-					} , "Check on AbuseIPDB"));
-				dl.appendChild(ipItem);
+					dl.appendChild(make('dt', {}, "User-Agent:"));
+					dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
+
+					dl.appendChild(make('dt', {}, "Languages:"));
+					dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
+
+					dl.appendChild(make('dt', {}, "Session ID:"));
+					dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
+
+					if (data.geo && data.geo !=='') {
+						dl.appendChild(make('dt', {}, "Location:"));
+						dl.appendChild(make('dd', {
+							'class': 'has_icon country ctry_' + data.geo.toLowerCase(),
+							'data-ctry': data.geo,
+							'title': "Country: " + data._country
+						}, data._country + ' (' + data.geo + ')'));
+					}
+				}
 
 				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {
 					dl.appendChild(make('dt', {}, "Seen:"));
@@ -2721,12 +2737,9 @@ BotMon.live = {
 				dl.appendChild(make('dt', {}, "Actions:"));
 				dl.appendChild(make('dd', {'class': 'views'},
 					"Page loads: " + data._loadCount.toString() +
-					( data._captcha['Y'] > 0 || data._captcha['W'] || data._captcha['-'] > 0 ? ", captchas: " + (data._captcha['Y']+data._captcha['W']+data._captcha['-']).toString() : '') +
+					( data._captcha['Y'] > 0 ? ", captchas: " + data._captcha['Y'].toString() : '') +
 					", views: " + data._viewCount.toString()
 				));
-
-				dl.appendChild(make('dt', {}, "User-Agent:"));
-				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
 				if (data.ref && data.ref !== '') {
 					dl.appendChild(make('dt', {}, "Referrer:"));
@@ -2741,27 +2754,12 @@ BotMon.live = {
 					}, data.ref));
 				}
 
-				dl.appendChild(make('dt', {}, "Languages:"));
-				dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
-
-				if (data.geo && data.geo !=='') {
-					dl.appendChild(make('dt', {}, "Location:"));
-					dl.appendChild(make('dd', {
-						'class': 'has_icon country ctry_' + data.geo.toLowerCase(),
-						'data-ctry': data.geo,
-						'title': "Country: " + data._country
-					}, data._country + ' (' + data.geo + ')'));
-				}
-
 				if (data.captcha && data.captcha !=='') {
 					dl.appendChild(make('dt', {}, "Captcha-status:"));
 					dl.appendChild(make('dd', {
 						'class': 'captcha'
 					}, model._makeCaptchaTitle(data._captcha)));
 				}
-
-				dl.appendChild(make('dt', {}, "Session ID:"));
-				dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
 
 				dl.appendChild(make('dt', {}, "Seen by:"));
 				dl.appendChild(make('dd', {'class': 'has_icon seenby sb_' + data._seenBy.join('')}, data._seenBy.join(', ') ));
@@ -2773,7 +2771,7 @@ BotMon.live = {
 				/* list all page views */
 				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
-					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page));
+					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page, combinedItem));
 				});
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
@@ -2835,14 +2833,15 @@ BotMon.live = {
 			},
 
 			// make a page view item:
-			_makePageViewItem: function(page) {
-				//console.log("makePageViewItem:",page);
+			_makePageViewItem: function(page, moreInfo) {
+				console.log("makePageViewItem:",page);
 
 				// shortcut for neater code:
 				const make = BotMon.t._makeElement;
 
 				// the actual list item:
 				const pgLi = make('li');
+				if (moreInfo) pgLi.classList.add('detailled');
 
 				const row1 = make('div', {'class': 'row'});
 
