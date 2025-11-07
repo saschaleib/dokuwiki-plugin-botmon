@@ -102,5 +102,9 @@
 	{"n": "wget",
 	 "id": "wget",
 	 "rx": [ "Wget\\/(\\d+\\.?\\d*\\.?\\d*)" ]
+	},
+	{"n": "PrivacyBrowser",
+	 "id": "privacybrowser",
+	 "rx": [ "PrivacyBrowser\\/(\\d+\\.?\\d*)" ]
 	}
 ]

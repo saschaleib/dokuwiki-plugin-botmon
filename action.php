@@ -314,8 +314,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		$today = substr((new DateTime())->format('c'), 0, 10);
 
-		$raw = $this->getConf('captchaSeed') /*. '|' . $_SERVER['SERVER_NAME'] . '|' . $_SERVER['REMOTE_ADDR'] . '|' . $today */;
-		$expected = $raw; //hash('sha256', $raw);
+		$raw = $this->getConf('captchaSeed') . ';' . $_SERVER['SERVER_NAME'] . ';' . $_SERVER['REMOTE_ADDR'] . ';' . $today;
+		$expected = hash('sha256', $raw);
 
 		// for debugging: write captcha data to the log:
 		$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], $expected);

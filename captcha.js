@@ -54,7 +54,7 @@ const $BMCaptcha = {
 		setTimeout($BMCaptcha._delayedCallback, $BMCaptcha._cbDly * 1000);
 	},
 
-	/* creates a digest hash for the cookie function */
+	/* creates a digest hash */
 	digest: {
 
 		/* simple SHA hash function - adapted from https://geraintluff.github.io/sha256/ */
@@ -168,16 +168,15 @@ const $BMCaptcha = {
 			try {
 				var $status = 'loading';
 
-				// generate the hash: -- disabled until I found the pesky bug in the digest
-				/*const dat = [ // the data to encode
+				// generate the hash:
+				const dat = [ // the data to encode
 					document._botmon.seed || '',
 					location.hostname,
 					document._botmon.ip || '0.0.0.0',
 					(new Date()).toISOString().substring(0, 10)
-				]; */
-				//if ($BMCaptcha._st - performance.now() >= 0) dat.push($BMCaptcha._st - performance.now());
-				//const hash = $BMCaptcha.digest.hash(dat.join('|'));
-				const hash = document._botmon.seed || ''
+				];
+				if (performance.now() - $BMCaptcha._st <= 1500) dat.push(performance.now() - $BMCaptcha._st);
+				const hash = $BMCaptcha.digest.hash(dat.join(';'));
 
 				// set the cookie:
 				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + '; path=/; session;'

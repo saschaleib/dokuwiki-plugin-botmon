@@ -118,16 +118,16 @@
 	 "rx": ["Perplexity\\-User\\/(\\d+\\.\\d+);"],
 	 "url": "https://perplexity.ai/perplexitybot"
 	},
-	{"id": "metabots",
-	 "n": "Meta/Facebook",
-	 "r": ["meta-webindexer","meta-externalads","meta-externalagent"],
-	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.\\d+)", "meta-externala\\w+\\/(\\d+\\.\\d+)"],
-	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
-	},
 	{"id": "metauser",
 	 "n": "Meta/Facebook User",
 	 "r": ["facebookexternalhit","facebookcatalog"],
-	 "rx": ["facebook\\w*\\/(\\d+\\.?\\d*)", "meta\\-?\\w*\\/(\\d\\.\\d)"],
+	 "rx": ["facebookexternalhit\\/(\\d+\\.?\\d*)", "facebookcatalog\\/(\\d\\.?\\d*)"],
+	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
+	},
+	{"id": "metabots",
+	 "n": "Meta/Facebook",
+	 "r": ["meta-webindexer","meta-externalads","meta-externalagent", "meta-webindexer"],
+	 "rx": ["facebook[cw]\\w+\\/(\\d+\\.?\\d*)", "meta\\-[cw]\\w+\\/(\\d+\\.?\\d*)", "meta-externalads\\/(\\d+\\.?\\d*)", "meta-externalagent\\/(\\d+\\.?\\d*)"],
 	 "url": "https://developers.facebook.com/docs/sharing/webmasters/crawler"
 	},
 	{"id": "qwant",

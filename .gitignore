@@ -3,5 +3,5 @@ logs/*.log.txt
 logs/*.srv.txt
 logs/*.tck.txt
 logs/*.captcha.txt
-config/user-*.json
+config/user-*.*
 php_errors.log
