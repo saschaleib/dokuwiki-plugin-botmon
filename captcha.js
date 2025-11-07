@@ -176,11 +176,10 @@ const $BMCaptcha = {
 					(new Date()).toISOString().substring(0, 10)
 				];
 				if (performance.now() - $BMCaptcha._st <= 1500) dat.push(performance.now() - $BMCaptcha._st);
-				const hash = $BMCaptcha.digest.hash(dat.join(';'));
 
 				// set the cookie:
-				document.cookie = "DWConfirm=" + encodeURIComponent(hash) + '; path=/; session;'
-					+ (document.location.protocol === 'https:' ? ' secure;' : '');
+				document.cookie = "DWConfirm=" + encodeURIComponent($BMCaptcha.digest.hash(dat.join(';'))) + '; path=/; session;';
+				//	+ (document.location.protocol === 'https:' ? ' secure;' : '');
 
 			} catch (err) {
 				console.error(err);

@@ -416,7 +416,7 @@ BotMon.live = {
 						_client: BotMon.live.data.clients.match(nv.agent) ?? null, // client info
 						_platform: BotMon.live.data.platforms.match(nv.agent), // platform info
 						_captcha: {'X': 0, 'Y': 0, 'N': 0, 'W':0, 'H': 0,
-							_str: function() { return (this.X > 0 ? 'X' : '') + (this.Y > 0 ? 'Y' : '') + (this.N > 0 ? 'N' : '') + (this.W > 0 ? 'W' : '') + (this.H > 0 ? 'H' : ''); }
+							_str: function() { return (this.X > 0 ? 'X' : '') + (this.Y > 0 ? (this.Y > 1 ? 'YY' : 'Y') : '') + (this.N > 0 ? 'N' : '') + (this.W > 0 ? 'W' : '') + (this.H > 0 ? 'H' : ''); }
 						} // captcha counter
 					}};
 					model._visitors.push(visitor);
@@ -574,11 +574,13 @@ BotMon.live = {
 			_makeCaptchaTitle: function(cObj) {
 				const cStr = cObj._str();
 				switch (cStr) {
-					case 'Y':
-					case 'NY': return "Blocked.";
+					case 'Y': return "Blocked.";
+					case 'YY': return "Blocked multiple times.";
 					case 'YN': return "Solved";
+					case 'YYN': return "Solved after multiple attempts";
 					case 'W': return "Whitelisted";
 					case 'H': return "HEAD request, no captcha";
+					case 'YH': case 'YYH': return "Block & HEAD mixed";
 					default: return "Undefined: " + cStr;
 				}
 			}
@@ -2083,7 +2085,7 @@ BotMon.live = {
 					botList.forEach( (botInfo) => {
 						const bli = makeElement('dd');
 						bli.appendChild(makeElement('span', {'class': 'has_icon bot bot_' + botInfo.id }, botInfo.name));
-						bli.appendChild(makeElement('span', {'class': 'count' }, botInfo.count));
+						bli.appendChild(makeElement('span', {'class': 'count' }, botInfo.count || kNoData));
 						botElement.append(bli)
 					});
 				}
@@ -2098,7 +2100,7 @@ BotMon.live = {
 					ispList.forEach( (netInfo) => {
 						const li = makeElement('dd');
 						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + netInfo.typ }, netInfo.name));
-						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count));
+						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count || kNoData));
 						botIps.append(li)
 					});
 				}
@@ -2111,7 +2113,7 @@ BotMon.live = {
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
 						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
-						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count || kNoData));
 						botCountries.appendChild(cLi);
 					});
 				}
@@ -2210,7 +2212,7 @@ BotMon.live = {
 					usrCtryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
 						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
-						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count || kNoData));
 						usrCountries.appendChild(cLi);
 					});
 				}
@@ -2234,7 +2236,7 @@ BotMon.live = {
 							pgDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': pgInfo.count + " page views"
-							}, pgInfo.count));
+							}, pgInfo.count || kNoData));
 							wmpages.appendChild(pgDd);
 						});
 					}
