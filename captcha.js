@@ -6,6 +6,11 @@
 const $BMCaptcha = {
 
 	init: function() {
+
+		// hide the NoJS warning:
+		document.getElementById('BM__NoJSWarning').close();
+
+		// install the captcha:
 		document.getElementsByTagName('body')[0].classList.add('botmon_captcha');
 		$BMCaptcha._cbDly = 1.5;
 		$BMCaptcha.install()

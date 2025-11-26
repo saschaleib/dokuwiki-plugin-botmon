@@ -270,6 +270,10 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			echo  DOKU_TAB . '};' . NL;
 
 			echo '</script>' . NL;
+
+			// insert a warning message for users without JavaScript:
+			echo '<dialog open closedby="any" id="BM__NoJSWarning"><p>' . $this->getLang('bm_noJsWarning') . '</p></dialog>' . NL;
+
 		}
 	}
 

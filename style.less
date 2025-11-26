@@ -106,7 +106,19 @@ body.botmon_captcha {
 	}
 }
 
-// smaller screens:
+// no js warning
+#BM__NoJSWarning {
+	position: fixed;
+	bottom: calc(50vh - 2.5rem);
+	width: 100%; max-width: fit-content;
+	margin: 0 auto;
+	padding: .25rem 1rem;
+	border-radius: .5rem;
+	border: red solid 2pt;
+	box-shadow: rgba(128, 0, 0, 0.5) .25rem .25rem .5rem;
+}
+
+// captcha on smaller screens:
 @media (max-width: 480px) {
 	body.botmon_captcha #botmon_captcha_box {
 		width: 100vw;

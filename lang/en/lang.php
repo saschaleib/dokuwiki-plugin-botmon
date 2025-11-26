@@ -12,3 +12,4 @@ $lang['bm_dlgConfirm']   = 'Click to confirm.';
 $lang['bm_dlgChecking']  = 'Checking&nbsp;&hellip;';
 $lang['bm_dlgLoading']   = 'Loading page&nbsp;&hellip;';
 $lang['bm_dlgError']     = 'An error occured.';
+$lang['bm_noJsWarning']  = 'This page requires JavaScript to be enabled.';

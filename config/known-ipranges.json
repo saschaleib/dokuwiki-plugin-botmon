@@ -6,7 +6,6 @@
 		{"id": "brasilnet", "name": "BrasilNet"},
 		{"id": "charter", "name": "Charter Inc. Range"},
 		{"id": "chinanet", "name": "ChinaNet"},
-		{"id": "cloudflare", "name": "Cloudflare Network"},
 		{"id": "cnisp", "name": "China ISP Range"},
 		{"id": "cnmob", "name": "China Mobile"},
 		{"id": "domtehniki", "name": "Dom Tehniki / WS Telecom"},
@@ -108,7 +107,6 @@
 		{"from": "2603:8000::::::", "to": "2603:80ff:ffff:ffff:ffff:ffff:ffff:ffff", "m": 24, "g": "charter"},
 		{"from": "2607:a400::::::", "to": "2607:a400:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32, "g": "zenlayer"},
 		{"from": "2804:::::::", "to": "2804:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "m": 16, "g": "misc_sa"},
-		{"from": "2a09:bac3::::::", "to": "2a09:bac3:ffff:ffff:ffff:ffff:ffff:ffff", "m": 32,"g": "cloudflare"},
 		{"from": "2a0a:4cc0::::::", "to": "2a0a:4cc0:FFFF:FFFF:FFFF:FFFF:FFFF:FFFF", "g": "netcup"}
 	]
 }
