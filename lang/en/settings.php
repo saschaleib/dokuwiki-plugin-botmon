@@ -5,6 +5,22 @@
  * @author     Sascha Leib <sascha@leib.be>
  */
 
+$lang['showday']			= 'Which data to show in the “Latest” tab:';
+	$lang['showday_o_yesterday']		= 'Last full day (yesterday)';
+	$lang['showday_o_today']			= 'Ongoing logs (today)';
+
+$lang['combineNets']	= 'Combine visits from known IP-ranges into one entry:';
+
 $lang['geoiplib']			= 'Add GeoIP Information<br><small>(requires PHP module to be installed)</small>';
-	$lang['geoiplib_o_disabled']	= 'Disabled';
-	$lang['geoiplib_o_phpgeoip']	= 'Use GeoIP Module';
+	$lang['geoiplib_o_disabled']		= 'Disabled';
+	$lang['geoiplib_o_phpgeoip']		= 'Use GeoIP Module';
+
+$lang['useCaptcha']		= 'Enable Captcha<br><small>(Experimental, read the manual first!)</small>';
+	$lang['useCaptcha_o_disabled']		= 'Disabled';
+	$lang['useCaptcha_o_loremipsum']	= 'Captcha with Lorem ipsum text';
+	$lang['useCaptcha_o_dada']			= 'Captcha with Dada placeholder text';
+
+$lang['captchaSeed']	= 'Captcha Seed<br><small>(Enter a random string, e.g. <a href="https://www.browserling.com/tools/random-hex" target="_blank">from here</a>)</small>';
+
+$lang['captchaBypass']		= 'Automatically solve the Captcha, if …<br><small>(Note: this probably does not make much sense for English wikis!)</small>';
+	$lang['captchaBypass_langmatch']		= 'Client and page languages match ';

@@ -34,6 +34,7 @@ class admin_plugin_botmon extends AdminPlugin {
 
 		// display GeoIP data?
 		$geoIPconf = $this->getConf('geoiplib');
+		$useCaptchaConf = ($this->getConf('useCaptcha') !== 'disabled');
 
 		$hasOldLogFiles = $this->hasOldLogFiles();
 
@@ -43,7 +44,7 @@ class admin_plugin_botmon extends AdminPlugin {
 		$pluginPath = $conf['basedir'] . 'lib/plugins/' . $this->getPluginName();
 
 		/* Plugin Headline */
-		echo '<div id="botmon__admin">
+		echo NL . '<div id="botmon__admin">
 	<h1>Bot Monitoring Plugin</h1>
 	<nav id="botmon__tabs">
 		<ul class="tabs" role="tablist">
@@ -52,11 +53,18 @@ class admin_plugin_botmon extends AdminPlugin {
 		</ul>
 	</nav>
 	<article role="tabpanel" id="botmon__latest">
+		<script>
+			const BMSettings = {
+				showday: ' . json_encode($this->getConf('showday')) . ',
+				combineNets: ' . json_encode($this->getConf('combineNets')) . ',
+				useCaptcha: ' . json_encode($this->getConf('useCaptcha') !== 'disabled') . '
+			};
+		</script>
 		<h2 class="a11y">Latest data</h2>
 		<header id="botmon__today__title">Loading&nbsp;&hellip;</header>
 		<div id="botmon__today__content">
 			<details id="botmon__today__overview" open>
-				<summary>Overview</summary>
+				<summary>Bots overview</summary>
 				<div class="botmon_bots_grid" data-geoip="' . $geoIPconf  . '">
 					<dl id="botmon__today__botsvshumans"></dl>
 					<dl id="botmon__botslist"></dl>
@@ -79,8 +87,18 @@ class admin_plugin_botmon extends AdminPlugin {
 					<dl id="botmon__today__wm_pages"></dl>
 					<dl id="botmon__today__wm_referers"></dl>
 				</div>
-			</details>
-			<details id="botmon__today__visitors">
+			</details>' . NL;
+		if ($useCaptchaConf) {
+			echo '			<details id="botmon__today__captcha">
+				<summary>Captcha statistics</summary>
+				<div class="botmon_captcha_grid">
+					<dl id="botmon__today__cp_humans"></dl>
+					<dl id="botmon__today__cp_sus"></dl>
+					<dl id="botmon__today__cp_bots"></dl>
+				</div>
+			</details>' . NL;
+		}
+		echo '			<details id="botmon__today__visitors">
 				<summary>Visitor logs</summary>
 				<div id="botmon__today__visitorlists"></div>
 			</details>
@@ -92,7 +110,7 @@ class admin_plugin_botmon extends AdminPlugin {
 	</article>
 	<article role="tabpanel" id="botmon__log" hidden>
 		<h2 class="a11y">Process log</h2>
-		<ul id="botmon__loglist">';
+		<ul id="botmon__loglist">' . NL;
 
 		/* proces old logs */
 		if ($hasOldLogFiles) {
@@ -101,10 +119,11 @@ class admin_plugin_botmon extends AdminPlugin {
 
 			$helper->cleanup();
 		} else {
-			echo '<li>No files to process.</li>';
+			echo DOKU_TAB . DOKU_TAB . DOKU_TAB . '<li>No files to process.</li>' . NL;
 		}
 
-		echo '</article></div><!-- End of BotMon Admin Tool -->';
+		echo DOKU_TAB . DOKU_TAB . '</ul>' . NL . DOKU_TAB . '</article>' . NL;
+		echo '</div><!-- End of BotMon Admin Tool -->';
 
 	}
 

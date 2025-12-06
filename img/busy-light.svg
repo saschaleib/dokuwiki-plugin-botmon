@@ -1,0 +1,139 @@
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
+<style>.box{fill:#00CADB;transform-origin: 50% 50%}
+@keyframes box-1 {
+	9% {transform: translate(-12px,0)}
+	18% {transform: translate(0px,0)}
+	27% {transform: translate(0px,0)}
+	36% {transform: translate(12px,0)}
+	45% {transform: translate(12px,12px)}
+	55% {transform: translate(12px,12px)}
+	64% {transform: translate(12px,12px)}
+	73% {transform: translate(12px,0px)}
+	82% {transform: translate(0px,0px)}
+	91% {transform: translate(-12px,0px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(1){animation: box-1 4s infinite}
+@keyframes box-2 {
+	9% {transform: translate(0,0)}
+	18% {transform: translate(12px,0)}
+	27% {transform: translate(0px,0)}
+	36% {transform: translate(12px,0)}
+	45% {transform: translate(12px,12px)}
+	55% {transform: translate(12px,12px)}
+	64% {transform: translate(12px,12px)}
+	73% {transform: translate(12px,12px)}
+	82% {transform: translate(0px,12px)}
+	91% {transform: translate(0px,12px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(2){animation: box-2 4s infinite}
+@keyframes box-3 {
+	9% {transform: translate(-12px,0)}
+	18% {transform: translate(-12px,0)}
+	27% {transform: translate(0px,0)}
+	36% {transform: translate(-12px,0)}
+	45% {transform: translate(-12px,0)}
+	55% {transform: translate(-12px,0)}
+	64% {transform: translate(-12px,0)}
+	73% {transform: translate(-12px,0)}
+	82% {transform: translate(-12px,-12px)}
+	91% {transform: translate(0px,-12px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(3) {animation: box-3 4s infinite}
+@keyframes box-4 {
+	9% {transform: translate(-12px,0)}
+	18% {transform: translate(-12px,0)}
+	27% {transform: translate(-12px,-12px)}
+	36% {transform: translate(0px,-12px)}
+	45% {transform: translate(0px,0px)}
+	55% {transform: translate(0px,-12px)}
+	64% {transform: translate(0px,-12px)}
+	73% {transform: translate(0px,-12px)}
+	82% {transform: translate(-12px,-12px)}
+	91% {transform: translate(-12px,0px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(4) {animation: box-4 4s infinite}
+@keyframes box-5 {
+	9% {transform: translate(0,0)}
+	18% {transform: translate(0,0)}
+	27% {transform: translate(0,0)}
+	36% {transform: translate(12px,0)}
+	45% {transform: translate(12px,0)}
+	55% {transform: translate(12px,0)}
+	64% {transform: translate(12px,0)}
+	73% {transform: translate(12px,0)}
+	82% {transform: translate(12px,-12px)}
+	91% {transform: translate(0px,-12px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(5) {animation: box-5 4s infinite}
+@keyframes box-6 {
+	9% {transform: translate(0,0)}
+	18% {transform: translate(-12px,0)}
+	27% {transform: translate(-12px,0)}
+	36% {transform: translate(0px,0)}
+	45% {transform: translate(0px,0)}
+	55% {transform: translate(0px,0)}
+	64% {transform: translate(0px,0)}
+	73% {transform: translate(0px,12px)}
+	82% {transform: translate(-12px,12px)}
+	91% {transform: translate(-12px,0px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(6) {animation: box-6 4s infinite}
+@keyframes box-7 {
+	9% {transform: translate(12px,0)}
+	18% {transform: translate(12px,0)}
+	27% {transform: translate(12px,0)}
+	36% {transform: translate(0px,0)}
+	45% {transform: translate(0px,-12px)}
+	55% {transform: translate(12px,-12px)}
+	64% {transform: translate(0px,-12px)}
+	73% {transform: translate(0px,-12px)}
+	82% {transform: translate(0px,0px)}
+	91% {transform: translate(12px,0px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(7) {animation: box-7 4s infinite}
+@keyframes box-8 {
+	9% {transform: translate(0,0)}
+	18% {transform: translate(-12px,0)}
+	27% {transform: translate(-12px,-12px)}
+	36% {transform: translate(0px,-12px)}
+	45% {transform: translate(0px,-12px)}
+	55% {transform: translate(0px,-12px)}
+	64% {transform: translate(0px,-12px)}
+	73% {transform: translate(0px,-12px)}
+	82% {transform: translate(12px,-12px)}
+	91% {transform: translate(12px,0px)}
+	100% {transform: translate(0px,0px)}
+}
+.box:nth-child(8){animation: box-8 4s infinite}
+@keyframes box-9{
+	 9% {transform: translate(-12px,0)}
+	18% {transform: translate(-12px,0)}
+	27% {transform: translate(0px,0)}
+	36% {transform: translate(-12px,0)}
+	45% {transform: translate(0px,0)}
+	55% {transform: translate(0px,0)}
+	64% {transform: translate(-12px,0)}
+	73% {transform: translate(-12px,0)}
+	82% {transform: translate(-24px,0)}
+	91% {transform: translate(-12px,0)}
+	100% {transform: translate(0px,0)}
+}
+.box:nth-child(9) {animation: box-9 4s infinite}
+</style>
+<g><rect class="box" x="13" y="1" rx="1" width="10" height="10"/>
+<rect class="box" x="13" y="1" rx="1" width="10" height="10"/>
+<rect class="box" x="25" y="25" rx="1" width="10" height="10"/>
+<rect class="box" x="13" y="13" rx="1" width="10" height="10"/>
+<rect class="box" x="13" y="13" rx="1" width="10" height="10"/>
+<rect class="box" x="25" y="13" rx="1" width="10" height="10"/>
+<rect class="box" x="1" y="25" rx="1" width="10" height="10"/>
+<rect class="box" x="13" y="25" rx="1" width="10" height="10"/>
+<rect class="box" x="25" y="25" rx="1" width="10" height="10"/></g>
+</svg>

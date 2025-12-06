@@ -87,12 +87,24 @@
 	 "id": "undici",
 	 "rx": ["undici"]
 	},
-	{"n": "GoHTTP-based crawler",
+	{"n": "GoHTTP-based bot",
 	 "id": "gohttp",
 	 "rx": ["Go\\-http\\-client\\/(\\d+)", "quic\\-go\\-HTTP\\/(\\d+)"]
+	},
+	{"n": "Python URLlib-based crawler",
+	 "id": "python",
+	 "rx": ["Python\\-?\\w*\\/(\\d+\\.?\\d*)"]
 	},
 	{"n": "AppleWebKit",
 	 "id": "webkit",
 	 "rx": [ "AppleWebKit\\/(\\d*)\\." ]
+	},
+	{"n": "wget",
+	 "id": "wget",
+	 "rx": [ "Wget\\/(\\d+\\.?\\d*\\.?\\d*)" ]
+	},
+	{"n": "PrivacyBrowser",
+	 "id": "privacybrowser",
+	 "rx": [ "PrivacyBrowser\\/(\\d+\\.?\\d*)" ]
 	}
 ]

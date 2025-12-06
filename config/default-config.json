@@ -2,8 +2,8 @@
 	"threshold": 100,
 	"rules": [
 		{"func": "fromKnownBotIP",
-		 "id": "botIpRange", "desc": "Common Bot IP range",
-		 "bot": 50
+		 "id": "knownIpRange", "desc": "From known IP range",
+		 "bot": 40
 		},
 		{"func": "matchesClient", "params": ["aol","msie","ffold","chromeold","oldedge","operaold"],
 		 "id": "oldClient", "desc": "Obsolete browser version",
@@ -41,7 +41,7 @@
 		 "id": "susClient", "desc": "Client identifier that is popular with bot networks",
 		 "bot": 10
 		},
-		{"func": "matchesClient", "params": ["undici","gohttp"],
+		{"func": "matchesClient", "params": ["undici","gohttp","python","wget","curl"],
 		 "id": "botClient", "desc": "Client identifier indicates web crawler",
 		 "bot": 100
 		},
@@ -57,9 +57,13 @@
 		 "id": "impPC", "desc": "Impossible combination of platform and client",
 		 "bot": 70
 		},
+		{"func": "loadSpeed", "params": [3, 10],
+		 "id": "speedRun", "desc": "Average time between page loads is less than 10 seconds",
+		 "bot": 30
+		},
 		{"func": "loadSpeed", "params": [3, 20],
 		 "id": "speedRun", "desc": "Average time between page loads is less than 20 seconds",
-		 "bot": 60
+		 "bot": 30
 		},
 		{"func": "noAcceptLang",
 		 "id": "noAcc", "desc": "No “Accept-Language” header",
@@ -69,9 +73,13 @@
 		 "id": "langMatch", "desc": "Client’s ‘Accept-Language’ header does not match the page language",
 		 "bot": 30
 		},
-		{"func": "matchesClient", "params": ["whatsapp","applemsgs","goognblm","tiktok","meta","chatgpt","claude","perplexity"],
-		 "id": "previewClient", "desc": "User-triggered bot load (e.g. preview)",
-		 "bot": -120
+		{"func": "blockedByCaptcha", "params": [],
+		 "id": "blockedByCaptcha", "desc": "Visitor did not solve the captcha",
+		 "bot": 50
+		},
+		{"func": "whitelistedByCaptcha", "params": [],
+		 "id": "whitelistedByCaptcha", "desc": "Visitor uses a whitelisted IP address",
+		 "bot": -30
 		}
 	]
 }

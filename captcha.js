@@ -1,0 +1,237 @@
+"use strict";
+/* DokuWiki BotMon Captcha JavaScript */
+/* 23.10.2025 - 0.1.2 - pre-release */
+/* Author: Sascha Leib <ad@hominem.info> */
+
+const $BMCaptcha = {
+
+	init: function() {
+
+		// hide the NoJS warning:
+		document.getElementById('BM__NoJSWarning').close();
+
+		// install the captcha:
+		document.getElementsByTagName('body')[0].classList.add('botmon_captcha');
+		$BMCaptcha._cbDly = 1.5;
+		$BMCaptcha.install()
+	},
+
+	install: function() {
+
+		// localisation helper function:
+		let _loc = function(id, alt) {
+			if ($BMLocales && $BMLocales[id]) return $BMLocales[id];
+			return alt;
+		}
+
+		// find the parent element:
+		let bm_parent = document.getElementsByTagName('body')[0];
+
+		// create the dialog:
+		const dlg = document.createElement('dialog');
+		dlg.setAttribute('closedby', 'none');
+		dlg.setAttribute('open', 'open');
+		dlg.setAttribute('role', 'alertdialog');
+		dlg.setAttribute('aria-labelledby', 'botmon_captcha_title');
+		dlg.classList.add('checking');
+		dlg.id = 'botmon_captcha_box';
+		dlg.innerHTML = '<h2 id="botmon_captcha_title">' + _loc('dlgTitle', 'Title') + '</h2><p>' + _loc('dlgSubtitle', 'Subtitle') + '</p>';
+
+		// Checkbox:
+		const lbl = document.createElement('label');
+		lbl.setAttribute('aria-live', 'assertive');
+		lbl.innerHTML = '<span class="confirm">' + _loc('dlgConfirm', "Confirm.") + '</span>' + 
+			'<span class="busy"></span><span class="checking">' + _loc('dlgChecking', "Checking") + '</span>' +
+			'<span class="loading">' + _loc('dlgLoading', "Loading") + '</span>' + 
+			'<span class="erricon">&#65533;</span><span class="error">' + _loc('dlgError', "Error") + '</span>';
+		const cb = document.createElement('input');
+		cb.setAttribute('type', 'checkbox');
+		cb.setAttribute('disabled', 'disabled');
+		cb.addEventListener('click', $BMCaptcha._cbCallback);
+		lbl.prepend(cb);
+
+		dlg.appendChild(lbl);
+
+		bm_parent.appendChild(dlg);
+
+		// call the delayed callback in a couple of seconds:
+		$BMCaptcha._st = performance.now();
+		setTimeout($BMCaptcha._delayedCallback, $BMCaptcha._cbDly * 1000);
+	},
+
+	/* creates a digest hash */
+	digest: {
+
+		/* simple SHA hash function - adapted from https://geraintluff.github.io/sha256/ */
+		hash: function(ascii) {
+
+			// shortcut:
+			const sha256 = $BMCaptcha.digest.hash;
+
+			// helper function
+			const rightRotate = function(v, a) {
+				return (v>>>a) | (v<<(32 - a));
+			};
+			
+			var mathPow = Math.pow;
+			var maxWord = mathPow(2, 32);
+			var lengthProperty = 'length'
+			var i, j;
+			var result = ''
+
+			var words = [];
+			var asciiBitLength = ascii[lengthProperty]*8;
+			
+			//* caching results is optional - remove/add slash from front of this line to toggle
+			// Initial hash value: first 32 bits of the fractional parts of the square roots of the first 8 primes
+			// (we actually calculate the first 64, but extra values are just ignored)
+			var hash = sha256.h = sha256.h || [];
+			// Round constants: first 32 bits of the fractional parts of the cube roots of the first 64 primes
+			var k = sha256.k = sha256.k || [];
+			var primeCounter = k[lengthProperty];
+			/*/
+			var hash = [], k = [];
+			var primeCounter = 0;
+			//*/
+
+			var isComposite = {};
+			for (var candidate = 2; primeCounter < 64; candidate++) {
+				if (!isComposite[candidate]) {
+					for (i = 0; i < 313; i += candidate) {
+						isComposite[i] = candidate;
+					}
+					hash[primeCounter] = (mathPow(candidate, .5)*maxWord)|0;
+					k[primeCounter++] = (mathPow(candidate, 1/3)*maxWord)|0;
+				}
+			}
+			
+			ascii += '\x80' // Append Ƈ' bit (plus zero padding)
+			while (ascii[lengthProperty]%64 - 56) ascii += '\x00' // More zero padding
+			for (i = 0; i < ascii[lengthProperty]; i++) {
+				j = ascii.charCodeAt(i);
+				if (j>>8) return; // ASCII check: only accept characters in range 0-255
+				words[i>>2] |= j << ((3 - i)%4)*8;
+			}
+			words[words[lengthProperty]] = ((asciiBitLength/maxWord)|0);
+			words[words[lengthProperty]] = (asciiBitLength)
+			
+			// process each chunk
+			for (j = 0; j < words[lengthProperty];) {
+				var w = words.slice(j, j += 16); // The message is expanded into 64 words as part of the iteration
+				var oldHash = hash;
+				// This is now the undefinedworking hash", often labelled as variables a...g
+				// (we have to truncate as well, otherwise extra entries at the end accumulate
+				hash = hash.slice(0, 8);
+				
+				for (i = 0; i < 64; i++) {
+					var i2 = i + j;
+					// Expand the message into 64 words
+					// Used below if 
+					var w15 = w[i - 15], w2 = w[i - 2];
+
+					// Iterate
+					var a = hash[0], e = hash[4];
+					var temp1 = hash[7]
+						+ (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) // S1
+						+ ((e&hash[5])^((~e)&hash[6])) // ch
+						+ k[i]
+						// Expand the message schedule if needed
+						+ (w[i] = (i < 16) ? w[i] : (
+								w[i - 16]
+								+ (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15>>>3)) // s0
+								+ w[i - 7]
+								+ (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2>>>10)) // s1
+							)|0
+						);
+					// This is only used once, so *could* be moved below, but it only saves 4 bytes and makes things unreadble
+					var temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) // S0
+						+ ((a&hash[1])^(a&hash[2])^(hash[1]&hash[2])); // maj
+					
+					hash = [(temp1 + temp2)|0].concat(hash); // We don't bother trimming off the extra ones, they're harmless as long as we're truncating when we do the slice()
+					hash[4] = (hash[4] + temp1)|0;
+				}
+				
+				for (i = 0; i < 8; i++) {
+					hash[i] = (hash[i] + oldHash[i])|0;
+				}
+			}
+			
+			for (i = 0; i < 8; i++) {
+				for (j = 3; j + 1; j--) {
+					var b = (hash[i]>>(j*8))&255;
+					result += ((b < 16) ? 0 : '') + b.toString(16);
+				}
+			}
+			return result;
+		}
+	},
+
+	_cbCallback: function(e) {
+		if (e.target.checked) {
+			//document.getElementById('botmon_captcha_box').close();
+
+			try {
+				var $status = 'loading';
+
+				// generate the hash:
+				const dat = [ // the data to encode
+					document._botmon.seed || '',
+					location.hostname,
+					document._botmon.ip || '0.0.0.0',
+					(new Date()).toISOString().substring(0, 10)
+				];
+				if (performance.now() - $BMCaptcha._st <= 1500) dat.push(performance.now() - $BMCaptcha._st);
+
+				// set the cookie:
+				document.cookie = "DWConfirm=" + encodeURIComponent($BMCaptcha.digest.hash(dat.join(';'))) + '; path=/; session;';
+				//	+ (document.location.protocol === 'https:' ? ' secure;' : '');
+
+			} catch (err) {
+				console.error(err);
+				$status = 'error';
+			}
+
+			// change the interface:
+			const dlg = document.getElementById('botmon_captcha_box');
+			if (dlg) {
+				dlg.classList.add( $status );
+				dlg.classList.remove('ready');
+			}
+
+			// reload the page:
+			if ($status !== 'error')window.location.reload(true);
+		}
+	},
+
+	_delayedCallback: function() {
+		const dlg = document.getElementById('botmon_captcha_box');
+		if (dlg) {
+			dlg.classList.add('ready');
+			dlg.classList.remove('checking');
+
+			const input = dlg.getElementsByTagName('input')[0];
+			if (input) {
+				input.removeAttribute('disabled');
+				input.focus();
+				setTimeout($BMCaptcha._autoCheck, 200, input);
+			}
+		}
+	},
+	_cbDly: null,
+	_st: null,
+
+	_autoCheck: function(e) {
+
+		const bypass = ($BMConfig['captchaBypass'] || '').split(',');
+		var action = false;
+
+		if (bypass.indexOf('langmatch') >= 0) { // Languages matching
+			const cntLangs = navigator.languages.map(lang => lang.split('-')[0]);
+			if (cntLangs.indexOf(document.documentElement.lang || 'en') >= 0) action = true;
+		}
+
+		if (action) e.click(); // action!
+	}
+}
+// initialise the captcha module:
+$BMCaptcha.init();

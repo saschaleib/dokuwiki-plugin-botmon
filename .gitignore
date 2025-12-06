@@ -2,5 +2,6 @@
 logs/*.log.txt
 logs/*.srv.txt
 logs/*.tck.txt
-config/user-config.json
+logs/*.captcha.txt
+config/user-*.*
 php_errors.log

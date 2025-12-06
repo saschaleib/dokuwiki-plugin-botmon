@@ -42,7 +42,7 @@ const BotMon = {
 
 		// get yesterday's date:
 		let d = new Date();
-		d.setDate(d.getDate() - 1);
+		if (BMSettings.showday == 'yesterday') d.setDate(d.getDate() - 1);
 		this._datestr = d.toISOString().slice(0, 10);
 
 		// init the sub-objects:
@@ -105,7 +105,7 @@ const BotMon = {
 					r.textContent = text.toString();
 				}
 			} catch(e) {
-				console.error(e);
+				console.error('Botmon:', e);
 			}
 			return r;
 		},
@@ -161,6 +161,7 @@ const BotMon = {
 
 			var bg = b;
 			var sm = a;
+			if (a == 0 || b == 0) return '—';
 			if (a > b) {
 				var bg = a;
 				var sm = b;
@@ -182,10 +183,10 @@ const BotMon = {
 	}
 };
 
-/* everything specific to the "Latest" tab is self-contained in the "live" object: */
+/* everything specific to the 'Latest' tab is self-contained in the 'live' object: */
 BotMon.live = {
 	init: function() {
-		console.info('BotMon.live.init()');
+		//console.info('BotMon.live.init()');
 
 		// set the title:
 		const tDiff = '<abbr title="Coordinated Universal Time">UTC</abbr> ' + (BotMon._timeDiff != '' ? ` (offset: ${BotMon._timeDiff}` : '' ) + ')';
@@ -291,7 +292,8 @@ BotMon.live = {
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
-				const timeout = 60 * 60 * 1000; // session timeout: One hour
+				// combine Bot networks to one visitor?
+				const combineNets = (BMSettings.hasOwnProperty('combineNets') ? BMSettings['combineNets'] : true);;
 
 				if (visitor._type == BM_USERTYPE.KNOWN_BOT) { // known bots match by their bot ID:
 
@@ -303,13 +305,31 @@ BotMon.live = {
 							return v;
 						}
 					}
+
+				} else if (combineNets && visitor.hasOwnProperty('_ipRange')) { // combine with other visits from the same range
+
+					let nonRangeVisitor = null;
+
+					for (let i=0; i<model._visitors.length; i++) {
+						const v = model._visitors[i];
+
+						if ( v.hasOwnProperty('_ipRange') && v._ipRange.g == visitor._ipRange.g ) { // match the IPRange Group IDs
+							return v;
+						} else if ( v.id.trim() !== '' && v.id == visitor.id) { // match the DW/PHP IDs
+							nonRangeVisitor = v;
+						}
+					}
+
+					// if no ip range was found, return the non-range visitor instead
+					if (nonRangeVisitor) return nonRangeVisitor;
+
 				} else { // other types match by their DW/PHPIDs:
 
 					// loop over all visitors already registered and check for ID matches:
 					for (let i=0; i<model._visitors.length; i++) {
 						const v = model._visitors[i];
 
-						if ( v.id == visitor.id) { // match the DW/PHP IDs
+						if ( v.id.trim() !== '' && v.id == visitor.id) { // match the DW/PHP IDs
 							return v;
 						}
 					}
@@ -345,6 +365,7 @@ BotMon.live = {
 			registerVisit: function(nv, type) {
 				//console.info('registerVisit', nv, type);
 
+
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
 
@@ -364,6 +385,12 @@ BotMon.live = {
 				if (!nv._firstSeen) nv._firstSeen = nv.ts; // first-seen
 				nv._lastSeen = nv.ts; // last-seen
 
+				// known bot IP range?
+				if (nv._type == BM_USERTYPE.UNKNOWN) { // only for unknown visitors
+					const ipInfo = BotMon.live.data.ipRanges.match(nv.ip);
+					if (ipInfo) nv._ipRange = ipInfo;
+				}
+
 				// country name:
 				try {
 					nv._country = ( nv.geo == 'local' ? "localhost" : "Unknown" );
@@ -372,28 +399,44 @@ BotMon.live = {
 						nv._country = countryName.of(nv.geo.substring(0,2)) ?? nv.geo;
 					}
 				} catch (err) {
-					console.error(err);
+					console.error('Botmon:', err);
 					nv._country = 'Error';
 				}
 
 				// check if it already exists:
 				let visitor = model.findVisitor(nv, type);
 				if (!visitor) {
-					visitor = nv;
-					visitor._seenBy = [type];
-					visitor._pageViews = []; // array of page views
-					visitor._hasReferrer = false; // has at least one referrer
-					visitor._jsClient = false; // visitor has been seen logged by client js as well
-					visitor._client = BotMon.live.data.clients.match(nv.agent) ?? null; // client info
-					visitor._platform = BotMon.live.data.platforms.match(nv.agent); // platform info
+					visitor = {...nv, ...{
+						_seenBy: [type],
+						_viewCount: 0, // number of page views
+						_loadCount: 0, // number of page loads (not necessarily views!)
+						_pageViews: [], // array of page views
+						_hasReferrer: false, // has at least one referrer
+						_jsClient: false, // visitor has been seen logged by client js as well
+						_client: BotMon.live.data.clients.match(nv.agent) ?? null, // client info
+						_platform: BotMon.live.data.platforms.match(nv.agent), // platform info
+						_captcha: {'X': 0, 'Y': 0, 'N': 0, 'W':0, 'H': 0,
+							_str: function() { return (this.X > 0 ? 'X' : '') + (this.Y > 0 ? (this.Y > 1 ? 'YY' : 'Y') : '') + (this.N > 0 ? 'N' : '') + (this.W > 0 ? 'W' : '') + (this.H > 0 ? 'H' : ''); }
+						} // captcha counter
+					}};
 					model._visitors.push(visitor);
-				} else { // update existing 
-					if (visitor._firstSeen > nv.ts) {
-						visitor._firstSeen = nv.ts;
-					}
+				};
+
+				// update first and last seen:
+				if (visitor._firstSeen > nv.ts) {
+					visitor._firstSeen = nv.ts;
+				}
+				if (visitor._lastSeen < nv.ts) {
+					visitor._lastSeen = nv.ts;
 				}
 
-				// find browser 
+				// update total loads and views (not the same!):
+				visitor._loadCount += 1;
+				visitor._viewCount += (nv.captcha == 'Y' ? 0 : 1);
+
+				// ...because also a captcha is a "load", but not a "view".
+				// let's count the captcha statuses as well:
+				if (nv.captcha) visitor._captcha[nv.captcha] += 1;
 
 				// is this visit already registered?
 				let prereg = model._getPageView(visitor, nv);
@@ -401,13 +444,16 @@ BotMon.live = {
 					// add new page view:
 					prereg = model._makePageView(nv, type);
 					visitor._pageViews.push(prereg);
-				} else {
-					// update last seen date
-					prereg._lastSeen = nv.ts;
-					// increase view count:
-					prereg._viewCount += 1;
-					prereg._tickCount += 1;
 				}
+				prereg._loadCount += 1;
+				prereg._viewCount += (nv.captcha == 'Y' ? 0 : 1);
+
+				// update last seen date
+				prereg._lastSeen = nv.ts;
+
+				// increase view count:
+				prereg._loadCount += (visitor.captcha == 'Y' ? 0 : 1);
+				//prereg._tickCount += 1;
 
 				// update referrer state:
 				visitor._hasReferrer = visitor._hasReferrer || 
@@ -458,7 +504,11 @@ BotMon.live = {
 					prereg = model._makePageView(dat, type);
 					visitor._pageViews.push(prereg);
 				}
+				// update the page view:
 				prereg._tickCount += 1;
+				if (dat.captcha) {
+					prereg._captcha += dat.captcha;
+				}
 			},
 
 			// updating visit data from the ticker log:
@@ -473,8 +523,8 @@ BotMon.live = {
 				// find the visit info:
 				let visitor = model.findVisitor(dat, type);
 				if (!visitor) {
-					console.info(`No visitor with ID “${dat.id}” found, registering as a new one.`);
-					visitor = model.registerVisit(dat, type);
+					console.info(`Botmon: No visitor with ID “${dat.id}” found, registering as a new one.`);
+					visitor = model.registerVisit(dat, type, true);
 				}
 				if (visitor) {
 					// update visitor:
@@ -484,7 +534,7 @@ BotMon.live = {
 					// get the page view info:
 					let pv = model._getPageView(visitor, dat);
 					if (!pv) {
-						console.info(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
+						console.info(`Botmon: No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
 						pv = model._makePageView(dat, type);
 						visitor._pageViews.push(pv);
 					}
@@ -499,15 +549,14 @@ BotMon.live = {
 
 			// helper function to create a new "page view" item:
 			_makePageView: function(data, type) {
-				// console.info('_makePageView', data);
+				//console.info('_makePageView', data);
 
 				// try to parse the referrer:
 				let rUrl = null;
 				try {
 					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
 				} catch (e) {
-					console.warn(`Invalid referer: “${data.ref}”.`);
-					console.info(data);
+					console.info(`Botmon: Ignoring invalid referer: “${data.ref}”.`);
 				}
 
 				return {
@@ -520,9 +569,27 @@ BotMon.live = {
 					_lastSeen: data.ts,
 					_seenBy: [type],
 					_jsClient: ( type !== BM_LOGTYPE.SERVER),
-					_viewCount: 1,
-					_tickCount: 0
+					_agent: data.agent,
+					_viewCount: 0,
+					_loadCount: 0,
+					_tickCount: 0,
+					_captcha: data.captcha ? data.captcha : 'X'
 				};
+			},
+
+			// helper function to make a human-readable title from the Captcha statuses:
+			_makeCaptchaTitle: function(cObj) {
+				const cStr = cObj._str();
+				switch (cStr) {
+					case 'Y': return "Blocked.";
+					case 'YY': return "Blocked multiple times.";
+					case 'YN': return "Solved";
+					case 'YYN': return "Solved after multiple attempts";
+					case 'W': return "Whitelisted";
+					case 'H': return "HEAD request, no captcha";
+					case 'YH': case 'YYH': return "Block & HEAD mixed";
+					default: return "Undefined: " + cStr;
+				}
 			}
 		},
 
@@ -538,14 +605,37 @@ BotMon.live = {
 
 			// data storage:
 			data: {
-				totalVisits: 0,
-				totalPageViews: 0,
-				humanPageViews: 0,
-				bots: {
-					known: 0,
+				visits: {
+					bots: 0,
 					suspected: 0,
-					human: 0,
-					users: 0
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				views: {
+					bots: 0,
+					suspected: 0,
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				loads: {
+					bots: 0,
+					suspected: 0,
+					humans: 0,
+					users: 0,
+					total: 0
+				},
+				captcha: {
+					bots_blocked: 0,
+					bots_passed: 0,
+					bots_whitelisted: 0,
+					humans_blocked: 0,
+					humans_passed: 0,
+					humans_whitelisted: 0,
+					sus_blocked: 0,
+					sus_passed: 0,
+					sus_whitelisted: 0
 				}
 			},
 
@@ -563,6 +653,7 @@ BotMon.live = {
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
+				const data = BotMon.live.data.analytics.data;
 				const me = BotMon.live.data.analytics;
 
 				BotMon.live.gui.status.showBusy("Analysing data …");
@@ -570,21 +661,39 @@ BotMon.live = {
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
 
-					// count visits and page views:
-					this.data.totalVisits += 1;
-					this.data.totalPageViews += v._pageViews.length;
-					
+					const captchaStr = v._captcha._str().replaceAll(/[^YNW]/g, '');
+
+					// count total visits and page views:
+					data.visits.total += 1;
+					data.loads.total += v._loadCount;
+					data.views.total += v._viewCount;
+
 					// check for typical bot aspects:
 					let botScore = 0;
 
 					if (v._type == BM_USERTYPE.KNOWN_BOT) { // known bots
 
-						this.data.bots.known += v._pageViews.length;
 						this.groups.knownBots.push(v);
+
+						if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+							data.visits.bots += 1;
+							data.views.bots += v._viewCount;
+
+							// captcha counter
+							if (captchaStr.indexOf('YN') > -1) {
+								data.captcha.bots_passed += 1;
+							} else if (captchaStr.indexOf('Y') > -1) {
+								data.captcha.bots_blocked += 1;
+							}
+							if (captchaStr.indexOf('W') > -1) {
+								data.captcha.bots_whitelisted += 1;
+							}
+						}
 
 					} else if (v._type == BM_USERTYPE.KNOWN_USER) { // known users */
 
-						this.data.bots.users += v._pageViews.length;
+						data.visits.users += 1;
+						data.views.users += v._viewCount;
 						this.groups.users.push(v);
 
 					} else {
@@ -595,30 +704,68 @@ BotMon.live = {
 						v._botVal = e.val;
 
 						if (e.isBot) { // likely bots
+
 							v._type = BM_USERTYPE.LIKELY_BOT;
-							this.data.bots.suspected += v._pageViews.length;
 							this.groups.suspectedBots.push(v);
+
+							if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+
+								data.visits.suspected += 1;
+								data.views.suspected += v._viewCount;
+
+								// captcha counter
+								if (captchaStr.indexOf('YN') > -1) {
+									data.captcha.sus_passed += 1;
+								} else if (captchaStr.indexOf('Y') > -1) {
+									data.captcha.sus_blocked += 1;
+								}
+								if (captchaStr.indexOf('W') > -1) {
+									data.captcha.sus_whitelisted += 1;
+								}
+							}
+
 						} else { // probably humans
+
 							v._type = BM_USERTYPE.PROBABLY_HUMAN;
-							this.data.bots.human += v._pageViews.length;
 							this.groups.humans.push(v);
+
+							if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
+								data.visits.humans += 1;
+								data.views.humans += v._viewCount;
+
+								// captcha counter
+								if (captchaStr.indexOf('YN') > -1) {
+									data.captcha.humans_passed += 1;
+								} else if (captchaStr.indexOf('Y') > -1) {
+									data.captcha.humans_blocked += 1;
+								}
+								if (captchaStr.indexOf('W') > -1) {
+									data.captcha.humans_whitelisted += 1;
+								}
+							}
 						}						
 					}
 
 					// perform actions depending on the visitor type:
 					if (v._type == BM_USERTYPE.KNOWN_BOT ) { /* known bots only */
 
+						// no specific actions here.
+
 					} else if (v._type == BM_USERTYPE.LIKELY_BOT) { /* probable bots only */
 
 						// add bot views to IP range information:
-						me.addToIpRanges(v);
+						if (v.ip) {
+							me.addToIpRanges(v);
+						} else {
+							console.log(v);
+						}
 
-					} else { /* humans only */
+					} else { /* registered users and probable humans */
 
 						// add browser and platform statistics:
 						me.addBrowserPlatform(v);
 
-						// add 
+						// add to referrer and pages lists:
 						v._pageViews.forEach( pv => {
 							me.addToRefererList(pv._ref);
 							me.addToPagesList(pv.pg);
@@ -640,7 +787,7 @@ BotMon.live = {
 				//console.log(BotMon.live.data.analytics.groups.knownBots);
 
 				let botsList = BotMon.live.data.analytics.groups.knownBots.toSorted( (a, b) => {
-					return b._pageViews.length - a._pageViews.length;
+					return b._viewCount - a._viewCount;
 				});
 
 				const other = {
@@ -659,12 +806,12 @@ BotMon.live = {
 							rList.push({
 								id: it._bot.id,
 								name: (it._bot.n ? it._bot.n : it._bot.id),
-								count: it._pageViews.length
+								count: it._viewCount
 							});
 						} else {
 							other.count += it._pageViews.length;
 						};
-						total += it._pageViews.length;
+						total += it._viewCount;
 					}
 				};
 
@@ -885,7 +1032,7 @@ BotMon.live = {
 						arr = me._countries.bot;
 						break;
 					default:
-						console.warn(`Unknown user type ${type} in function addToCountries.`);
+						console.warn(`Botmon: Unknown user type ${type} in function addToCountries.`);
 				}
 
 				if (arr) {
@@ -925,7 +1072,7 @@ BotMon.live = {
 						arr = me._countries.bot;
 						break;
 					default:
-						console.warn(`Unknown user type ${type} in function getCountryList.`);
+						console.warn(`Botmon: Unknown user type ${type} in function getCountryList.`);
 						return;
 				}
 				
@@ -997,7 +1144,7 @@ BotMon.live = {
 				const list = me.groups[type];
 				
 				list.forEach(it => {
-					bounces += (it._pageViews.length <= 1 ? 1 : 0);
+					bounces += (it._viewCount <= 1 ? 1 : 0);
 				});
 
 				return bounces;
@@ -1032,20 +1179,19 @@ BotMon.live = {
 
 				} else { // no known IP range, let's collect necessary information:
 
-
 					// collect basic IP address info:
 					if (ipType == BM_IPVERSION.IPv6) {
 						ipSeg = ipAddr.split(':');
 						const prefix = v.ip.split(':').slice(0, kIP6Segments).join(':');
 						rawIP = ipSeg.slice(0, kIP6Segments).join(':');
 						ipGroup = 'ip6-' + rawIP.replaceAll(':', '-');
-						ipName = prefix + '::' + '/' + (16 * kIP6Segments);
+						ipName = prefix + '::'; // + '/' + (16 * kIP6Segments);
 					} else {
 						ipSeg = ipAddr.split('.');
 						const prefix = v.ip.split('.').slice(0, kIP4Segments).join('.');
 						rawIP = ipSeg.slice(0, kIP4Segments).join('.') ;
 						ipGroup = 'ip4-' + rawIP.replaceAll('.', '-');
-						ipName = prefix + '.x.x.x'.substring(0, 1+(4-kIP4Segments)*2) + '/' + (8 * kIP4Segments);
+						ipName = prefix + '.x.x.x'.substring(0, 1+(4-kIP4Segments)*2); // + '/' + (8 * kIP4Segments);
 					}
 				}
 
@@ -1085,7 +1231,7 @@ BotMon.live = {
 				}
 
 				// add to counter:
-				ipRec.count += v._pageViews.length;
+				ipRec.count += v._viewCount;
 
 			},
 
@@ -1513,19 +1659,20 @@ BotMon.live = {
 
 					const pId = ( visitor._platform ? visitor._platform.id : '');
 
-					if (visitor._platform.id == null) console.log(visitor._platform);
+					//if (visitor._platform.id == null) console.log(visitor._platform);
 
 					return platforms.includes(pId);
 				},
 
 				// are there at lest num pages loaded?
 				smallPageCount: function(visitor, num) {
-					return (visitor._pageViews.length <= Number(num));
+					return (visitor._viewCount <= Number(num));
 				},
 
 				// There was no entry in a specific log file for this visitor:
 				// note that this will also trigger the "noJavaScript" rule:
 				noRecord: function(visitor, type) {
+					if (!visitor._seenBy.includes('srv')) return false; // only if 'srv' is also specified!
 					return !visitor._seenBy.includes(type);
 				},
 
@@ -1571,14 +1718,17 @@ BotMon.live = {
 				fromKnownBotIP: function(visitor) {
 					//console.info('fromKnownBotIP()', visitor.ip);
 
-					const ipInfo = BotMon.live.data.ipRanges.match(visitor.ip);
+					return visitor.hasOwnProperty('_ipRange');
+				},
 
-					if (ipInfo) {
-						visitor._ipInKnownBotRange = true;
-						visitor._ipRange = ipInfo;
+				// is the IP address from a specifin known ISP network
+				fromISPRange: function(visitor, ...isps) {
+					if (visitor.hasOwnProperty('_ipRange')) {
+						if (isps.indexOf(visitor._ipRange.g) > -1) {
+							return true;
+						}
 					}
-
-					return (ipInfo !== null);
+					return false;
 				},
 
 				// is the page language mentioned in the client's accepted languages?
@@ -1613,7 +1763,7 @@ BotMon.live = {
 				// At least x page views were recorded, but they come within less than y seconds
 				loadSpeed: function(visitor, minItems, maxTime) {
 
-					if (visitor._pageViews.length >= minItems) {
+					if (visitor._viewCount >= minItems) {
 						//console.log('loadSpeed', visitor._pageViews.length, minItems, maxTime);
 
 						const pvArr = visitor._pageViews.map(pv => pv._lastSeen).sort();
@@ -1622,8 +1772,6 @@ BotMon.live = {
 						for (let i=1; i < pvArr.length; i++) {
 							totalTime += (pvArr[i] - pvArr[i-1]);
 						}
-
-						//console.log('     ', totalTime , Math.round(totalTime / (pvArr.length * 1000)), (( totalTime / pvArr.length ) <= maxTime * 1000), visitor.ip);
 
 						return (( totalTime / pvArr.length ) <= maxTime * 1000);
 					}
@@ -1647,6 +1795,16 @@ BotMon.live = {
 						return (countries.indexOf(visitor.geo) < 0);
 					}
 					return false;
+				},
+
+				// Check if visitor never went beyond a captcha
+				blockedByCaptcha: function(visitor) {
+					return (visitor._captcha.Y > 0 && visitor._captcha.N === 0);
+				},
+
+				// Check if visitor came from a whitelisted IP-address
+				whitelistedByCaptcha: function(visitor) {
+					return (visitor._captcha.W > 0);
 				}
 			}
 		},
@@ -1704,7 +1862,7 @@ BotMon.live = {
 			switch (type) {
 				case "srv":
 					typeName = "Server";
-					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo'];
+					columns = ['ts','ip','pg','id','typ','usr','agent','ref','lang','accept','geo','captcha','method'];
 					break;
 				case "log":
 					typeName = "Page load";
@@ -1715,7 +1873,7 @@ BotMon.live = {
 					columns = ['ts','ip','pg','id','agent'];
 					break;
 				default:
-					console.warn(`Unknown log type ${type}.`);
+					console.warn(`Botmon: Unknown log type ${type} in function “loadLogFile” (1).`);
 					return;
 			}
 
@@ -1742,8 +1900,12 @@ BotMon.live = {
 					}
 
 					logtxt.split('\n').forEach((line) => {
-						if (line.trim() === '') return; // skip empty lines
+
+						const line2 = line.replaceAll(new RegExp('[\x00-\x1F]','g'), "\u{FFFD}").trim();
+						if (line2 === '') return; // skip empty lines
+
 						const cols = line.split('\t');
+						if (cols.length == 1) return
 
 						// assign the columns to an object:
 						const data = {};
@@ -1767,7 +1929,7 @@ BotMon.live = {
 								BotMon.live.data.model.updateTicks(data);
 								break;
 							default:
-								console.warn(`Unknown log type ${type}.`);
+								console.warn(`Botmon: Unknown log type ${type} in function “loadLogFile” (2).`);
 								return;
 						}
 					});
@@ -1867,18 +2029,19 @@ BotMon.live = {
 			 */
 			make: function() {
 
-				const data = BotMon.live.data.analytics.data;
-
 				const maxItemsPerList = 5; // how many list items to show?
+				const useCaptcha = BMSettings.useCaptcha || false;
 
 				const kNoData = '–'; // shown when data is missing
+				const kSeparator = ' / ';
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const makeElement = BotMon.t._makeElement;
+				const data = BotMon.live.data.analytics.data;
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Page views"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics"));
 
 					for (let i = 0; i <= 5; i++) {
 						const dd = makeElement('dd');
@@ -1886,31 +2049,31 @@ BotMon.live = {
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Known bots:";
-								value = data.bots.known || kNoData;
+								title = "Known bots visits:";
+								value =  data.visits.bots || kNoData;
 								break;
 							case 1:
-								title = "Suspected bots:";
-								value = data.bots.suspected || kNoData;
+								title = "Suspected bots visits:";
+								value = data.visits.suspected || kNoData;
 								break;
 							case 2:
-								title = "Probably humans:";
-								value = data.bots.human || kNoData;
+								title = "Bots-humans ratio visits:";
+								value = BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
 								break;
 							case 3:
-								title = "Registered users:";
-								value = data.bots.users || kNoData;
+								title = "Known bots views:";
+								value = data.views.bots || kNoData;
 								break;
 							case 4:
-								title = "Total:";
-								value = data.totalPageViews || kNoData;
+								title = "Suspected bots views:";
+								value = data.views.suspected || kNoData;
 								break;
 							case 5:
-								title = "Bots-humans ratio:";
-								value = BotMon.t._getRatio(data.bots.suspected + data.bots.known, data.bots.users + data.bots.human, 100);
+								title = "Bots-humans ratio views:";
+								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100);
 								break;
 							default:
-								console.warn(`Unknown list type ${i}.`);
+								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (1).`);
 						}
 						dd.appendChild(makeElement('span', {}, title));
 						dd.appendChild(makeElement('strong', {}, value));
@@ -1927,7 +2090,7 @@ BotMon.live = {
 					botList.forEach( (botInfo) => {
 						const bli = makeElement('dd');
 						bli.appendChild(makeElement('span', {'class': 'has_icon bot bot_' + botInfo.id }, botInfo.name));
-						bli.appendChild(makeElement('span', {'class': 'count' }, botInfo.count));
+						bli.appendChild(makeElement('span', {'class': 'count' }, botInfo.count || kNoData));
 						botElement.append(bli)
 					});
 				}
@@ -1938,11 +2101,10 @@ BotMon.live = {
 					botIps.appendChild(makeElement('dt', {}, "Top bot Networks"));
 
 					const ispList = BotMon.live.data.analytics.getTopBotISPs(5);
-					//console.log(ispList);
 					ispList.forEach( (netInfo) => {
 						const li = makeElement('dd');
 						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + netInfo.typ }, netInfo.name));
-						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count));
+						li.appendChild(makeElement('span', {'class': 'count' }, netInfo.count || kNoData));
 						botIps.append(li)
 					});
 				}
@@ -1955,7 +2117,7 @@ BotMon.live = {
 					countryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
 						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
-						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count || kNoData));
 						botCountries.appendChild(cLi);
 					});
 				}
@@ -1964,37 +2126,41 @@ BotMon.live = {
 				const wmoverview = document.getElementById('botmon__today__wm_overview');
 				if (wmoverview) {
 
-					const humanVisits = BotMon.live.data.analytics.groups.users.length + BotMon.live.data.analytics.groups.humans.length;
+					const humanVisits = data.visits.users + data.visits.humans;
 					const bounceRate = Math.round(100 * (BotMon.live.data.analytics.getBounceCount('users') + BotMon.live.data.analytics.getBounceCount('humans')) / humanVisits);
 
 					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics"));
-					for (let i = 0; i <= 4; i++) { 
+					for (let i = 0; i <= 5; i++) { 
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Registered users’ page views:";
-								value = data.bots.users || kNoData;
+								title = "Registered users visits:";
+								value = data.visits.users || kNoData;
 								break;
 							case 1:
-								title = "“Probably humans” page views:";
-								value = data.bots.human || kNoData;
+								title = "Registered users views:";
+								value = data.views.users || kNoData;
 								break;
 							case 2:
-								title = "Total human page views:";
-								value = (data.bots.users + data.bots.human) || kNoData;
+								title = "Probably humans visits:";
+								value = data.visits.humans || kNoData;
 								break;
 							case 3:
-								title = "Total human visits:";
-								value = humanVisits || kNoData;
+								title = "Probably humans views:";
+								value = data.views.humans || kNoData;
 								break;
 							case 4:
+								title = "Total human visits / views";
+								value = (data.visits.users + data.visits.humans || kNoData) + kSeparator + ((data.views.users + data.views.humans) || kNoData);
+								break;
+							case 5:
 								title = "Humans’ bounce rate:";
 								value = bounceRate + '%';
 								break;
 							default:
-								console.warn(`Unknown list type ${i}.`);
+								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (2).`);
 						}
 						dd.appendChild(makeElement('span', {}, title));
 						dd.appendChild(makeElement('strong', {}, value));
@@ -2050,7 +2216,7 @@ BotMon.live = {
 					usrCtryList.forEach( (cInfo) => {
 						const cLi = makeElement('dd');
 						cLi.appendChild(makeElement('span', {'class': 'has_icon country ctry_' + cInfo.id.toLowerCase() }, cInfo.name));
-						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count));
+						cLi.appendChild(makeElement('span', {'class': 'count' }, cInfo.count || kNoData));
 						usrCountries.appendChild(cLi);
 					});
 				}
@@ -2074,7 +2240,7 @@ BotMon.live = {
 							pgDd.appendChild(makeElement('span', {
 								'class': 'count',
 								'title': pgInfo.count + " page views"
-							}, pgInfo.count));
+							}, pgInfo.count || kNoData));
 							wmpages.appendChild(pgDd);
 						});
 					}
@@ -2099,6 +2265,131 @@ BotMon.live = {
 						});
 					}
 				}
+
+				// Update Captcha statistics:
+				const captchaStatsBlock = document.getElementById('botmon__today__captcha');
+				if (captchaStatsBlock) {
+					
+					// first column:
+					const captchaHumans = document.getElementById('botmon__today__cp_humans');
+					if (captchaHumans) {
+						captchaHumans.appendChild(makeElement('dt', {}, "Probably humans:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.humans_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.humans_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.humans_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.humans;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.humans_blocked / data.visits.humans * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (3).`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaHumans.appendChild(dd);
+						}
+
+					}
+
+					// second column:
+					const captchaSus = document.getElementById('botmon__today__cp_sus');
+					if (captchaSus) {
+						captchaSus.appendChild(makeElement('dt', {}, "Suspected bots:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.sus_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.sus_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.sus_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.suspected;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.sus_blocked / data.visits.suspected * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Botmon: Unknown list type ${i} in function “BotMon.live.gui.overview.make” (4).`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaSus.appendChild(dd);
+						}
+
+					}
+
+					// Third column:
+					const captchaBots = document.getElementById('botmon__today__cp_bots');
+					if (captchaBots) {
+						captchaBots.appendChild(makeElement('dt', {}, "Known bots:"));
+
+						for (let i = 0; i <= 4; i++) {
+							const dd = makeElement('dd');
+							let title = '';
+							let value = '';
+							switch(i) {
+								case 0:
+									title = "Solved:";
+									value = data.captcha.bots_passed;
+									break;
+								case 1:
+									title = "Blocked:";
+									value = data.captcha.bots_blocked;
+									break;
+								case 2:
+									title = "Whitelisted:";
+									value = data.captcha.bots_whitelisted;
+									break;
+								case 3:
+									title = "Total visits:";
+									value = data.visits.bots;
+									break;
+								case 4:
+									title = "Pct. blocked:";
+									value = (data.captcha.bots_blocked / data.visits.bots * 100).toFixed(0) + '%';
+									break;
+								default:
+									console.warn(`Botmon: Unknown list type ${i} in function “BotMon.live.gui.overview.make” (5).`);
+							}
+							dd.appendChild(makeElement('span', {}, title));
+							dd.appendChild(makeElement('strong', {}, value || kNoData));
+							captchaBots.appendChild(dd);
+						}
+
+					}
+				}
 			}
 		},
 
@@ -2118,7 +2409,7 @@ BotMon.live = {
 			},
 	
 			setError: function(txt) {
-				console.error(txt);
+				console.error('Botmon:', txt);
 				BotMon.live.gui.status._errorCount += 1;
 				const el = document.getElementById('botmon__today__status');
 				if (el) {
@@ -2183,7 +2474,7 @@ BotMon.live = {
 								infolink = 'https://leib.be/sascha/projects/dokuwiki/botmon/info/known_bots';
 								break;
 							default:
-								console.warn('Unknown list number.');
+								console.warn(`Botmon: Unknown list number. ${i} in function “lists.init”.`);
 						}
 
 						const details = makeElement('details', {
@@ -2236,9 +2527,11 @@ BotMon.live = {
 			},
 
 			_makeVisitorItem: function(data, type) {
+				//console.info('BotMon.live.gui.lists._makeVisitorItem()', data, type);
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const make = BotMon.t._makeElement;
+				const model = BotMon.live.data.model;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
@@ -2248,6 +2541,10 @@ BotMon.live = {
 
 				const sumClass = ( !data._seenBy || data._seenBy.indexOf(BM_LOGTYPE.SERVER) < 0 ? 'noServer' : 'hasServer');
 
+				// combine with other networks?
+				const combineNets = (BMSettings.hasOwnProperty('combineNets') ? BMSettings['combineNets'] : true)
+						&& data.hasOwnProperty('_ipRange');
+
 				const li = make('li'); // root list item
 				const details = make('details');
 				const summary = make('summary', {
@@ -2256,18 +2553,6 @@ BotMon.live = {
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
-
-				if (data._type !== BM_USERTYPE.KNOWN_BOT) { /* No platform/client for bots */
-					span1.appendChild(make('span', { /* Platform */
-						'class': 'icon_only platform pf_' + (data._platform ? data._platform.id : 'unknown'),
-						'title': "Platform: " + platformName
-					}, platformName));
-
-					span1.appendChild(make('span', { /* Client */
-						'class': 'icon_only client client cl_' + (data._client ? data._client.id : 'unknown'),
-						'title': "Client: " + clientName
-					}, clientName));
-				}
 
 				// identifier:
 				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
@@ -2287,32 +2572,28 @@ BotMon.live = {
 
 				} else { /* others */
 
-					
-					/*span1.appendChild(make('span', { // IP-Address
-						'class': 'has_icon ipaddr ip' + ipType,
-						'title': "IP-Address: " + data.ip
-					}, data.ip));*/
+					if (combineNets) {
 
-					span1.appendChild(make('span', { /* Internal ID */
-						'class': 'has_icon session typ_' + data.typ,
-						'title': "ID: " + data.id
-					}, data.id));
+						const ispName = BotMon.live.data.ipRanges.getOwner( data._ipRange.g ) || data._ipRange.g;
+
+						span1.appendChild(make('span', { // IP-Address
+							'class': 'has_icon ipaddr ipnet',
+							'title': "IP-Range: " + data._ipRange.g
+						}, ispName));
+
+					} else {
+
+						span1.appendChild(make('span', { // IP-Address
+							'class': 'has_icon ipaddr ip' + ipType,
+							'title': "IP-Address: " + data.ip
+						}, data.ip));
+					}
 				}
 
-				// seen by icon:
-				span1.appendChild(make('span', {
-					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
-					'title': "Seen by: " + data._seenBy.join('+')
-				}, data._seenBy.join(', ')));
-
-				// country flag:
-				if (data.geo && data.geo !== 'ZZ') {
-					span1.appendChild(make('span', {
-						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
-						'data-ctry': data.geo,
-						'title': "Country: " + ( data._country || "Unknown")
-					}, ( data._country || "Unknown") ));
-				}
+				span1.appendChild(make('span', { /* page views */
+					'class': 'has_icon pageseen',
+					'title': data._pageViews.length + " page load(s)"
+				}, data._pageViews.length));
 
 				// referer icons:
 				if ((data._type == BM_USERTYPE.PROBABLY_HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
@@ -2326,15 +2607,29 @@ BotMon.live = {
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
-					span2.appendChild(make('span', { /* first-seen */
-						'class': 'has_iconfirst-seen',
-						'title': "First seen: " + data._firstSeen.toLocaleString() + " UTC"
-					}, BotMon.t._formatTime(data._firstSeen)));
+				// country flag (not for combined networks):
+				if (!combineNets && data.geo && data.geo !== 'ZZ') {
+					span2.appendChild(make('span', {
+						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + ( data._country || "Unknown")
+					}, ( data._country || "Unknown") ));
+				}
 
-					span2.appendChild(make('span', { /* page views */
-						'class': 'has_icon pageviews',
-						'title': data._pageViews.length + " page view(s)"
-					}, data._pageViews.length));
+				span2.appendChild(make('span', { // seen-by icon:
+					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
+					'title': "Seen by: " + data._seenBy.join('+')
+				}, data._seenBy.join(', ')));
+
+				// captcha status:
+				const cCode = ( data._captcha ? data._captcha._str() : '');
+				if (cCode !== '') {
+					const cTitle = model._makeCaptchaTitle(data._captcha)
+					span2.appendChild(make('span', { // captcha status
+						'class': 'icon_only captcha cap_' + cCode,
+						'title': "Captcha-status: " + cTitle
+					}, cTitle));
+				}
 
 				summary.appendChild(span2);
 
@@ -2347,13 +2642,15 @@ BotMon.live = {
 
 			_makeVisitorDetails: function(data, type) {
 
-				// shortcut for neater code:
+				// shortcuts for neater code:
 				const make = BotMon.t._makeElement;
+				const model = BotMon.live.data.model;
 
 				let ipType = ( data.ip.indexOf(':') >= 0 ? '6' : '4' );
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
+				const combinedItem = type == 'knownBots' || data.hasOwnProperty('_ipRange');
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
@@ -2373,7 +2670,10 @@ BotMon.live = {
 
 					}
 
-				} else { /* not for bots */
+					dl.appendChild(make('dt', {}, "User-Agent:"));
+					dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
+
+				} else if (!combinedItem) { /* not for bots or combined items */
 
 					dl.appendChild(make('dt', {}, "Client:")); /* client */
 					dl.appendChild(make('dd', {'class': 'has_icon client cl_' + (data._client ? data._client.id : 'unknown')},
@@ -2383,26 +2683,41 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'has_icon platform pf_' + (data._platform ? data._platform.id : 'unknown')},
 						platformName + ( data._platform.v > 0 ? ' (' + data._platform.v + ')' : '' ) ));
 
-					/*dl.appendChild(make('dt', {}, "ID:"));
-					dl.appendChild(make('dd', {'class': 'has_icon ip' + data.typ}, data.id));*/
-				}
+					dl.appendChild(make('dt', {}, "IP-Address:"));
+					const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
+						ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink ipinfo',
+							'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
+							'target': 'ipinfo',
+							'title': "View this address on IPInfo.io"
+						} , "DNS Info"));
+						ipItem.appendChild(make('a', {
+							'class': 'icon_only extlink abuseipdb',
+							'href': `https://www.abuseipdb.com/check/${encodeURIComponent(data.ip)}`,
+							'target': 'abuseipdb',
+							'title': "Check this address on AbuseIPDB.com"
+						} , "Check on AbuseIPDB"));
+					dl.appendChild(ipItem);
 
-				dl.appendChild(make('dt', {}, "IP-Address:"));
-				const ipItem = make('dd', {'class': 'has_icon ipaddr ip' + ipType});
-					ipItem.appendChild(make('span', {'class': 'address'} , data.ip));
-					ipItem.appendChild(make('a', {
-						'class': 'icon_only extlink ipinfo',
-						'href': `https://ipinfo.io/${encodeURIComponent(data.ip)}`,
-						'target': 'ipinfo',
-						'title': "View this address on IPInfo.io"
-					} , "DNS Info"));
-					ipItem.appendChild(make('a', {
-						'class': 'icon_only extlink abuseipdb',
-						'href': `https://www.abuseipdb.com/check/${encodeURIComponent(data.ip)}`,
-						'target': 'abuseipdb',
-						'title': "Check this address on AbuseIPDB.com"
-					} , "Check on AbuseIPDB"));
-				dl.appendChild(ipItem);
+					dl.appendChild(make('dt', {}, "User-Agent:"));
+					dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
+
+					dl.appendChild(make('dt', {}, "Languages:"));
+					dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
+
+					dl.appendChild(make('dt', {}, "Session ID:"));
+					dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
+
+					if (data.geo && data.geo !=='') {
+						dl.appendChild(make('dt', {}, "Location:"));
+						dl.appendChild(make('dd', {
+							'class': 'has_icon country ctry_' + data.geo.toLowerCase(),
+							'data-ctry': data.geo,
+							'title': "Country: " + data._country
+						}, data._country + ' (' + data.geo + ')'));
+					}
+				}
 
 				if (Math.abs(data._lastSeen - data._firstSeen) < 100) {
 					dl.appendChild(make('dt', {}, "Seen:"));
@@ -2414,10 +2729,15 @@ BotMon.live = {
 					dl.appendChild(make('dd', {'class': 'lastSeen'}, data._lastSeen.toLocaleString()));
 				}
 
-				dl.appendChild(make('dt', {}, "User-Agent:"));
-				dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
+				dl.appendChild(make('dt', {}, "Actions:"));
 
-				if (data.ref && data.ref !== '') {
+				dl.appendChild(make('dd', {'class': 'views'},
+					"Page loads: " + data._loadCount.toString() +
+					( data._captcha['Y'] > 0 ? ", captchas: " + data._captcha['Y'].toString() : '') +
+					", views: " + data._viewCount.toString()
+				));
+
+				if (!combinedItem && data.ref && data.ref !== '') {
 					dl.appendChild(make('dt', {}, "Referrer:"));
 					
 					const refInfo = BotMon.live.data.analytics.getRefererInfo(data.ref);
@@ -2430,20 +2750,12 @@ BotMon.live = {
 					}, data.ref));
 				}
 
-				dl.appendChild(make('dt', {}, "Languages:"));
-				dl.appendChild(make('dd', {'class': 'langs'}, ` [${data.accept}]`));
-
-				if (data.geo && data.geo !=='') {
-					dl.appendChild(make('dt', {}, "Location:"));
+				if (data.captcha && data.captcha !=='') {
+					dl.appendChild(make('dt', {}, "Captcha-status:"));
 					dl.appendChild(make('dd', {
-						'class': 'has_icon country ctry_' + data.geo.toLowerCase(),
-						'data-ctry': data.geo,
-						'title': "Country: " + data._country
-					}, data._country + ' (' + data.geo + ')'));
+						'class': 'captcha'
+					}, model._makeCaptchaTitle(data._captcha)));
 				}
-
-				dl.appendChild(make('dt', {}, "Session ID:"));
-				dl.appendChild(make('dd', {'class': 'has_icon session typ_' + data.typ}, data.id));
 
 				dl.appendChild(make('dt', {}, "Seen by:"));
 				dl.appendChild(make('dd', {'class': 'has_icon seenby sb_' + data._seenBy.join('')}, data._seenBy.join(', ') ));
@@ -2455,7 +2767,7 @@ BotMon.live = {
 				/* list all page views */
 				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
-					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page));
+					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page, combinedItem, type));
 				});
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
@@ -2463,7 +2775,7 @@ BotMon.live = {
 				/* bot evaluation rating */
 				if (data._type !== BM_USERTYPE.KNOWN_BOT && data._type !== BM_USERTYPE.KNOWN_USER) {
 					dl.appendChild(make('dt', undefined, "Bot rating:"));
-					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '–' ) + ' (of ' + BotMon.live.data.rules._threshold + ')'));
+					dl.appendChild(make('dd', {'class': 'bot-rating'}, ( data._botVal ? data._botVal : '0' ) + ' (of ' + BotMon.live.data.rules._threshold + ')'));
 
 					/* add bot evaluation details: */
 					if (data._eval) {
@@ -2505,12 +2817,13 @@ BotMon.live = {
 						dl.appendChild(evalDd);
 					}
 				}
+
 				// return the element to add to the UI:
 				return dl;
 			},
 
 			// make a page view item:
-			_makePageViewItem: function(page) {
+			_makePageViewItem: function(page, moreInfo, type) {
 				//console.log("makePageViewItem:",page);
 
 				// shortcut for neater code:
@@ -2518,6 +2831,7 @@ BotMon.live = {
 
 				// the actual list item:
 				const pgLi = make('li');
+				if (moreInfo) pgLi.classList.add('detailled');
 
 				const row1 = make('div', {'class': 'row'});
 
@@ -2528,12 +2842,18 @@ BotMon.live = {
 						'title': "PageID: " + page.pg
 					}, page.pg)); /* DW Page ID */
 
-					// get the time difference:
-					row1.appendChild(make('span', {
-						'class': 'first-seen',
-						'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
-					}, BotMon.t._formatTime(page._firstSeen)));
-					
+					const rightGroup = row1.appendChild(make('div')); // right-hand group
+
+						rightGroup.appendChild(make('span', {
+							'class': 'first-seen',
+							'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
+						}, BotMon.t._formatTime(page._firstSeen)));
+
+
+						rightGroup.appendChild(make('span', { // captcha status
+							'class': 'icon_only captcha cap_' + page._captcha,
+						}, page._captcha));						
+
 				pgLi.appendChild(row1);
 
 				/* LINE 2 */
@@ -2543,31 +2863,74 @@ BotMon.live = {
 					// page referrer:
 					if (page._ref) {
 						row2.appendChild(make('span', {
-							'class': 'referer',
-							'title': "Referrer: " + page._ref.href
-						}, page._ref.hostname));
+							'class': 'referer'
+						}, "Referrer: " + page._ref.hostname));
 					} else {
 						row2.appendChild(make('span', {
 							'class': 'referer'
 						}, "No referer"));
 					}
 
-					// visit duration:
-					let visitTimeStr = "Bounce";
-					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
-					if (visitDuration > 0) {
-						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
-					}
-					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
-					if (tDiff) {
-						row2.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
-					} else {
-						row2.appendChild(make('span', {
-							'class': 'bounce',
-							'title': "Visitor bounced"}, "Bounce"));
+					const rightGroup2 = row2.appendChild(make('div')); // right-hand group
+
+						// visit duration:
+						let visitTimeStr = "Bounce";
+						const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+						if (visitDuration > 0) {
+							visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+						}
+						var tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+						if (tDiff) {
+							tDiff += " (" + page._tickCount.toString() + " ticks)";
+							rightGroup2.appendChild(make('span', {
+								'class': 'visit-length',
+								'title': "Last seen: " + page._lastSeen.toLocaleString()},
+								tDiff));
+						} else {
+							rightGroup2.appendChild(make('span', {
+								'class': 'bounce',
+								'title': "Visitor bounced (no ticks)"},
+								"Bounce"));
+						}
+					
+				pgLi.appendChild(row2);
+
+				if (moreInfo) { /* LINE 3 */
+
+					const row3 = make('div', {'class': 'row'});
+
+						const leftGroup3 = row3.appendChild(make('div')); // left-hand group
+
+							leftGroup3.appendChild(make('span', {
+								'class': 'ip-address'
+							}, "IP: " + page.ip));
+
+						const rightGroup3 = row3.appendChild(make('div')); // right-hand group
+
+							rightGroup3.appendChild(make('span', {
+								'class': 'views'
+							}, page._loadCount.toString() + " loads, " + page._viewCount.toString() + " views"));
+
+
+					pgLi.appendChild(row3);
+
+					/* LINE 4 */
+
+					if (type !== 'knownBots' && page._agent) {
+						const row4 = make('div', {'class': 'row'});
+							row4.appendChild(make('span', {
+								'class': 'user-agent'
+							}, "User-agent: " + page._agent));
+						pgLi.appendChild(row4);
 					}
 
-				pgLi.appendChild(row2);
+					/* LINE X (DEBUG ONLY!)
+
+					const rowx = make('div', {'class': 'row'});
+						rowx.appendChild(make('pre', {'style': 'white-space: normal;width:calc(100% - 24rem)'}, JSON.stringify(page)));
+
+					pgLi.appendChild(rowx); */
+				}
 
 				return pgLi;
 			}
