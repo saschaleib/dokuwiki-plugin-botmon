@@ -105,7 +105,7 @@ const BotMon = {
 					r.textContent = text.toString();
 				}
 			} catch(e) {
-				console.error(e);
+				console.error('Botmon:', e);
 			}
 			return r;
 		},
@@ -399,7 +399,7 @@ BotMon.live = {
 						nv._country = countryName.of(nv.geo.substring(0,2)) ?? nv.geo;
 					}
 				} catch (err) {
-					console.error(err);
+					console.error('Botmon:', err);
 					nv._country = 'Error';
 				}
 
@@ -445,6 +445,8 @@ BotMon.live = {
 					prereg = model._makePageView(nv, type);
 					visitor._pageViews.push(prereg);
 				}
+				prereg._loadCount += 1;
+				prereg._viewCount += (nv.captcha == 'Y' ? 0 : 1);
 
 				// update last seen date
 				prereg._lastSeen = nv.ts;
@@ -517,7 +519,7 @@ BotMon.live = {
 				// find the visit info:
 				let visitor = model.findVisitor(dat, type);
 				if (!visitor) {
-					console.info(`No visitor with ID “${dat.id}” found, registering as a new one.`);
+					console.info(`Botmon: No visitor with ID “${dat.id}” found, registering as a new one.`);
 					visitor = model.registerVisit(dat, type, true);
 				}
 				if (visitor) {
@@ -528,7 +530,7 @@ BotMon.live = {
 					// get the page view info:
 					let pv = model._getPageView(visitor, dat);
 					if (!pv) {
-						console.info(`No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
+						console.info(`Botmon: No page view for visit ID “${dat.id}”, page “${dat.pg}”, registering a new one.`);
 						pv = model._makePageView(dat, type);
 						visitor._pageViews.push(pv);
 					}
@@ -543,15 +545,14 @@ BotMon.live = {
 
 			// helper function to create a new "page view" item:
 			_makePageView: function(data, type) {
-				// console.info('_makePageView', data);
+				//console.info('_makePageView', data);
 
 				// try to parse the referrer:
 				let rUrl = null;
 				try {
 					rUrl = ( data.ref && data.ref !== '' ? new URL(data.ref) : null );
 				} catch (e) {
-					console.warn(`Invalid referer: “${data.ref}”.`);
-					console.info(data);
+					console.info(`Botmon: Ignoring invalid referer: “${data.ref}”.`);
 				}
 
 				return {
@@ -564,9 +565,11 @@ BotMon.live = {
 					_lastSeen: data.ts,
 					_seenBy: [type],
 					_jsClient: ( type !== BM_LOGTYPE.SERVER),
+					_agent: data.agent,
 					_viewCount: 0,
 					_loadCount: 0,
-					_tickCount: 0
+					_tickCount: 0,
+					_captcha: data.captcha
 				};
 			},
 
@@ -1025,7 +1028,7 @@ BotMon.live = {
 						arr = me._countries.bot;
 						break;
 					default:
-						console.warn(`Unknown user type ${type} in function addToCountries.`);
+						console.warn(`Botmon: Unknown user type ${type} in function addToCountries.`);
 				}
 
 				if (arr) {
@@ -1065,7 +1068,7 @@ BotMon.live = {
 						arr = me._countries.bot;
 						break;
 					default:
-						console.warn(`Unknown user type ${type} in function getCountryList.`);
+						console.warn(`Botmon: Unknown user type ${type} in function getCountryList.`);
 						return;
 				}
 				
@@ -1652,7 +1655,7 @@ BotMon.live = {
 
 					const pId = ( visitor._platform ? visitor._platform.id : '');
 
-					if (visitor._platform.id == null) console.log(visitor._platform);
+					//if (visitor._platform.id == null) console.log(visitor._platform);
 
 					return platforms.includes(pId);
 				},
@@ -1766,8 +1769,6 @@ BotMon.live = {
 							totalTime += (pvArr[i] - pvArr[i-1]);
 						}
 
-						//console.log('     ', totalTime , Math.round(totalTime / (pvArr.length * 1000)), (( totalTime / pvArr.length ) <= maxTime * 1000), visitor.ip);
-
 						return (( totalTime / pvArr.length ) <= maxTime * 1000);
 					}
 				},
@@ -1868,7 +1869,7 @@ BotMon.live = {
 					columns = ['ts','ip','pg','id','agent'];
 					break;
 				default:
-					console.warn(`Unknown log type ${type}.`);
+					console.warn(`Botmon: Unknown log type ${type} in function “loadLogFile” (1).`);
 					return;
 			}
 
@@ -1924,7 +1925,7 @@ BotMon.live = {
 								BotMon.live.data.model.updateTicks(data);
 								break;
 							default:
-								console.warn(`Unknown log type ${type}.`);
+								console.warn(`Botmon: Unknown log type ${type} in function “loadLogFile” (2).`);
 								return;
 						}
 					});
@@ -2068,7 +2069,7 @@ BotMon.live = {
 								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100);
 								break;
 							default:
-								console.warn(`Unknown list type ${i}.`);
+								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (1).`);
 						}
 						dd.appendChild(makeElement('span', {}, title));
 						dd.appendChild(makeElement('strong', {}, value));
@@ -2096,7 +2097,6 @@ BotMon.live = {
 					botIps.appendChild(makeElement('dt', {}, "Top bot Networks"));
 
 					const ispList = BotMon.live.data.analytics.getTopBotISPs(5);
-					//console.log(ispList);
 					ispList.forEach( (netInfo) => {
 						const li = makeElement('dd');
 						li.appendChild(makeElement('span', {'class': 'has_icon ipaddr ip' + netInfo.typ }, netInfo.name));
@@ -2156,7 +2156,7 @@ BotMon.live = {
 								value = bounceRate + '%';
 								break;
 							default:
-								console.warn(`Unknown list type ${i}.`);
+								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (2).`);
 						}
 						dd.appendChild(makeElement('span', {}, title));
 						dd.appendChild(makeElement('strong', {}, value));
@@ -2297,7 +2297,7 @@ BotMon.live = {
 									value = (data.captcha.humans_blocked / data.visits.humans * 100).toFixed(0) + '%';
 									break;
 								default:
-									console.warn(`Unknown list type ${i}.`);
+									console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (3).`);
 							}
 							dd.appendChild(makeElement('span', {}, title));
 							dd.appendChild(makeElement('strong', {}, value || kNoData));
@@ -2337,7 +2337,7 @@ BotMon.live = {
 									value = (data.captcha.sus_blocked / data.visits.suspected * 100).toFixed(0) + '%';
 									break;
 								default:
-									console.warn(`Unknown list type ${i}.`);
+									console.warn(`Botmon: Unknown list type ${i} in function “BotMon.live.gui.overview.make” (4).`);
 							}
 							dd.appendChild(makeElement('span', {}, title));
 							dd.appendChild(makeElement('strong', {}, value || kNoData));
@@ -2377,7 +2377,7 @@ BotMon.live = {
 									value = (data.captcha.bots_blocked / data.visits.bots * 100).toFixed(0) + '%';
 									break;
 								default:
-									console.warn(`Unknown list type ${i}.`);
+									console.warn(`Botmon: Unknown list type ${i} in function “BotMon.live.gui.overview.make” (5).`);
 							}
 							dd.appendChild(makeElement('span', {}, title));
 							dd.appendChild(makeElement('strong', {}, value || kNoData));
@@ -2405,7 +2405,7 @@ BotMon.live = {
 			},
 	
 			setError: function(txt) {
-				console.error(txt);
+				console.error('Botmon:', txt);
 				BotMon.live.gui.status._errorCount += 1;
 				const el = document.getElementById('botmon__today__status');
 				if (el) {
@@ -2470,7 +2470,7 @@ BotMon.live = {
 								infolink = 'https://leib.be/sascha/projects/dokuwiki/botmon/info/known_bots';
 								break;
 							default:
-								console.warn('Unknown list number.');
+								console.warn(`Botmon: Unknown list number. ${i} in function “lists.init”.`);
 						}
 
 						const details = makeElement('details', {
@@ -2737,13 +2737,14 @@ BotMon.live = {
 				}
 
 				dl.appendChild(make('dt', {}, "Actions:"));
+
 				dl.appendChild(make('dd', {'class': 'views'},
 					"Page loads: " + data._loadCount.toString() +
 					( data._captcha['Y'] > 0 ? ", captchas: " + data._captcha['Y'].toString() : '') +
 					", views: " + data._viewCount.toString()
 				));
 
-				if (data.ref && data.ref !== '') {
+				if (!combinedItem && data.ref && data.ref !== '') {
 					dl.appendChild(make('dt', {}, "Referrer:"));
 					
 					const refInfo = BotMon.live.data.analytics.getRefererInfo(data.ref);
@@ -2824,19 +2825,13 @@ BotMon.live = {
 					}
 				}
 
-				// for debugging only. Disable on production:
-				/*dl.appendChild(make('dt', {}, "Debug info:"));
-				const dbgDd = make('dd', {'class': 'debug'});
-				dbgDd.innerHTML = '<pre>' + JSON.stringify(data, null, 4) + '</pre>';
-				dl.appendChild(dbgDd);*/
-
 				// return the element to add to the UI:
 				return dl;
 			},
 
 			// make a page view item:
 			_makePageViewItem: function(page, moreInfo) {
-				console.log("makePageViewItem:",page);
+				//console.log("makePageViewItem:",page);
 
 				// shortcut for neater code:
 				const make = BotMon.t._makeElement;
@@ -2856,16 +2851,15 @@ BotMon.live = {
 
 					const rightGroup = row1.appendChild(make('div')); // right-hand group
 
-						// get the time difference:
 						rightGroup.appendChild(make('span', {
 							'class': 'first-seen',
 							'title': "First visited: " + page._firstSeen.toLocaleString() + " UTC"
 						}, BotMon.t._formatTime(page._firstSeen)));
-						
-						rightGroup.appendChild(make('span', { /* page loads */
-							'class': 'has_icon pageviews',
-							'title': page._viewCount.toString() + " page load(s)"
-						}, page._viewCount.toString()));
+
+
+						rightGroup.appendChild(make('span', { // captcha status
+							'class': 'icon_only captcha cap_' + page._captcha,
+						}, page._captcha));						
 
 				pgLi.appendChild(row1);
 
@@ -2876,31 +2870,74 @@ BotMon.live = {
 					// page referrer:
 					if (page._ref) {
 						row2.appendChild(make('span', {
-							'class': 'referer',
-							'title': "Referrer: " + page._ref.href
-						}, page._ref.hostname));
+							'class': 'referer'
+						}, "Referrer: " + page._ref.hostname));
 					} else {
 						row2.appendChild(make('span', {
 							'class': 'referer'
 						}, "No referer"));
 					}
 
-					// visit duration:
-					let visitTimeStr = "Bounce";
-					const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
-					if (visitDuration > 0) {
-						visitTimeStr = Math.floor(visitDuration / 1000) + "s";
-					}
-					const tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
-					if (tDiff) {
-						row2.appendChild(make('span', {'class': 'visit-length', 'title': 'Last seen: ' + page._lastSeen.toLocaleString()}, tDiff));
-					} else {
-						row2.appendChild(make('span', {
-							'class': 'bounce',
-							'title': "Visitor bounced"}, "Bounce"));
+					const rightGroup2 = row2.appendChild(make('div')); // right-hand group
+
+						// visit duration:
+						let visitTimeStr = "Bounce";
+						const visitDuration = page._lastSeen.getTime() - page._firstSeen.getTime();
+						if (visitDuration > 0) {
+							visitTimeStr = Math.floor(visitDuration / 1000) + "s";
+						}
+						var tDiff = BotMon.t._formatTimeDiff(page._firstSeen, page._lastSeen);
+						if (tDiff) {
+							tDiff += " (" + page._tickCount.toString() + " ticks)";
+							rightGroup2.appendChild(make('span', {
+								'class': 'visit-length',
+								'title': "Last seen: " + page._lastSeen.toLocaleString()},
+								tDiff));
+						} else {
+							rightGroup2.appendChild(make('span', {
+								'class': 'bounce',
+								'title': "Visitor bounced (no ticks)"},
+								"Bounce"));
+						}
+					
+				pgLi.appendChild(row2);
+
+				if (moreInfo) { /* LINE 3 */
+
+					const row3 = make('div', {'class': 'row'});
+
+						const leftGroup3 = row3.appendChild(make('div')); // left-hand group
+
+							leftGroup3.appendChild(make('span', {
+								'class': 'ip-address'
+							}, "IP: " + page.ip + ': '));
+
+						const rightGroup3 = row3.appendChild(make('div')); // right-hand group
+
+							rightGroup3.appendChild(make('span', {
+								'class': 'views'
+							}, page._loadCount.toString() + " loads, " + page._viewCount.toString() + " views"));
+
+
+					pgLi.appendChild(row3);
+
+					/* LINE 4 */
+
+					if (page._agent) {
+						const row4 = make('div', {'class': 'row'});
+							row4.appendChild(make('span', {
+								'class': 'user-agent'
+							}, "User-agent: " + page._agent));
+						pgLi.appendChild(row4);
 					}
 
-				pgLi.appendChild(row2);
+					/* LINE X (DEBUG ONLY!)
+
+					const rowx = make('div', {'class': 'row'});
+						rowx.appendChild(make('pre', {'style': 'white-space: normal;width:calc(100% - 24rem)'}, JSON.stringify(page)));
+
+					pgLi.appendChild(rowx); */
+				}
 
 				return pgLi;
 			}

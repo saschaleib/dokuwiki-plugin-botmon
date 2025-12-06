@@ -106,6 +106,12 @@ body.botmon_captcha {
 	}
 }
 
+@keyframes delayed-fade-in {
+	0% { opacity: 0; }
+	50% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
 // no js warning
 #BM__NoJSWarning {
 	position: fixed;
@@ -116,6 +122,7 @@ body.botmon_captcha {
 	border-radius: .5rem;
 	border: red solid 2pt;
 	box-shadow: rgba(128, 0, 0, 0.5) .25rem .25rem .5rem;
+	animation: delayed-fade-in 4s forwards;
 }
 
 // captcha on smaller screens:

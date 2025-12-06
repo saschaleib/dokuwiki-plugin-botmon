@@ -7,7 +7,7 @@
 	{"id": "googlebot",
 	 "n": "GoogleBot",
 	 "r": ["Googlebot"],
-	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)"],
+	 "rx": ["Googlebot\\/(\\d+\\.\\d+)", "Googlebot-Image\\/(\\d+\\.\\d+)","\\sGoogleOther(\\-\\w+)?[\\)\\/]"],
 	 "url": "http://www.google.com/bot.html"
 	},
 	{"id": "googleads",
@@ -21,12 +21,6 @@
 	 "r": ["APIs-Google"],
 	 "rx": ["APIs-Google"],
 	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-special-case-crawlers"
-	},
-	{"id": "googleother",
-	 "n": "GoogleOther",
-	 "r": ["GoogleOther"],
-	 "rx": ["\\sGoogleOther(\\-\\w+)?[\\)\\/]"],
-	 "url": "https://developers.google.com/search/docs/crawling-indexing/google-common-crawlers#googleother"
 	},
 	{"id": "googinspct",
 	 "n": "Google-InspectionTool",

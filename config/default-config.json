@@ -75,11 +75,11 @@
 		},
 		{"func": "blockedByCaptcha", "params": [],
 		 "id": "blockedByCaptcha", "desc": "Visitor did not solve the captcha",
-		 "bot": 20
+		 "bot": 50
 		},
 		{"func": "whitelistedByCaptcha", "params": [],
 		 "id": "whitelistedByCaptcha", "desc": "Visitor uses a whitelisted IP address",
-		 "bot": -20
+		 "bot": -30
 		}
 	]
 }

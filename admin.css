@@ -701,20 +701,9 @@
 							&:nth-child(odd) {
 								background-color: #DFDFDF;
 							}
-							&.detailled {
+							/*&.detailled {
 								outline: red dotted 1pt;
-							}
-							div.row {
-								display: flex;
-								flex-direction: row;
-								justify-content: space-between;
-								align-items: baseline;
-								white-space: nowrap;
-								line-height: 1.35em;
-							}
-							span {
-								display: inline-block;
-							}
+							}*/
 						}
 					}
 					a[hreflang] {
@@ -733,6 +722,23 @@
 						padding: 0 1pt;
 						margin-left: .2em;
 					}
+					div.row {
+						& {
+							display: flex;
+							flex-direction: row;
+							justify-content: space-between;
+							align-items: baseline;
+							white-space: nowrap;
+							line-height: 1.35em;
+						}
+						& > div {
+							display: inline-flex;
+							column-gap: .4em;
+						}
+					}
+					span {
+						display: inline-block;
+					}
 					span.first-seen {
 						min-width: 4.2em;
 						text-align: right;
@@ -741,19 +747,25 @@
 						font-size: smaller;
 					}
 					span.bounce {
-						width: 1.25em; height: 1.25em;
+						width: 1em; height: 1em;
 						overflow: hidden;
 					}
 					span.bounce::before {
 						display: inline-block;
 						content: '';
-						width: 1.25em; height: 1em;
+						width: 1em; height: 1em;
 						background: transparent url('img/bounce.svg') center no-repeat;
 						background-size: .95em;
 					}
-					span.referer {
+					span.referer, span.views, span.ip-address, span.user-agent {
 						font-size: smaller;
+					}
+					span.referer, span.ip-address, span.user-agent {
 						margin-left: .67rem;
+					}
+					span.user-agent {
+						line-break: anywhere;
+						text-wrap-mode: wrap;
 					}
 				}
 			}
@@ -779,7 +791,7 @@
 			}
 
 			/* pages seen */
-			span.pageseen, span.pageviews {
+			span.pageseen/*, span.pageviews */{
 				border: #999 solid 1px;
 				padding: 0 2px;
 				font-size: smaller;
@@ -794,13 +806,13 @@
 				background: transparent url('img/page.svg') center no-repeat;
 				background-size: 1.25em;
 			}
-			span.pageviews::before {
+			/*span.pageviews::before {
 				content : '';
 				display: inline-block;
 				width: 1.25em; height: 1.25em;
 				background: transparent url('img/views.svg') center no-repeat;
 				background-size: 1.25em;
-			}
+			}*/
 		}
 
 		/* item footer */
