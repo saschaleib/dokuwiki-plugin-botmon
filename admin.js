@@ -2523,6 +2523,7 @@ BotMon.live = {
 			},
 
 			_makeVisitorItem: function(data, type) {
+				//console.info('BotMon.live.gui.lists._makeVisitorItem()', data, type);
 
 				// shortcuts for neater code:
 				const make = BotMon.t._makeElement;
@@ -2538,7 +2539,7 @@ BotMon.live = {
 
 				// combine with other networks?
 				const combineNets = (BMSettings.hasOwnProperty('combineNets') ? BMSettings['combineNets'] : true)
-					&& data.hasOwnProperty('_ipRange');
+						&& data.hasOwnProperty('_ipRange');
 
 				const li = make('li'); // root list item
 				const details = make('details');
@@ -2548,18 +2549,6 @@ BotMon.live = {
 				details.appendChild(summary);
 
 				const span1 = make('span'); /* left-hand group */
-
-				/*if (data._type !== BM_USERTYPE.KNOWN_BOT) { // No platform/client for bots // disabled because no longer relevant
-					span1.appendChild(make('span', { // Platform 
-						'class': 'icon_only platform pf_' + (data._platform ? data._platform.id : 'unknown'),
-						'title': "Platform: " + platformName
-					}, platformName));
-
-					span1.appendChild(make('span', { // Client 
-						'class': 'icon_only client client cl_' + (data._client ? data._client.id : 'unknown'),
-						'title': "Client: " + clientName
-					}, clientName));
-				}*/
 
 				// identifier:
 				if (data._type == BM_USERTYPE.KNOWN_BOT) { /* Bot only */
@@ -2602,7 +2591,6 @@ BotMon.live = {
 					'title': data._pageViews.length + " page load(s)"
 				}, data._pageViews.length));
 
-
 				// referer icons:
 				if ((data._type == BM_USERTYPE.PROBABLY_HUMAN || data._type == BM_USERTYPE.LIKELY_BOT) && data.ref) {
 					const refInfo = BotMon.live.data.analytics.getRefererInfo(data.ref);
@@ -2615,15 +2603,13 @@ BotMon.live = {
 				summary.appendChild(span1);
 				const span2 = make('span'); /* right-hand group */
 
-				// country flag:
-				if (!combineNets) { // not for combined networks
-					if (data.geo && data.geo !== 'ZZ') {
-						span2.appendChild(make('span', {
-							'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
-							'data-ctry': data.geo,
-							'title': "Country: " + ( data._country || "Unknown")
-						}, ( data._country || "Unknown") ));
-					}
+				// country flag (not for combined networks):
+				if (!combineNets && data.geo && data.geo !== 'ZZ') {
+					span2.appendChild(make('span', {
+						'class': 'icon_only country ctry_' + data.geo.toLowerCase(),
+						'data-ctry': data.geo,
+						'title': "Country: " + ( data._country || "Unknown")
+					}, ( data._country || "Unknown") ));
 				}
 
 				span2.appendChild(make('span', { // seen-by icon:
@@ -2660,7 +2646,7 @@ BotMon.live = {
 				if (data.ip == '127.0.0.1' || data.ip == '::1' ) ipType = '0';
 				const platformName = (data._platform ? data._platform.n : 'Unknown');
 				const clientName = (data._client ? data._client.n: 'Unknown');
-				const combinedItem = data.hasOwnProperty('_ipRange');
+				const combinedItem = type == 'knownBots' || data.hasOwnProperty('_ipRange');
 
 				const dl = make('dl', {'class': 'visitor_details'});
 				
@@ -2679,6 +2665,9 @@ BotMon.live = {
 						}, data._bot.url)); /* bot info link*/
 
 					}
+
+					dl.appendChild(make('dt', {}, "User-Agent:"));
+					dl.appendChild(make('dd', {'class': 'agent'}, data.agent));
 
 				} else if (!combinedItem) { /* not for bots or combined items */
 
@@ -2774,7 +2763,7 @@ BotMon.live = {
 				/* list all page views */
 				data._pageViews.sort( (a, b) => a._firstSeen - b._firstSeen );
 				data._pageViews.forEach( (page) => {
-					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page, combinedItem));
+					pageList.appendChild(BotMon.live.gui.lists._makePageViewItem(page, combinedItem, type));
 				});
 				pagesDd.appendChild(pageList);
 				dl.appendChild(pagesDd);
@@ -2830,7 +2819,7 @@ BotMon.live = {
 			},
 
 			// make a page view item:
-			_makePageViewItem: function(page, moreInfo) {
+			_makePageViewItem: function(page, moreInfo, type) {
 				//console.log("makePageViewItem:",page);
 
 				// shortcut for neater code:
@@ -2910,7 +2899,7 @@ BotMon.live = {
 
 							leftGroup3.appendChild(make('span', {
 								'class': 'ip-address'
-							}, "IP: " + page.ip + ': '));
+							}, "IP: " + page.ip));
 
 						const rightGroup3 = row3.appendChild(make('div')); // right-hand group
 
@@ -2923,7 +2912,7 @@ BotMon.live = {
 
 					/* LINE 4 */
 
-					if (page._agent) {
+					if (type !== 'knownBots' && page._agent) {
 						const row4 = make('div', {'class': 'row'});
 							row4.appendChild(make('span', {
 								'class': 'user-agent'

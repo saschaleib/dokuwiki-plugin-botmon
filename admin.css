@@ -119,14 +119,13 @@
 		/* Captcha statuses */
 		&.captcha::before { background-image: url('img/captcha.png') }
 		&.cap_Y::before { background-position-y: -20px }
-		&.cap_YN::before, &.cap_YYN::before { background-position-y: -40px }
+		&.cap_N::before, &.cap_YN::before, &.cap_YYN::before { background-position-y: -40px }
 		&.cap_W::before { background-position-y: -60px }
 		&.cap_H::before { background-position-y: -80px }
-		&.cap_X::before { background-position-y: -100px }
+		&.cap_X::before, &.cap_undefined::before { background-position-y: -100px }
 		&.cap_YH::before, &.cap_YYH::before { background-position-y: -120px }
 		&.cap_YNH::before { background-position-y: -140px }
 		&.cap_YY::before { background-position-y: -160px }
-		&.cap_N::before { background-position-y: -180px }
 
 		/* Country flags */
 		/* Note: flag images and CSS adapted from: https://github.com/lafeber/world-flags-sprite/ */
