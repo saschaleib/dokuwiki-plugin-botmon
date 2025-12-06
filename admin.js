@@ -504,7 +504,11 @@ BotMon.live = {
 					prereg = model._makePageView(dat, type);
 					visitor._pageViews.push(prereg);
 				}
+				// update the page view:
 				prereg._tickCount += 1;
+				if (dat.captcha) {
+					prereg._captcha += dat.captcha;
+				}
 			},
 
 			// updating visit data from the ticker log:
@@ -569,7 +573,7 @@ BotMon.live = {
 					_viewCount: 0,
 					_loadCount: 0,
 					_tickCount: 0,
-					_captcha: data.captcha
+					_captcha: data.captcha ? data.captcha : 'X'
 				};
 			},
 
