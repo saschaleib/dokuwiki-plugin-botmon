@@ -222,7 +222,7 @@ const $BMCaptcha = {
 
 	_autoCheck: function(e) {
 
-		const bypass = ($BMConfig['captchaBypass'] || '').split(',');
+		const bypass = ($BMConfig['captchaOptions'] || '').split(',');
 		var action = false;
 
 		if (bypass.indexOf('langmatch') >= 0) { // Languages matching
