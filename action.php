@@ -266,7 +266,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 			// captcha configuration options
 			echo  DOKU_TAB . '$BMConfig = {' . NL;
-			echo  DOKU_TAB . DOKU_TAB . '"captchaBypass": ' . json_encode($this->getConf('captchaBypass')) . NL;
+			echo  DOKU_TAB . DOKU_TAB . '"captchaOptions": ' . json_encode($this->getConf('captchaOptions')) . NL;
 			echo  DOKU_TAB . '};' . NL;
 
 			echo '</script>' . NL;
@@ -316,13 +316,20 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		$cookieVal = isset($_COOKIE['DWConfirm']) ? $_COOKIE['DWConfirm'] : null;
 
-		$today = substr((new DateTime())->format('c'), 0, 10);
+		// bypass cookie checking, of config option is set:
+		$captchaOptions = explode(',', $this->getConf('captchaOptions'));
+		if (in_array('anyval', $captchaOptions) && strlen($cookieVal) == 64) {
+			//$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], "BYPASSED:" . strlen($cookieVal)); // Debug only
+			return true;
+		}
 
+		//  calculate the expected cookie value:
+		$today = substr((new DateTime())->format('c'), 0, 10);
 		$raw = $this->getConf('captchaSeed') . ';' . $_SERVER['SERVER_NAME'] . ';' . $_SERVER['REMOTE_ADDR'] . ';' . $today;
 		$expected = hash('sha256', $raw);
 
 		// for debugging: write captcha data to the log:
-		$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], $expected);
+		//$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], $expected);
 
 		return $cookieVal == $expected;
 	}
@@ -374,7 +381,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		fclose($logfile);
 	}
 
-
 	// check if the visitor's IP is on a whitelist:
 	private function captchaWhitelisted() {
 
@@ -409,7 +415,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		return false; /* IP not found in whitelist */
 	}
 
-	// inserts a blank box to ensure there is enough space for the captcha:
+	// inserts a static text content in place of the actual page content:
 	private function insertLoremIpsum() {
 
 		echo '<div class="level1">' . NL;

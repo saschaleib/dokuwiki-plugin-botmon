@@ -21,5 +21,5 @@ $meta['useCaptcha'] = array('multichoice',
 
 $meta['captchaSeed'] = array('string');
 
-$meta['captchaBypass'] = array('multicheckbox',
-						'_choices' => array ('langmatch'), '_other' => 'exists');
+$meta['captchaOptions'] = array('multicheckbox',
+						'_choices' => array ('langmatch', 'anyval'), '_other' => 'exists');
