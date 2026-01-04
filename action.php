@@ -318,8 +318,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		// bypass cookie checking, of config option is set:
 		$captchaOptions = explode(',', $this->getConf('captchaOptions'));
-		if (in_array('anyval', $captchaOptions)) {
-			//$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], "BYPASSED"); // Debug only
+		if (in_array('anyval', $captchaOptions) && strlen($cookieVal) == 64) {
+			//$this->writeCaptchaLog($_SERVER['REMOTE_ADDR'], $cookieVal, $_SERVER['SERVER_NAME'], "BYPASSED:" . strlen($cookieVal)); // Debug only
 			return true;
 		}
 
@@ -380,7 +380,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		/* Done. close the file. */
 		fclose($logfile);
 	}
-
 
 	// check if the visitor's IP is on a whitelist:
 	private function captchaWhitelisted() {
