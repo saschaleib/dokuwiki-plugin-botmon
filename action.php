@@ -31,6 +31,9 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 				$this->showCaptcha = 'Y'; // Yes, show the captcha
 			}
 		}
+
+		/* DEBUGGING ONLY: */
+		$_SERVER['HTTP_CF_IPCOUNTRY'] = 'XF'; // simulate Cloudflare header for testing
 	}
 
 	/**
@@ -180,15 +183,27 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 
 		$country = ( $_SERVER['REMOTE_ADDR'] == '127.0.0.1' ? 'local' : 'ZZ' ); // default if no geoip is available!
 
-		$lib = $this->getConf('geoiplib'); /* which library to use? (can only be phpgeoip or disabled) */
+		$lib = $this->getConf('geoiplib'); /* which library to use? (possible values are: disabled, phpgeoip or cloudflare) */
 
 		try {
 
-			// use GeoIP module?
-			if ($lib == 'phpgeoip' && extension_loaded('geoip') && geoip_db_avail(GEOIP_COUNTRY_EDITION)) { // Use PHP GeoIP module
-				$result = geoip_country_code_by_name($_SERVER['REMOTE_ADDR']);
-				$country = ($result ? $result : $country);
+			switch($lib) {
+
+			case 'phpgeoip':
+				if (extension_loaded('geoip') && geoip_db_avail(GEOIP_COUNTRY_EDITION)) { // PHP GeoIP module available?
+					$result = geoip_country_code_by_name($_SERVER['REMOTE_ADDR']);
+					$country = ($result ? $result : $country);
+				}
+				break;
+
+			case 'cloudflare':
+				$result = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? null;
+				$country = ( $result == 'XX' || $result === null ? 'ZZ' : $result ); // Cloudflare returns 'XX' for unknown countries, we want 'ZZ' in that case
+				break;
+
 			}
+
+			
 		} catch (Exception $e) {
 			Logger::error('BotMon Plugin: GeoIP Error', $e->getMessage());
 		}
