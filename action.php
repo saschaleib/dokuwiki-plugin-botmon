@@ -32,8 +32,8 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			}
 		}
 
-		/* DEBUGGING ONLY: */
-		$_SERVER['HTTP_CF_IPCOUNTRY'] = 'XF'; // simulate Cloudflare header for testing
+		/* DEBUGGING ONLY:
+		$_SERVER['HTTP_CF_IPCOUNTRY'] = 'XF'; // simulate Cloudflare header for testing */
 	}
 
 	/**
