@@ -31,9 +31,6 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 				$this->showCaptcha = 'Y'; // Yes, show the captcha
 			}
 		}
-
-		/* DEBUGGING ONLY:
-		$_SERVER['HTTP_CF_IPCOUNTRY'] = 'XF'; // simulate Cloudflare header for testing */
 	}
 
 	/**
