@@ -13,7 +13,7 @@ $meta['combineNets'] = array('onoff');
 
 // Geolocation settings:
 $meta['geoiplib'] = array('multichoice',
-						'_choices' => array ('disabled', 'phpgeoip'));
+						'_choices' => array ('disabled', 'phpgeoip','cloudflare'));
 
 // Captcha settings:						
 $meta['useCaptcha'] = array('multichoice',
