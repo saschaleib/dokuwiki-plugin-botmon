@@ -142,7 +142,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		$pageId = preg_replace('/[\x00-\x1F]/', "\u{FFFD}", $INFO['id'] ?? '');
 
 		// get accepted languages:
-		$acceptedLanguages = ( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ? $_SERVER['HTTP_ACCEPT_LANGUAGE'] : '' );
+		$acceptedLanguages = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
 
 		// create the log array:
 		$logArr = Array(
