@@ -69,6 +69,11 @@
 		&.bot_tiktok::before { background-position-y: -380px }
 		&.bot_claudeusr::before { background-position-y: -400px }
 		&.bot_yahoolp::before { background-position-y: -420px }
+		&.bot_ddg::before { background-position-y: -440px }
+		&.bot_qwant::before { background-position-y: -460px }
+		&.bot_lyrenth::before { background-position-y: -480px }
+		&.bot_amazn::before { background-position-y: -500px }
+		&.bot_amaznusr::before { background-position-y: -520px }
 		&.bot_other::before { background-image: url('img/more.svg') }
 
 		/* platform icons */	
@@ -400,6 +405,8 @@
 		&.ref_fallacies::before { background-position-y: -260px }
 		&.ref_facebook::before { background-position-y: -280px }
 		&.ref_discord::before { background-position-y: -300px }
+		&.ref_reddit::before { background-position-y: -320px }
+		&.ref_mastodon::before { background-position-y: -340px }
 		&.ref_other::before { background-image: url('img/more.svg') }
 
 		/* seen-by icons */	

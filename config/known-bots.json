@@ -333,5 +333,23 @@
 	 "r": [],
 	 "rx": ["Turnitin\\s"],
 	 "url": "https://www.turnitin.com/robot/crawlerinfo.html"
+	},
+	{"id": "lyrenth",
+	 "n": "Lyrenth AIWebIndexer",
+	 "r": [],
+	 "rx": ["AIWebIndex\\/([\\d\\.]+)"],
+	 "url": "https://www.lyrenth.com/bot"
+	},
+	{"id": "amzn",
+	 "n": "Amazon Bots",
+	 "r": [],
+	 "rx": ["Amazonbot\\/([\\d\\.]+)","Amzn-SearchBot\\/([\\d\\.]+)"],
+	 "url": "https://developer.amazon.com/amazonbot"
+	},
+	{"id": "amznusr",
+	 "n": "Amazon User",
+	 "r": [],
+	 "rx": ["Amzn-User\\/([\\d\\.]+)"],
+	 "url": "https://developer.amazon.com/amazonbot"
 	}
 ]
