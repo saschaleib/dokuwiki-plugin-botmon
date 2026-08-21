@@ -1,3 +1,4 @@
+
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
 /* 14.10.2025 - 0.5.0 - pre-release */
@@ -363,8 +364,7 @@ BotMon.live = {
 
 			// register a new visitor (or update if already exists)
 			registerVisit: function(nv, type) {
-				//console.info('registerVisit', nv, type);
-
+				// console.info('registerVisit', nv, type);
 
 				// shortcut to make code more readable:
 				const model = BotMon.live.data.model;
@@ -410,6 +410,7 @@ BotMon.live = {
 						_seenBy: [type],
 						_viewCount: 0, // number of page views
 						_loadCount: 0, // number of page loads (not necessarily views!)
+						_exportCount: 0, // number of exports done
 						_pageViews: [], // array of page views
 						_hasReferrer: false, // has at least one referrer
 						_jsClient: false, // visitor has been seen logged by client js as well
@@ -452,8 +453,11 @@ BotMon.live = {
 				prereg._lastSeen = nv.ts;
 
 				// increase view count:
-				prereg._loadCount += (visitor.captcha == 'Y' ? 0 : 1);
+				//prereg._loadCount += (visitor.captcha == 'Y' ? 0 : 1);
 				//prereg._tickCount += 1;
+
+				// increase export counter
+				visitor._exportCount += (prereg.method == 'RAW' ? 1 : 0);
 
 				// update referrer state:
 				visitor._hasReferrer = visitor._hasReferrer || 
@@ -508,6 +512,11 @@ BotMon.live = {
 				prereg._tickCount += 1;
 				if (dat.captcha) {
 					prereg._captcha += dat.captcha;
+				}
+
+				// propagate download info to the visit, if needed:
+				if (dat.method && dat.method == "RAW" && visitor.method !== "RAW") {
+					visitor.method = "RAW";
 				}
 			},
 
@@ -564,6 +573,7 @@ BotMon.live = {
 					ip: data.ip,
 					pg: data.pg,
 					lang: data.lang || '??',
+					method: data.method || '---',
 					_ref: rUrl,
 					_firstSeen: data.ts,
 					_lastSeen: data.ts,
@@ -626,6 +636,13 @@ BotMon.live = {
 					users: 0,
 					total: 0
 				},
+				exports: {
+					bots: 0,
+					suspected: 0,
+					humans: 0,
+					users: 0,
+					total: 0
+				},
 				captcha: {
 					bots_blocked: 0,
 					bots_passed: 0,
@@ -661,12 +678,15 @@ BotMon.live = {
 				// loop over all visitors:
 				model._visitors.forEach( (v) => {
 
+					//console.log(v);
+
 					const captchaStr = v._captcha._str().replaceAll(/[^YNW]/g, '');
 
 					// count total visits and page views:
 					data.visits.total += 1;
 					data.loads.total += v._loadCount;
 					data.views.total += v._viewCount;
+					data.exports.total += v._exportCount;
 
 					// check for typical bot aspects:
 					let botScore = 0;
@@ -678,6 +698,7 @@ BotMon.live = {
 						if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
 							data.visits.bots += 1;
 							data.views.bots += v._viewCount;
+							data.exports.bots += v._exportCount;
 
 							// captcha counter
 							if (captchaStr.indexOf('YN') > -1) {
@@ -695,6 +716,7 @@ BotMon.live = {
 						data.visits.users += 1;
 						data.views.users += v._viewCount;
 						this.groups.users.push(v);
+						data.exports.users += v._exportCount;
 
 					} else {
 
@@ -712,6 +734,7 @@ BotMon.live = {
 
 								data.visits.suspected += 1;
 								data.views.suspected += v._viewCount;
+								data.exports.suspected += v._exportCount;
 
 								// captcha counter
 								if (captchaStr.indexOf('YN') > -1) {
@@ -732,6 +755,7 @@ BotMon.live = {
 							if (v._seenBy.indexOf(BM_LOGTYPE.SERVER) > -1) { // not for ghost items!
 								data.visits.humans += 1;
 								data.views.humans += v._viewCount;
+								data.exports.humans += v._exportCount;
 
 								// captcha counter
 								if (captchaStr.indexOf('YN') > -1) {
@@ -2041,36 +2065,33 @@ BotMon.live = {
 
 				const botsVsHumans = document.getElementById('botmon__today__botsvshumans');
 				if (botsVsHumans) {
-					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics"));
+					botsVsHumans.appendChild(makeElement('dt', {}, "Bot statistics (visits / views)"));
 
-					for (let i = 0; i <= 5; i++) {
+					for (let i = 0; i <= 4; i++) {
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Known bots visits:";
-								value =  data.visits.bots || kNoData;
+								title = "Known bots:";
+								value =  ( data.visits.bots || kNoData) + " / " + (data.views.bots || kNoData);
 								break;
 							case 1:
-								title = "Suspected bots visits:";
-								value = data.visits.suspected || kNoData;
+								title = "Suspected bots:";
+								value = ( data.visits.suspected || kNoData ) + " / " + ( data.views.suspected || kNoData );
 								break;
 							case 2:
-								title = "Bots-humans ratio visits:";
-								value = BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100);
+								title = "Ratio:";
+								value = ( BotMon.t._getRatio(data.visits.suspected + data.visits.bots, data.visits.users + data.visits.humans, 100) )
+										+ " / " + ( BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100) );
 								break;
 							case 3:
-								title = "Known bots views:";
-								value = data.views.bots || kNoData;
+								title = "Exports (known bots):";
+								value = data.exports.bots || kNoData;
 								break;
 							case 4:
-								title = "Suspected bots views:";
-								value = data.views.suspected || kNoData;
-								break;
-							case 5:
-								title = "Bots-humans ratio views:";
-								value = BotMon.t._getRatio(data.views.suspected + data.views.bots, data.views.users + data.views.humans, 100);
+								title = "Exports (suspected):";
+								value = data.exports.suspected || kNoData;
 								break;
 							default:
 								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (1).`);
@@ -2129,35 +2150,35 @@ BotMon.live = {
 					const humanVisits = data.visits.users + data.visits.humans;
 					const bounceRate = Math.round(100 * (BotMon.live.data.analytics.getBounceCount('users') + BotMon.live.data.analytics.getBounceCount('humans')) / humanVisits);
 
-					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics"));
+					wmoverview.appendChild(makeElement('dt', {}, "Humans’ metrics (visits / views)"));
 					for (let i = 0; i <= 5; i++) { 
 						const dd = makeElement('dd');
 						let title = '';
 						let value = '';
 						switch(i) {
 							case 0:
-								title = "Registered users visits:";
-								value = data.visits.users || kNoData;
+								title = "Registered users:";
+								value = ( data.visits.users || kNoData ) + " / " + ( data.views.users || kNoData );
 								break;
 							case 1:
-								title = "Registered users views:";
-								value = data.views.users || kNoData;
+								title = "Probably humans:";
+								value = ( data.visits.humans || kNoData ) + " / " + ( data.views.humans || kNoData );
 								break;
 							case 2:
-								title = "Probably humans visits:";
-								value = data.visits.humans || kNoData;
-								break;
-							case 3:
-								title = "Probably humans views:";
-								value = data.views.humans || kNoData;
-								break;
-							case 4:
-								title = "Total human visits / views";
+								title = "Total:";
 								value = (data.visits.users + data.visits.humans || kNoData) + kSeparator + ((data.views.users + data.views.humans) || kNoData);
 								break;
-							case 5:
+							case 3:
 								title = "Humans’ bounce rate:";
 								value = bounceRate + '%';
+								break;
+							case 4:
+								title = "Exports (users)";
+								value = data.exports.users;
+								break;
+							case 5:
+								title = "Exports (humans)";
+								value = data.exports.humans;
 								break;
 							default:
 								console.warn(`Botmon: Unknown list type ${i} in function “overview.make” (2).`);
@@ -2616,6 +2637,13 @@ BotMon.live = {
 					}, ( data._country || "Unknown") ));
 				}
 
+				if (data._exportCount > 0) {
+					span2.appendChild(make('span', { // RAW icon:
+						'class': 'icon_only export xt_' + data.method.toLowerCase(),
+						'title': "Exports: " + data._exportCount
+					}, data.method));
+				}
+
 				span2.appendChild(make('span', { // seen-by icon:
 					'class': 'icon_only seenby sb_' + data._seenBy.join(''),
 					'title': "Seen by: " + data._seenBy.join('+')
@@ -2734,7 +2762,8 @@ BotMon.live = {
 				dl.appendChild(make('dd', {'class': 'views'},
 					"Page loads: " + data._loadCount.toString() +
 					( data._captcha['Y'] > 0 ? ", captchas: " + data._captcha['Y'].toString() : '') +
-					", views: " + data._viewCount.toString()
+					", views: " + data._viewCount.toString() +
+					", exports: " + data._exportCount.toString()
 				));
 
 				if (!combinedItem && data.ref && data.ref !== '') {
@@ -2843,6 +2872,13 @@ BotMon.live = {
 					}, page.pg)); /* DW Page ID */
 
 					const rightGroup = row1.appendChild(make('div')); // right-hand group
+
+						if (page.method == 'RAW') {
+							rightGroup.appendChild(make('span', { // RAW icon:
+								'class': 'icon_only export xt_' + page.method.toLowerCase(),
+								'title': "Exported"
+							}, page.method));
+						}
 
 						rightGroup.appendChild(make('span', {
 							'class': 'first-seen',

@@ -38,6 +38,9 @@
 		/* user info Icon */
 		&.user_known::before { background-image: url('img/user.svg') }
 
+		/* Export Icon */
+		&.export::before { background-image: url('img/download.svg') }
+
 		/* IP Address types */
 		&.ipaddr::before { background-image: url('img/addr.png') }
 		&.ip4::before { background-position-y: -20px }

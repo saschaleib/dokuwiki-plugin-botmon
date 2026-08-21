@@ -53,15 +53,24 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			// Override the page rendering, if a captcha needs to be displayed:
 			$controller->register_hook('TPL_ACT_RENDER', 'BEFORE', $this, 'insertCaptchaCode');
 
-		} else if ($ACT == 'admin' && isset($_REQUEST['page']) && $_REQUEST['page'] == 'botmon') {
+		} else if ($ACT == 'admin' && isset($_REQUEST['page']) && $_REQUEST['page'] == 'botmon' ) {
 			$controller->register_hook('TPL_METAHEADER_OUTPUT', 'BEFORE', $this, 'insertAdminHeader');
 		} 
 
-		// also show a captcha before the image preview
-		$controller->register_hook('TPL_IMG_DISPLAY', 'BEFORE', $this, 'showImageCaptcha');
+		// special case for export_raw: */
+		if ($ACT == 'export_raw') {
 
-		// write to the log after the page content was displayed:
-		$controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'writeServerLog');
+			$controller->register_hook('ACTION_EXPORT_POSTPROCESS', 'AFTER', $this, 'writeRawDataLog');
+
+
+		} else { // all other actions
+
+			// also show a captcha before the image preview
+			$controller->register_hook('TPL_IMG_DISPLAY', 'BEFORE', $this, 'showImageCaptcha');
+
+			// write to the log after the page content was displayed:
+			$controller->register_hook('TPL_CONTENT_DISPLAY', 'AFTER', $this, 'writeServerLog');
+		}
 
 	}
 
@@ -129,7 +138,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 	 *
 	 * @return void
 	 */
-	public function writeServerLog(Event $event, $param) {
+	public function writeServerLog(Event $event, $param, $methodOverride = null) {
 
 		global $conf;
 		global $INFO;
@@ -157,7 +166,7 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 			implode(',', array_unique(array_map( function($it) { return substr(trim($it),0,2); }, explode(',',trim($acceptedLanguages, " \t;,*"))))), /* accepted client languages */
 			$this->getCountryCode(), /* GeoIP country code */
 			$this->showCaptcha, /* show captcha? */
-			$_SERVER['REQUEST_METHOD'] ?? '' /* request method */
+			( $methodOverride ? $methodOverride : $_SERVER['REQUEST_METHOD'] ?? '') /* request method or override*/
 		);
 
 		//* create the log line */
@@ -178,6 +187,15 @@ class action_plugin_botmon extends DokuWiki_Action_Plugin {
 		/* Done */
 		fclose($logfile);
 	}
+
+	/**
+	 * Writes "export raw" data to the server log.
+	 *
+	 * @return void
+	 */
+	public function writeRawDataLog(Event $event, $param) {
+		$this->writeServerLog($event, $param, 'RAW');
+	}		
 
 	private function getCountryCode() {
 
