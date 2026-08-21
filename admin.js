@@ -1,7 +1,7 @@
 
 "use strict";
 /* DokuWiki BotMon Plugin Script file */
-/* 14.10.2025 - 0.5.0 - pre-release */
+/* 26.08.2026 - 0.6.0 - beta */
 /* Author: Sascha Leib <ad@hominem.info> */
 
 // enumeration of user types:
